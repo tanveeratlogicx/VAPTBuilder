@@ -1,0 +1,633 @@
+VAPT Enforcement Run at 2026-01-19 23:44:55
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:45:10
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:45:27
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:45:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:45:41
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:46:23
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:47:15
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:47:23
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:48:27
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:49:12
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:49:23
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:50:27
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:51:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:51:23
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:52:27
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:53:14
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:53:23
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:54:27
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:55:23
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:56:28
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-19 23:58:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:00:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:02:31
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:04:32
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:06:33
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:08:25
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:09:21
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:10:38
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:11:34
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:12:38
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:13:53
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:13:55
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:13:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:13:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:14:05
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:15:03
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:15:06
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:15:43
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"implementation_notes":"remove_action('wp_head','wp_generator'); delete readme.html; suppress version in REST and error outputs","verify_version_hide":null,"verify_readme_block":null}
+VAPT Enforcement Run at 2026-01-20 00:15:49
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:15:50
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:15:50
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:16:11
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:16:50
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:10
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:19
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:19
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:31
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:33
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:37
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:50
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:50
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:51
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:52
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:53
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:55
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:56
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:17:59
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:18:02
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:18:03
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:18:05
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:18:06
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:18:08
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:18:54
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:19:50
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:20:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:20:50
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:21:54
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:22:10
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:23:02
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:23:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:24:15
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:24:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:26:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:27:54
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:28:54
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:30:12
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:30:21
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:30:22
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:30:22
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:31:07
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:31:08
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:31:08
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:31:17
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:31:21
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:31:25
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:31:26
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:32:08
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:33:12
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:34:08
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:35:12
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:36:08
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:37:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:39:14
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:39:25
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:39:26
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:39:26
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:39:42
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:39:46
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:39:48
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:39:53
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":false,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:40:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:41:26
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:43:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:44:26
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:46:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:48:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:50:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:52:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 00:59:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 01:00:25
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 01:01:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 01:01:51
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 01:01:54
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 01:01:54
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 01:01:59
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 01:02:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"status":true,"core_snippet":"remove_action('wp_head', 'wp_generator');","notes":"Ensure readme.html is removed and server\/PHP error outputs do not reveal WordPress version strings.","verify_wp_version_hide":true}
+VAPT Enforcement Run at 2026-01-20 01:06:07
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:06:10
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:06:11
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:06:12
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:06:17
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:06:22
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:06:42
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:07:38
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:08:27
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:08:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:09:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:09:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:09:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:10:07
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:10:24
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:10:44
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:10:47
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:11:00
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:11:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:11:11
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:11:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:11:16
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:11:16
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:11:18
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:11:18
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:11:18
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:11:24
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:12:23
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:12:24
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:13:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:14:19
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:15:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:16:20
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:17:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:18:21
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:19:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:19:57
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:19:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:19:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:19:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:19:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:19:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:19:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:20:01
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:20:03
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:20:03
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:21:03
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:21:03
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:22:07
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:23:00
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:23:03
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:24:07
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:25:01
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:25:04
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:27:06
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:27:06
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:29:07
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:29:07
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:31:08
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:09
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:09
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:14
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:29
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:30
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:42
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:42
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:33:50
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:34:20
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:34:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:34:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:35:03
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:35:03
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":false,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:35:04
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:35:04
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":false,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:35:04
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:35:04
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":false,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:35:13
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:35:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":false,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:35:13
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:35:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":false,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:35:13
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:35:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":false,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:35:29
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:35:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":false,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:35:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:35:43
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:36:13
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:36:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}

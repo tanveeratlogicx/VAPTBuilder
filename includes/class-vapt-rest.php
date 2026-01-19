@@ -188,6 +188,9 @@ class VAPT_REST
     if (isset($raw_data['wordpress_vapt']) && is_array($raw_data['wordpress_vapt'])) {
       $features = $raw_data['wordpress_vapt'];
       $schema = isset($raw_data['schema']) ? $raw_data['schema'] : [];
+    } elseif (isset($raw_data['features']) && is_array($raw_data['features'])) {
+      $features = $raw_data['features'];
+      $schema = isset($raw_data['schema']) ? $raw_data['schema'] : [];
     } else {
       $features = $raw_data;
     }
@@ -222,13 +225,19 @@ class VAPT_REST
     foreach ($features as &$feature) {
       // Robust Title/Label mapping
       $label = '';
-      if (isset($feature['title'])) $label = $feature['title'];
-      else if (isset($feature['name'])) $label = $feature['name'];
+      if (isset($feature['name'])) $label = $feature['name'];
+      else if (isset($feature['title'])) $label = $feature['title'];
+      else if (isset($feature['label'])) $label = $feature['label'];
       else $label = __('Unnamed Feature', 'vapt-builder');
 
       $feature['label'] = $label;
 
-      $key = isset($feature['id']) ? $feature['id'] : (isset($feature['key']) ? $feature['key'] : sanitize_title($label));
+      // Unique Key Generation
+      $key = '';
+      if (isset($feature['id'])) $key = $feature['id'];
+      else if (isset($feature['key'])) $key = $feature['key'];
+      else $key = sanitize_title($label);
+
       $feature['key'] = $key;
 
       $st = isset($status_map[$key]) ? $status_map[$key] : array('status' => 'Draft', 'implemented_at' => null, 'assigned_to' => null);

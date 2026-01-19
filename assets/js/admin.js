@@ -1479,7 +1479,8 @@ window.vaptScriptLoaded = true;
       const { key, nextStatus } = transitioning;
       const { note, devInstruct, wireframeUrl } = formValues;
 
-      const feature = features.find(f => f.key === key);
+      const safeFeatures = Array.isArray(features) ? features : [];
+      const feature = safeFeatures.find(f => f.key === key);
       let updates = { status: nextStatus, history_note: note };
 
       // Save Wireframe if provided
@@ -1550,8 +1551,9 @@ window.vaptScriptLoaded = true;
     // 1. Analytics (Moved below filtering for scope)
 
     // 2. Extract Categories & Severities & All Keys
-    const categories = [...new Set(features.map(f => f.category))].filter(Boolean).sort();
-    const severities = [...new Set(features.map(f => f.severity))].filter(Boolean);
+    const safeFeatures = Array.isArray(features) ? features : [];
+    const categories = [...new Set(safeFeatures.map(f => f.category))].filter(Boolean).sort();
+    const severities = [...new Set(safeFeatures.map(f => f.severity))].filter(Boolean);
     const severityOrder = ['critical', 'high', 'medium', 'low', 'informational'];
     const uniqueSeverities = [...new Set(severities.map(s => s.toLowerCase()))]
       .sort((a, b) => severityOrder.indexOf(a) - severityOrder.indexOf(b))
@@ -1567,7 +1569,9 @@ window.vaptScriptLoaded = true;
       });
 
     // Collect all available keys from features data
-    const allKeys = [...new Set(features.reduce((acc, f) => [...acc, ...Object.keys(f)], []))].filter(k => !['key', 'label', 'status', 'has_history', 'include_test_method', 'include_verification', 'include_verification_engine', 'wireframe_url', 'generated_schema'].includes(k));
+    const allKeys = [...new Set(safeFeatures.reduce((acc, f) => [...acc, ...Object.keys(f)], []))].filter(k =>
+      !['key', 'label', 'status', 'normalized_status', 'has_history', 'include_test_method', 'include_verification', 'include_verification_engine', 'wireframe_url', 'generated_schema', 'implemented_at', 'assigned_to'].includes(k)
+    );
 
     // Update columnOrder if new keys are found that aren't in there
     useEffect(() => {
@@ -1578,7 +1582,7 @@ window.vaptScriptLoaded = true;
     }, [allKeys, columnOrder]);
 
     // 3. Filter & Sort
-    let processedFeatures = [...features];
+    let processedFeatures = [...safeFeatures];
 
     // Category Filter First
     if (selectedCategories.length > 0) {
@@ -1870,13 +1874,16 @@ window.vaptScriptLoaded = true;
             "design_prompt": {
               "interface_type": "Interactive Security Assessment Interface",
               "schema_definition": "WordPress VAPT schema with standardized control fields",
-              // "control_id": "{{id}}",
               "title": "{{title}}",
               "description": "{{description}}",
               "severity": "{{severity}}",
               "category": "{{category}}",
-              "validation_rules": "PHP verification logic for {{title}}",
-              "context": "{{category}}",
+              "compliance_references": "{{owasp}}",
+              "cwe_reference": "{{cwe}}",
+              "remediation_strategy": "{{remediation}}",
+              "evidence_requirements": "{{evidence_requirements}}",
+              "verification_steps": "{{verification_steps}}",
+              "test_method": "{{test_method}}",
               "ui_components": {
                 "primary_card": "{{automation_prompts.ai_ui}}",
                 "test_checklist": "{{tests}}",
@@ -1884,12 +1891,19 @@ window.vaptScriptLoaded = true;
                 "assurance_badges": "{{assurance}}",
                 "evidence_list": "{{evidence}}"
               },
-              "schema_fields": "{{schema_hints.fields}}",
+              "interface_layout": {
+                "grid_structure": "Two-Column (Controls Left, Status Right)",
+                "functional_blocks": [
+                  "Implementation Notes (Contextual Textarea)",
+                  "Manual Verification (Full-Width Protocol & Evidence Checklist)",
+                  "Automated Verification (Trigger Actions & Live Status)"
+                ],
+                "styling": "Standardized cards with subtle shadows, 24px padding, and clear hierarchy."
+              },
               "automation_context": {
                 "ai_check_prompt": "{{automation_prompts.ai_check}}",
                 "ai_schema_fields": "{{automation_prompts.ai_schema}}"
               },
-              "compliance_references": "{{references}}",
               "implementation_strategy": {
                 "execution_driver": "Universal PHP Hook Driver (class-vapt-hook-driver.php)",
                 "enforcement_mechanism": "Dynamic mapping of JSON control values to backend security methods.",
@@ -1900,19 +1914,20 @@ window.vaptScriptLoaded = true;
                   "enable_security_headers - Injects security headers",
                   "block_null_byte_injection - blocks null byte chars",
                   "hide_wp_version - Hides version",
-                  "block_debug_exposure - Blocks debug.log access"
+                  "block_debug_exposure - Blocks debug.log access",
+                  "block_author_enumeration - Blocks author archives",
+                  "disable_xmlrpc_pingback - Disables XML-RPC pingbacks"
                 ],
                 "data_binding": "Controls must use 'key' to bind to method arguments."
+              },
+              "verification_protocol": {
+                "operational_notes": "Contextual help and operational guidance (Right Column)",
+                "manual_verification": "Step-by-step human verification (Evidence Checklist)",
+                "automated_verification": "Interactive test actions for real-time proof"
               },
               "threat_model": {
                 "risks": "{{risks}}",
                 "assurance_against": "{{assurance_against}}"
-              },
-              "interaction_model": {
-                "test_execution": "Manual and automated test execution interface",
-                "evidence_collection": "File upload and screenshot capture",
-                "status_tracking": "Pass/Fail/In Progress/Not Applicable",
-                "remediation_tracking": "Action items with assignment and due dates"
               }
             }
           };
@@ -1936,7 +1951,12 @@ window.vaptScriptLoaded = true;
         contextJson = replaceAll(contextJson, 'tests', Array.isArray(feature.tests) ? feature.tests.join(', ') : (feature.tests || ''));
         contextJson = replaceAll(contextJson, 'evidence', Array.isArray(feature.evidence) ? feature.evidence.join(', ') : (feature.evidence || ''));
         contextJson = replaceAll(contextJson, 'schema_hints.fields', feature.schema_hints?.fields?.map(f => `${f.name} (${f.type})`).join(', '));
-        contextJson = replaceAll(contextJson, 'test_method', feature.test_method);
+        contextJson = replaceAll(contextJson, 'test_method', feature.test_method || '');
+        contextJson = replaceAll(contextJson, 'owasp', feature.owasp || '');
+        contextJson = replaceAll(contextJson, 'cwe', feature.cwe || '');
+        contextJson = replaceAll(contextJson, 'risks', Array.isArray(feature.risks) ? feature.risks.join(', ') : (feature.risks || ''));
+        contextJson = replaceAll(contextJson, 'evidence_requirements', Array.isArray(feature.evidence_requirements) ? feature.evidence_requirements.join(', ') : (feature.evidence_requirements || ''));
+        contextJson = replaceAll(contextJson, 'verification_steps', Array.isArray(feature.verification_steps) ? feature.verification_steps.join(', ') : (feature.verification_steps || ''));
 
         // Dynamic Substitution from automation_prompts
         const prompts = feature.automation_prompts || {};
@@ -1951,7 +1971,7 @@ window.vaptScriptLoaded = true;
         }
 
         // Assemble HYBRID PROMPT (Context + Instructions)
-        const finalPrompt = `You are an Expert WordPress Security Engineer, UI Designer, and VAPT Specialist. Your core mandate is to implement security controls that adhere to OWASP Top 10 risks and WordPress Coding Standards.
+        const finalPrompt = `You are an Expert WordPress Security Engineer, UI Designer, and VAPT Specialist. Your core mandate is to implement security controls that adhere to VAPT and OWASP Top 10 risks and WordPress Coding Standards.
 
 I need you to generate a highly optimized JSON Schema for a 'Functional Workbench' interface for the following security feature:
 
@@ -1988,7 +2008,9 @@ INSTRUCTIONS & CRITICAL RULES:
 9. **Self-Verifying Tests**: Any 'test_action' MUST define its own success criteria. You MUST include 'expected_headers' (containing the 'X-VAPT-Enforced' key from the table above) for any blocking feature.
 10. **Unified Verification**: For features that have a single mapping method, generate one authoritative 'Verify' control instead of multiple fragmented tests.
 11. **Truthful Reporting**: To differentiate between VAPT enforcement and external plugins/server rules, your test MUST fail if the 'X-VAPT-Enforced' header is missing, even if the HTTP status (e.g., 403) is correct.
-12. **Reference JSON Structure**:
+12. **Interface Layout (MANDATORY)**: You MUST follow a two-column grid structure. Primary functional controls (toggles, inputs) go on the left. Status indicators, alerts, and feedback blocks go on the right. Functional Verification (Manual and Automated) should be clearly separated and prominent.
+13. **Verification & Evidence (MANDATORY)**: You MUST include specific sections for: Operational Notes (textarea with key 'operational_notes', placed in the Right Column), Manual Verification (checklist), Automated Verification (test_action).
+14. **Reference JSON Structure**:
    {
      "controls": [
        { "type": "section", "label": "Configuration" },
@@ -2006,16 +2028,15 @@ INSTRUCTIONS & CRITICAL RULES:
    }
 
 Feature Name: ${feature.label || feature.title}
+CWE: ${feature.cwe || 'N/A'}
 Remediation (Core Logic): ${Array.isArray(feature.remediation) ? feature.remediation.join('\n- ') : (feature.remediation || 'None provided')}
-Protection Against (Risks): ${Array.isArray(feature.assurance_against) ? feature.assurance_against.join('\n- ') : (feature.assurance_against || 'None provided')}
+Protection Against (Risks): ${Array.isArray(feature.assurance_against) ? feature.assurance_against.join('\n- ') : (feature.owasp || 'None provided')}
 Success Goals (Assurance): ${Array.isArray(feature.assurance) ? feature.assurance.join('\n- ') : (feature.assurance || 'None provided')}
-Test Protocol (Required Tests): ${Array.isArray(feature.tests) ? feature.tests.join('\n- ') : (feature.tests || 'None provided')}
-Evidence (Success Markers): ${Array.isArray(feature.evidence) ? feature.evidence.join('\n- ') : (feature.evidence || 'None provided')}
+Test Protocol (Required Tests): ${Array.isArray(feature.verification_steps) && feature.verification_steps.length > 0 ? feature.verification_steps.join('\n- ') : (Array.isArray(feature.tests) ? feature.tests.join('\n- ') : (feature.tests || 'None provided'))}
+Evidence (Success Markers): ${Array.isArray(feature.evidence_requirements) && feature.evidence_requirements.length > 0 ? feature.evidence_requirements.join('\n- ') : (Array.isArray(feature.evidence) ? feature.evidence.join('\n- ') : 'NONE PROVIDED - Generate 3-5 concrete success markers based on VAPT standards.')}
 Schema Hints: ${feature.schema_hints?.fields ? feature.schema_hints.fields.map(f => `${f.name} (${f.type})`).join(', ') : 'None provided'}
-Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
-12. **Verification & Evidence (MANDATORY)**: You MUST include two specific controls at the end of the functional section:
-    - One 'test_checklist' control labeled "Test Protocol" containing the items from 'Test Protocol'.
-    - One 'evidence_list' control labeled "Evidence" containing the items from 'Evidence'.` : ''}`;
+Test Method: ${feature.test_method || 'None provided'}
+`;
 
         // Robust Copy Function
         const copyToClipboard = (text) => {
@@ -2168,40 +2189,52 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
             el('div', { style: { padding: '15px', flexGrow: 1 } }, [
               (() => {
                 const schema = parsedSchema || { controls: [] };
-                const hasTestActions = schema.controls && schema.controls.some(c => c.type === 'test_action');
-                const isVerifEngine = hasTestActions; // Preview follows schema content
+                const [isPreviewVerifOpen, setIsPreviewVerifOpen] = useState(false);
 
                 // Split Controls
-                const implControls = schema.controls ? schema.controls.filter(c => !['test_action', 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'].includes(c.type)) : [];
-                const verifActions = schema.controls ? schema.controls.filter(c => c.type === 'test_action') : [];
+                const implControls = schema.controls ? schema.controls.filter(c => !['test_action', 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'].includes(c.type) && !c.label?.toLowerCase().includes('notes')) : [];
+                const verifActions = schema.controls ? schema.controls.filter(c => c.type === 'test_action' || c.label?.toLowerCase().includes('notes')) : [];
                 const supportControls = schema.controls ? schema.controls.filter(c => ['risk_indicators', 'assurance_badges'].includes(c.type)) : [];
 
-                const subBoxStyle = { marginTop: '15px', padding: '12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' };
+                const boxStyle = { padding: '15px', background: '#fff', borderRadius: '8px', border: '1px solid #eee', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' };
 
                 return el(Fragment, null, [
-                  // Block 1: Functional & Engine (Side-by-Side Grid)
-                  // Single Column Stack for Preview
                   el('div', { id: 'vapt-preview-stack', style: { display: 'flex', flexDirection: 'column', gap: '20px' } }, [
                     // 1. Functional Implementation
-                    el('div', { id: 'vapt-preview-panel-functional' }, [
-                      el('div', { style: { background: '#fff', padding: '15px', borderRadius: '8px', border: '1px solid #eee', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' } }, [
-                        el('h4', { style: { margin: '0 0 10px 0', fontSize: '13px', fontWeight: 700, color: '#111827' } }, __('Functional Implementation')),
-                        GeneratedInterface
-                          ? el(GeneratedInterface, {
-                            feature: { ...feature, generated_schema: { ...schema, controls: implControls }, implementation_data: localImplData },
-                            onUpdate: (newData) => setLocalImplData(newData)
-                          })
-                          : el('p', null, __('Loading Preview Interface...', 'vapt-builder')),
+                    el('div', { id: 'vapt-preview-panel-functional', style: boxStyle }, [
+                      el('h4', { style: { margin: '0 0 10px 0', fontSize: '13px', fontWeight: 700, color: '#111827' } }, __('Functional Implementation')),
+                      GeneratedInterface
+                        ? el(GeneratedInterface, {
+                          feature: { ...feature, generated_schema: { ...schema, controls: implControls }, implementation_data: localImplData },
+                          onUpdate: (newData) => setLocalImplData(newData)
+                        })
+                        : el('p', null, __('Loading Preview Interface...', 'vapt-builder')),
 
-                        el('div', { style: { marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '10px', fontSize: '10px', color: '#888' } },
-                          `Feature Reference: ${feature.key ? feature.key.toUpperCase() : 'N/A'}`
-                        )
-                      ])
+                      el('div', { style: { marginTop: '20px', display: 'flex', gap: '10px' } }, [
+                        el(Button, {
+                          isSecondary: true,
+                          isSmall: true,
+                          onClick: () => setIsPreviewVerifOpen(!isPreviewVerifOpen),
+                          icon: 'shield'
+                        }, __('Functional Verification', 'vapt-builder'))
+                      ]),
+
+                      el('div', { style: { marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '10px', fontSize: '10px', color: '#888' } },
+                        `Feature Reference: ${feature.key ? feature.key.toUpperCase() : 'N/A'}`
+                      )
                     ]),
 
-                    // 2. Verification Engine (Actions)
-                    isVerifEngine && el('div', { id: 'vapt-preview-panel-engine' }, [
-                      el('div', { style: { background: '#fff', padding: '15px', borderRadius: '8px', border: '1px solid #eee', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' } }, [
+                    // 2. Verification Preview (Toggleable)
+                    isPreviewVerifOpen && el('div', {
+                      style: {
+                        marginTop: '10px', padding: '15px', background: '#f8fafc', borderRadius: '8px', border: '2px solid #e2e8f0',
+                        display: 'grid', gridTemplateColumns: '1fr', gap: '20px'
+                      }
+                    }, [
+                      el('h4', { style: { margin: 0, fontSize: '12px', fontWeight: 700, color: '#334155', textTransform: 'uppercase' } }, __('Verification Preview')),
+
+                      // Automated
+                      verifActions.length > 0 && el('div', { style: boxStyle }, [
                         el('h4', { style: { margin: '0 0 10px 0', fontSize: '13px', fontWeight: 700, color: '#0f766e', display: 'flex', alignItems: 'center', gap: '6px' } }, [
                           el(Icon, { icon: 'shield', size: 16 }),
                           __('Verification Engine')
@@ -2210,75 +2243,51 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
                           feature: { ...feature, generated_schema: { ...schema, controls: verifActions }, implementation_data: localImplData },
                           onUpdate: (newData) => setLocalImplData(newData)
                         })
+                      ]),
+
+                      // Manual
+                      (() => {
+                        const protocol = feature.test_method || '';
+                        const checklist = typeof feature.verification_steps === 'string' ? JSON.parse(feature.verification_steps) : (feature.verification_steps || []);
+                        const guideItems = schema.controls ? schema.controls.filter(c => ['test_checklist', 'evidence_list'].includes(c.type)) : [];
+
+                        if (!protocol && checklist.length === 0 && guideItems.length === 0) return null;
+
+                        return el('div', { style: { ...boxStyle, background: '#f8fafc' } }, [
+                          el('h5', { style: { margin: '0 0 12px 0', fontSize: '12px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' } }, __('Manual Verification')),
+                          el('div', { style: { display: 'flex', flexDirection: 'column', gap: '15px' } }, [
+                            protocol && el('div', null, [
+                              el('label', { style: { display: 'block', fontSize: '10px', fontWeight: 700, color: '#92400e', marginBottom: '8px', textTransform: 'uppercase' } }, __('Test Protocol')),
+                              el('ol', { style: { margin: 0, paddingLeft: '18px', fontSize: '12px', color: '#4b5563', lineHeight: '1.5' } },
+                                protocol.split('\n').filter(l => l.trim()).map((l, i) => el('li', { key: i, style: { marginBottom: '4px' } }, l.replace(/^\d+\.\s*/, '')))
+                              )
+                            ]),
+                            checklist.length > 0 && el('div', null, [
+                              el('label', { style: { display: 'block', fontSize: '10px', fontWeight: 700, color: '#0369a1', marginBottom: '8px', textTransform: 'uppercase' } }, __('Evidence Checklist')),
+                              el('ol', { style: { margin: 0, padding: 0, listStyle: 'none' } },
+                                checklist.map((step, i) => el('li', { key: i, style: { fontSize: '12px', color: '#4b5563', display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '6px' } }, [
+                                  el('input', { type: 'checkbox', style: { margin: '2px 0 0 0', width: '13px', height: '13px' } }),
+                                  el('span', null, step)
+                                ]))
+                              )
+                            ]),
+                            guideItems.length > 0 && el(GeneratedInterface, {
+                              feature: { ...feature, generated_schema: { ...schema, controls: guideItems }, implementation_data: localImplData },
+                              onUpdate: (newData) => setLocalImplData(newData),
+                              isGuidePanel: true
+                            })
+                          ])
+                        ]);
+                      })(),
+
+                      // Assurance
+                      supportControls.length > 0 && el('div', { style: { ...boxStyle, background: '#f0fdf4', border: '1px solid #bbf7d0' } }, [
+                        el('h5', { style: { margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, color: '#166534', textTransform: 'uppercase' } }, __('Assurance')),
+                        el(GeneratedInterface, {
+                          feature: { ...feature, generated_schema: { ...schema, controls: supportControls }, implementation_data: localImplData },
+                          onUpdate: (newData) => setLocalImplData(newData)
+                        })
                       ])
-                    ]),
-
-                    // 3. Manual Verification Steps
-                    (() => {
-                      const protocol = feature.test_method || '';
-                      const checklist = typeof feature.verification_steps === 'string' ? JSON.parse(feature.verification_steps) : (feature.verification_steps || []);
-                      const schemaGuideItems = schema.controls ? schema.controls.filter(c => ['test_checklist', 'evidence_list'].includes(c.type)) : [];
-                      const hasManualSteps = includeGuidance && (protocol || checklist.length > 0 || schemaGuideItems.length > 0);
-
-                      if (!hasManualSteps) return null;
-
-                      return el('div', {
-                        id: 'vapt-preview-card-verification',
-                        style: {
-                          background: '#f8fafc',
-                          padding: '15px',
-                          borderRadius: '8px',
-                          border: '1px solid #eee',
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                          margin: 0
-                        }
-                      }, [
-                        el('h5', { style: { margin: '0 0 12px 0', fontSize: '12px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' } }, __('Manual Verification Steps')),
-
-                        el('div', { style: { display: 'flex', flexDirection: 'column', gap: '15px' } }, [
-                          protocol && el('div', { id: 'vapt-preview-col-protocol' }, [
-                            el('label', { style: { display: 'block', fontSize: '10px', fontWeight: 700, color: '#92400e', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Test Protocol')),
-                            el('ol', { style: { margin: 0, paddingLeft: '18px', fontSize: '12px', color: '#4b5563', lineHeight: '1.5' } },
-                              protocol.split('\n').filter(l => l.trim()).map((l, i) => el('li', { key: i, style: { marginBottom: '4px' } }, l.replace(/^\d+\.\s*/, '')))
-                            )
-                          ]),
-
-                          checklist.length > 0 && el('div', { id: 'vapt-preview-col-checklist' }, [
-                            el('label', { style: { display: 'block', fontSize: '10px', fontWeight: 700, color: '#0369a1', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Evidence Checklist')),
-                            el('ol', { style: { margin: 0, padding: 0, listStyle: 'none' } },
-                              checklist.map((step, i) => el('li', { key: i, style: { fontSize: '12px', color: '#4b5563', display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '6px' } }, [
-                                el('input', { type: 'checkbox', style: { margin: '2px 0 0 0', width: '13px', height: '13px' } }),
-                                el('span', null, step)
-                              ]))
-                            )
-                          ]),
-
-                          schemaGuideItems.length > 0 && el(GeneratedInterface, {
-                            feature: { ...feature, generated_schema: { ...schema, controls: schemaGuideItems }, implementation_data: localImplData },
-                            onUpdate: (newData) => setLocalImplData(newData),
-                            isGuidePanel: true
-                          })
-                        ])
-                      ]);
-                    })(),
-
-                    // 4. Verification & Assurance
-                    includeGuidance && supportControls.length > 0 && el('div', {
-                      id: 'vapt-preview-card-assurance',
-                      style: {
-                        background: '#f0fdf4',
-                        padding: '15px',
-                        borderRadius: '8px',
-                        border: '1px solid #bbf7d0',
-                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                        margin: 0
-                      }
-                    }, [
-                      el('h5', { style: { margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, color: '#166534', textTransform: 'uppercase' } }, __('Verification & Assurance')),
-                      el(GeneratedInterface, {
-                        feature: { ...feature, generated_schema: { ...schema, controls: supportControls }, implementation_data: localImplData },
-                        onUpdate: (newData) => setLocalImplData(newData)
-                      })
                     ])
                   ])
                 ]);
@@ -2625,10 +2634,10 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
                   style: { padding: '8px', background: '#fff', border: '1px solid #ddd', borderRadius: '3px', fontSize: '11px', maxHeight: '180px', overflowY: 'auto' }
                 }, [
                   // 1. Protection Against (Why)
-                  transitioning.assurance_against && transitioning.assurance_against.length > 0 && [
+                  ((transitioning.assurance_against && transitioning.assurance_against.length > 0) || transitioning.owasp) && [
                     el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('1. [PROTECTION AGAINST]:', 'vapt-builder')),
                     el('ul', { style: { margin: '0 0 8px 0', paddingLeft: '15px' } },
-                      transitioning.assurance_against.map((item, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, item))
+                      (transitioning.assurance_against || []).concat(transitioning.owasp ? [`OWASP: ${transitioning.owasp}`] : []).map((item, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, item))
                     )
                   ],
                   // 2. Success Goals (What)
@@ -2639,20 +2648,27 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
                     )
                   ],
                   // 3. Test Protocol (How)
-                  transitioning.tests && transitioning.tests.length > 0 && [
-                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('3. [TEST PROTOCOL]:', 'vapt-builder')),
+                  ((transitioning.tests && transitioning.tests.length > 0) || transitioning.test_method) && [
+                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('3. [TEST PROTOCOL / METHOD]:', 'vapt-builder')),
                     el('ul', { style: { margin: '0 0 8px 0', paddingLeft: '15px' } },
-                      transitioning.tests.map((item, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, item))
+                      (transitioning.tests || []).concat(transitioning.test_method ? [transitioning.test_method] : []).map((item, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, item))
                     )
                   ],
-                  // 4. Evidence (Proof)
+                  // 4. Verification Steps
+                  transitioning.verification_steps && transitioning.verification_steps.length > 0 && [
+                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('4. [VERIFICATION STEPS]:', 'vapt-builder')),
+                    el('ul', { style: { margin: '0 0 8px 0', paddingLeft: '15px' } },
+                      transitioning.verification_steps.map((item, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, item))
+                    )
+                  ],
+                  // 5. Evidence (Proof)
                   transitioning.evidence && transitioning.evidence.length > 0 && [
-                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('4. [EVIDENCE]:', 'vapt-builder')),
+                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('5. [EVIDENCE]:', 'vapt-builder')),
                     el('ul', { style: { margin: '0 0 8px 0', paddingLeft: '15px' } },
                       transitioning.evidence.map((item, idx) => el('li', { key: idx, style: { marginBottom: '4px' } }, item))
                     )
                   ],
-                  // 5. Schema Hints (Implementation)
+                  // 6. Schema Hints (Implementation)
                   transitioning.schema_hints && transitioning.schema_hints.fields && transitioning.schema_hints.fields.length > 0 && [
                     el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('5. [SCHEMA HINTS]:', 'vapt-builder')),
                     el('ul', { style: { margin: '0', paddingLeft: '15px' } },
@@ -3076,10 +3092,10 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
           ...activeCols.map(col => {
             const label = col.charAt(0).toUpperCase() + col.slice(1).replace(/_/g, ' ');
             let width = 'auto';
-            if (col === 'title' || col === 'name') width = '280px';
-            if (col === 'category') width = '150px';
-            if (col === 'severity') width = '100px';
-            if (col === 'id') width = '150px';
+            if (col === 'title' || col === 'name') width = '200px';
+            if (col === 'category') width = '120px';
+            if (col === 'severity') width = '80px';
+            if (col === 'id') width = '100px';
 
             const isSortable = ['title', 'name', 'category', 'severity'].includes(col);
             const isActive = sortBy === col || (col === 'title' && sortBy === 'name');
@@ -3112,8 +3128,8 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
               label
             ]);
           }),
-          el('th', { style: { width: '380px' } }, __('Lifecycle Status', 'vapt-builder')),
-          el('th', { style: { width: '300px' } }, __('Include', 'vapt-builder')),
+          el('th', { style: { width: '300px' } }, __('Lifecycle Status', 'vapt-builder')),
+          el('th', { style: { width: '240px' } }, __('Include', 'vapt-builder')),
         ])),
         el('tbody', null, processedFeatures.map((f) => el(Fragment, { key: f.key }, [
           el('tr', null, [
@@ -3127,20 +3143,18 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
                 content = map[s] || (s.charAt(0).toUpperCase() + s.slice(1).toLowerCase());
               } else if (col === 'implemented_at' && f[col]) {
                 content = new Date(f[col]).toLocaleString();
-              } else if (col === 'references' && Array.isArray(f[col])) {
-                content = el('ul', { style: { margin: 0, padding: 0, listStyle: 'none' } },
-                  f[col].map((ref, idx) => el('li', { key: idx, style: { fontSize: '11px', marginBottom: '2px' } },
-                    el('a', { href: ref.url, target: '_blank', rel: 'noopener noreferrer' },
-                      ref.name || ref.url
-                    )
-                  ))
+              } else if (col === 'owasp') {
+                content = el('span', { className: 'vapt-pill-compact', style: { background: '#f0f6fb', color: '#2271b1' } }, f[col]);
+              } else if ((col === 'verification_steps' || col === 'verification') && Array.isArray(f[col])) {
+                content = el('ul', { style: { margin: 0, padding: 0, listStyle: 'decimal inside', fontSize: '11px' } },
+                  f[col].map((step, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, step))
                 );
               } else if (Array.isArray(f[col])) {
-                content = el('div', { style: { fontSize: '11px' } }, f[col].map((item, idx) => el('span', { key: idx, className: 'vapt-pill-compact' },
+                content = el('div', { style: { fontSize: '11px', display: 'flex', flexWrap: 'wrap', gap: '4px' } }, f[col].map((item, idx) => el('span', { key: idx, className: 'vapt-pill-compact' },
                   typeof item === 'object' ? JSON.stringify(item) : String(item)
                 )));
               } else if (typeof f[col] === 'object' && f[col] !== null) {
-                content = el('pre', { style: { fontSize: '10px', margin: 0, background: '#f0f0f0', padding: '4px' } }, JSON.stringify(f[col], null, 2));
+                content = el('pre', { style: { fontSize: '10px', margin: 0, background: '#f0f0f0', padding: '4px', whiteSpace: 'pre-wrap' } }, JSON.stringify(f[col], null, 2));
               }
               return el('td', { key: col }, content);
             }),
@@ -3148,25 +3162,17 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
               el(LifecycleIndicator, {
                 feature: f,
                 onChange: (newStatus) => {
-                  const now = new Date();
-                  const ts = now.getFullYear().toString() +
-                    (now.getMonth() + 1).toString().padStart(2, '0') +
-                    now.getDate().toString().padStart(2, '0') +
-                    ' @' +
-                    now.getHours().toString().padStart(2, '0') +
-                    now.getMinutes().toString().padStart(2, '0');
-
                   let defaultNote = '';
                   const title = f.label || f.title;
                   if (newStatus === 'Develop') {
-                    defaultNote = `[${ts}] Initiating implementation for ${title}. Configuring workbench and internal security drivers.`;
+                    defaultNote = `Initiating implementation for ${title}. Configuring workbench and internal security drivers.`;
                   } else if (newStatus === 'Test') {
                     const risk = (f.assurance_against && f.assurance_against.length > 0) ? f.assurance_against[0] : __('identified risks', 'vapt-builder');
-                    defaultNote = `[${ts}] Development phase complete. Ready to verify protection against: ${risk}.`;
+                    defaultNote = `Development phase complete. Ready to verify protection against: ${risk}.`;
                   } else if (newStatus === 'Release') {
-                    defaultNote = `[${ts}] Verification protocol passed for ${title}. Ready for baseline deployment.`;
+                    defaultNote = `Verification protocol passed for ${title}. Ready for baseline deployment.`;
                   } else {
-                    defaultNote = `[${ts}] Reverting ${title} to Draft for further planning.`;
+                    defaultNote = `Reverting ${title} to Draft for further planning.`;
                   }
 
                   setTransitioning({
@@ -3176,6 +3182,9 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
                     remediation: f.remediation || '',
                     assurance: f.assurance || [],
                     assurance_against: f.assurance_against || [],
+                    owasp: f.owasp || '',
+                    test_method: f.test_method || '',
+                    verification_steps: f.verification_steps || [],
                     tests: f.tests || [],
                     evidence: f.evidence || [],
                     schema_hints: f.schema_hints || {},

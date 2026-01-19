@@ -5,11 +5,7 @@
   if (typeof wp === 'undefined') return;
 
   const { render, useState, useEffect, useMemo, Fragment, createElement: el } = wp.element || {};
-  const {
-    Button, ToggleControl, Spinner, Notice,
-    Card, CardBody, CardHeader, CardFooter,
-    Icon
-  } = wp.components || {};
+  const { Button, ToggleControl, Spinner, Notice, Card, CardBody, CardHeader, CardFooter, Icon, Tooltip, Modal } = wp.components || {};
   const apiFetch = wp.apiFetch;
   const { __, sprintf } = wp.i18n || {};
 
@@ -34,6 +30,7 @@
     });
     const [activeCategory, setActiveCategory] = useState('all');
     const [saveStatus, setSaveStatus] = useState(null);
+    const [verifFeature, setVerifFeature] = useState(null);
 
     useEffect(() => {
       localStorage.setItem('vapt_workbench_active_status', activeStatus);
@@ -133,13 +130,26 @@
     };
 
     // Helper to render a single feature card
-    const renderFeatureCard = (f) => {
+    const renderFeatureCard = (f, setVerifFeature) => {
+      const schema = typeof f.generated_schema === 'string' ? JSON.parse(f.generated_schema) : (f.generated_schema || { controls: [] });
+      const isVerifEngine = f.include_verification_engine;
+
+      // Filter controls for implementation
+      const implControls = schema.controls ? schema.controls.filter(c =>
+        !['test_action', 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'].includes(c.type) &&
+        !c.label?.toLowerCase().includes('notes')
+      ) : [];
+
       return el(Card, { key: f.key, id: `feature-${f.key}`, style: { borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: 'none' } }, [
-        el(CardHeader, { style: { borderBottom: '1px solid #f3f4f6', padding: '20px 24px' } }, [
-          el('div', { style: { display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: '30px', width: '100%' } }, [
+        el(CardHeader, { style: { borderBottom: '1px solid #f3f4f6', padding: '12px 24px' } }, [
+          el('div', { style: { display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: '20px', width: '100%' } }, [
             el('div', null, [
-              el('h3', { style: { margin: 0, fontSize: '18px', fontWeight: 700, color: '#111827' } }, f.label),
-              el('p', { style: { margin: '4px 0 0 0', fontSize: '13px', color: '#6b7280' } }, f.description)
+              el('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
+                el('h3', { style: { margin: 0, fontSize: '16px', fontWeight: 700, color: '#111827' } }, f.label),
+                f.description && el(Tooltip, { text: f.description },
+                  el(Icon, { icon: 'info-outline', size: 16, style: { color: '#94a3b8', cursor: 'help' } })
+                )
+              ])
             ]),
             el('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' } }, [
               el('span', { className: `vapt-status-badge status-${f.status.toLowerCase()}`, style: { fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' } }, f.status),
@@ -156,118 +166,27 @@
           ])
         ]),
         el(CardBody, { style: { padding: '24px' } }, [
-          (() => {
-            const schema = typeof f.generated_schema === 'string' ? JSON.parse(f.generated_schema) : (f.generated_schema || { controls: [] });
-            const isVerifEngine = f.include_verification_engine;
-
-            // Split Controls
-            // 1. Functional Implementation
-            const implControls = schema.controls ? schema.controls.filter(c => !['test_action', 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'].includes(c.type)) : [];
-            // 2. Verification Engines (Automated Tests)
-            const verifActions = schema.controls ? schema.controls.filter(c => c.type === 'test_action') : [];
-            // 3. Verification Support (Risks & Badges)
-            const supportControls = schema.controls ? schema.controls.filter(c => ['risk_indicators', 'assurance_badges'].includes(c.type)) : [];
-
-            // Helper for box style
-            const boxStyle = { padding: '20px', background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' };
-            const subBoxStyle = { marginTop: '20px', padding: '15px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' };
-
-            return el(Fragment, null, [
-              // Block 1: Functional & Engine (Side-by-Side Grid)
-              el('div', { id: 'vaptw-preview-block-1', style: { display: 'grid', gridTemplateColumns: isVerifEngine ? '1fr 1fr' : '1fr', gap: '30px', marginBottom: '25px' } }, [
-                // Left Column: Implementation
-                el('div', { id: 'vaptw-preview-panel-functional', style: boxStyle }, [
-                  el('h4', { style: { margin: '0 0 15px 0', fontSize: '14px', fontWeight: 700, color: '#111827', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
-                    el('span', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
-                      el(Icon, { icon: 'admin-settings', size: 16 }),
-                      __('Functional Implementation', 'vapt-builder')
-                    ]),
-                    isVerifEngine && el('span', { style: { fontSize: '10px', background: '#dbeafe', color: '#1e40af', padding: '2px 6px', borderRadius: '4px' } }, 'CONFIG')
-                  ]),
-                  f.generated_schema && GeneratedInterface
-                    ? el(GeneratedInterface, { feature: { ...f, generated_schema: { ...schema, controls: implControls } }, onUpdate: (data) => updateFeature(f.key, { implementation_data: data }) })
-                    : el('div', { style: { padding: '30px', background: '#f9fafb', border: '1px dashed #d1d5db', borderRadius: '8px', textAlign: 'center', color: '#9ca3af', fontSize: '13px' } },
-                      __('No configurable controls.', 'vapt-builder'))
-                ]),
-
-                // Right Column: Verification Engine
-                isVerifEngine ? el('div', { id: 'vaptw-preview-panel-engine', style: boxStyle }, [
-                  el('h4', { style: { margin: '0 0 15px 0', fontSize: '14px', fontWeight: 700, color: '#0f766e', display: 'flex', alignItems: 'center', gap: '8px' } }, [
-                    el(Icon, { icon: 'shield', size: 16 }),
-                    __('Verification Engine', 'vapt-builder')
-                  ]),
-                  el('p', { style: { fontSize: '12px', color: '#64748b', marginBottom: '20px' } }, __('Interactive security verification controls.', 'vapt-builder')),
-
-                  // Automated Tests
-                  verifActions.length > 0
-                    ? el(GeneratedInterface, { feature: { ...f, generated_schema: { ...schema, controls: verifActions } }, onUpdate: (data) => updateFeature(f.key, { implementation_data: data }) })
-                    : el('div', { style: { padding: '20px', textAlign: 'center', color: '#94a3b8', fontStyle: 'italic', fontSize: '12px' } }, 'No automated tests defined.')
-                ]) : el('div', { style: { ...boxStyle, background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' } }, [
-                  el('p', { style: { margin: 0, fontSize: '12px', color: '#666', fontStyle: 'italic', textAlign: 'center' } }, __('Standard enforcement active. No direct verification engine actions.', 'vapt-builder'))
-                ])
-              ]),
-
-              // Block 2: Functional Verification & Assurance (Full Width)
-              el('div', { id: 'vaptw-preview-block-2', style: { display: 'flex', flexDirection: 'column', gap: '12px' } }, [
-                // Structural Header
-                el('h4', { style: { margin: '0', fontSize: '13px', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Functional Verification')),
-
-                // 2-Column Grid for Verification Steps and Assurance
-                el('div', { style: { display: 'grid', gridTemplateColumns: supportControls.length > 0 ? '1fr 1fr' : '1fr', gap: '25px', alignItems: 'stretch' } }, [
-
-                  // Left Column: Manual Verification Steps
-                  (() => {
-                    const protocol = f.test_method || '';
-                    const checklist = typeof f.verification_steps === 'string' ? JSON.parse(f.verification_steps) : (f.verification_steps || []);
-
-                    // Also gather from schema guideControls
-                    const schemaGuideItems = schema.controls ? schema.controls.filter(c => ['test_checklist', 'evidence_list'].includes(c.type)) : [];
-                    const hasManualSteps = protocol || checklist.length > 0 || schemaGuideItems.length > 0;
-
-                    if (!hasManualSteps) return null;
-
-                    return el('div', { id: 'vaptw-preview-card-verification', style: { ...boxStyle, background: '#f8fafc', margin: 0 } }, [
-                      el('h5', { style: { margin: '0 0 15px 0', fontSize: '12px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' } }, __('Manual Verification Steps')),
-
-                      el('div', { style: { display: 'flex', flexDirection: 'column', gap: '20px' } }, [
-                        // Test Protocol (From Metadata)
-                        protocol && el('div', { id: 'vaptw-preview-col-protocol' }, [
-                          el('label', { style: { display: 'block', fontSize: '11px', fontWeight: 700, color: '#92400e', marginBottom: '10px', textTransform: 'uppercase' } }, __('Test Protocol')),
-                          el('ol', { style: { margin: 0, paddingLeft: '20px', fontSize: '12px', color: '#4b5563', lineHeight: '1.6' } },
-                            protocol.split('\n').filter(line => line.trim()).map((line, i) => el('li', { key: i, style: { marginBottom: '6px' } }, line.replace(/^\d+\.\s*/, '')))
-                          )
-                        ]),
-
-                        // Evidence Checklist (From Metadata)
-                        checklist.length > 0 && el('div', { id: 'vaptw-preview-col-checklist' }, [
-                          el('label', { style: { display: 'block', fontSize: '11px', fontWeight: 700, color: '#0369a1', marginBottom: '10px', textTransform: 'uppercase' } }, __('Evidence Checklist')),
-                          el('ol', { style: { margin: 0, padding: 0, listStyle: 'none' } },
-                            checklist.map((step, i) => el('li', { key: i, style: { fontSize: '12px', color: '#4b5563', display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '8px' } }, [
-                              el('input', { type: 'checkbox', style: { margin: '3px 0 0 0', width: '14px', height: '14px' } }),
-                              el('span', null, step)
-                            ]))
-                          )
-                        ]),
-
-                        // Schema-defined Guide Controls
-                        schemaGuideItems.length > 0 && el(GeneratedInterface, {
-                          feature: { ...f, generated_schema: { ...schema, controls: schemaGuideItems } },
-                          onUpdate: (data) => updateFeature(f.key, { implementation_data: data }),
-                          isGuidePanel: true
-                        })
-                      ])
-                    ]);
-                  })(),
-
-                  // Right Column: Verification & Assurance Block (Badges/Risk)
-                  supportControls.length > 0 && el('div', { id: 'vaptw-preview-card-assurance', style: { ...boxStyle, background: '#f0fdf4', borderColor: '#bbf7d0', margin: 0 } }, [
-                    el('h5', { style: { margin: '0 0 12px 0', fontSize: '12px', fontWeight: 700, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Verification & Assurance')),
-                    el(GeneratedInterface, { feature: { ...f, generated_schema: { ...schema, controls: supportControls } }, onUpdate: (data) => updateFeature(f.key, { implementation_data: data }) })
-                  ])
-                ])
+          el('div', { className: 'vapt-implementation-panel', style: { padding: '15px', background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' } }, [
+            el('h4', { style: { margin: '0 0 15px 0', fontSize: '14px', fontWeight: 700, color: '#111827', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
+              el('span', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
+                el(Icon, { icon: 'admin-settings', size: 16 }),
+                __('Functional Implementation', 'vapt-builder')
               ])
-            ]);
-          })()
+            ]),
+            f.generated_schema && GeneratedInterface
+              ? el(GeneratedInterface, { feature: { ...f, generated_schema: { ...schema, controls: implControls } }, onUpdate: (data) => updateFeature(f.key, { implementation_data: data }) })
+              : el('div', { style: { padding: '30px', background: '#f9fafb', border: '1px dashed #d1d5db', borderRadius: '8px', textAlign: 'center', color: '#9ca3af', fontSize: '13px' } },
+                __('No configurable controls.', 'vapt-builder')),
+
+            el('div', { style: { marginTop: '20px', display: 'flex', gap: '15px' } }, [
+              el(Button, {
+                isSecondary: true,
+                onClick: () => setVerifFeature(f),
+                icon: 'shield',
+                style: { borderRadius: '6px' }
+              }, __('Functional Verification', 'vapt-builder'))
+            ])
+          ])
         ]),
         el(CardFooter, { style: { borderTop: '1px solid #f3f4f6', padding: '12px 24px', background: '#fafafa' } }, [
           el('span', { style: { fontSize: '11px', color: '#9ca3af' } }, sprintf(__('Feature Reference: %s', 'vapt-builder'), f.key))
@@ -278,7 +197,7 @@
     if (loading) return el('div', { className: 'vapt-loading' }, [el(Spinner), el('p', null, __('Loading Workbench...', 'vapt-builder'))]);
     if (error) return el(Notice, { status: 'error', isDismissible: false }, error);
 
-    return el('div', { className: 'vapt-workbench-root', style: { display: 'flex', flexDirection: 'column', height: '100vh', background: '#f9fafb', position: 'relative' } }, [
+    return el('div', { className: 'vapt-workbench-root', style: { display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 120px)', background: '#f9fafb', position: 'relative', paddingBottom: '40px' } }, [
 
       // Toast Notification
       saveStatus && el('div', {
@@ -417,14 +336,96 @@
                   return el('section', { key: cat, style: { marginBottom: '20px' } }, [
                     el('h4', { style: { borderBottom: '2px solid #e5e7eb', paddingBottom: '10px', marginBottom: '25px', color: '#374151', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.05em' } }, cat),
                     el('div', { style: { display: 'flex', flexDirection: 'column', gap: '20px' } },
-                      catFeats.map(f => renderFeatureCard(f))
+                      catFeats.map(f => renderFeatureCard(f, setVerifFeature))
                     )
                   ]);
                 })
-                : displayFeatures.map(f => renderFeatureCard(f))
+                : displayFeatures.map(f => renderFeatureCard(f, setVerifFeature))
             )
         ])
-      ])
+      ]),
+
+      // Functional Verification Modal
+      verifFeature && el(Modal, {
+        title: sprintf(__('Functional Verification: %s', 'vapt-builder'), verifFeature.label),
+        onRequestClose: () => setVerifFeature(null),
+        style: { width: '1000px', maxWidth: '98%' }
+      }, (() => {
+        const f = verifFeature;
+        const schema = typeof f.generated_schema === 'string' ? JSON.parse(f.generated_schema) : (f.generated_schema || { controls: [] });
+
+        // Split Controls
+        // 1. Automated Tests
+        const tests = schema.controls ? schema.controls.filter(c => c.type === 'test_action') : [];
+        // 2. Operational Notes
+        const notes = schema.controls ? schema.controls.filter(c => c.label?.toLowerCase().includes('notes')) : [];
+        // 3. Manual Steps
+        const protocol = f.test_method || '';
+        const checklist = typeof f.verification_steps === 'string' ? JSON.parse(f.verification_steps) : (f.verification_steps || []);
+        const guideItems = schema.controls ? schema.controls.filter(c => ['test_checklist', 'evidence_list'].includes(c.type)) : [];
+        // 4. Assurance
+        const support = schema.controls ? schema.controls.filter(c => ['risk_indicators', 'assurance_badges'].includes(c.type)) : [];
+
+        const boxStyle = { padding: '15px', background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' };
+
+        return el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', padding: '10px' } }, [
+          // Left Column: Automated Check
+          el('div', { style: { display: 'flex', flexDirection: 'column', gap: '20px' } }, [
+            el('div', { style: boxStyle }, [
+              el('h4', { style: { margin: '0 0 15px 0', fontSize: '12px', fontWeight: 700, color: '#0f766e', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Automated Verification Engine', 'vapt-builder')),
+              tests.length > 0 ? el(GeneratedInterface, {
+                feature: { ...f, generated_schema: { ...schema, controls: tests } },
+                onUpdate: (data) => updateFeature(f.key, { implementation_data: data })
+              }) : el('p', { style: { fontSize: '12px', color: '#64748b', fontStyle: 'italic' } }, __('No automated tests defined for this feature.', 'vapt-builder')),
+
+              // Operational Notes - specifically below the test actions
+              notes.length > 0 && el('div', { style: { marginTop: '20px', borderTop: '1px solid #f1f5f9', paddingTop: '15px' } }, [
+                el(GeneratedInterface, {
+                  feature: { ...f, generated_schema: { ...schema, controls: notes } },
+                  onUpdate: (data) => updateFeature(f.key, { implementation_data: data })
+                })
+              ])
+            ])
+          ]),
+
+          // Right Column: Manual Review
+          el('div', { style: { display: 'flex', flexDirection: 'column', gap: '20px' } }, [
+            // Manual Protocol
+            (protocol || checklist.length > 0 || guideItems.length > 0) && el('div', { style: { ...boxStyle, background: '#f8fafc' } }, [
+              el('h4', { style: { margin: '0 0 15px 0', fontSize: '12px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Manual Verification Steps', 'vapt-builder')),
+
+              protocol && el('div', { style: { marginBottom: '20px' } }, [
+                el('label', { style: { display: 'block', fontSize: '11px', fontWeight: 700, color: '#92400e', marginBottom: '8px', textTransform: 'uppercase' } }, __('Test Protocol')),
+                el('ol', { style: { margin: 0, paddingLeft: '20px', fontSize: '12px', color: '#4b5563', lineHeight: '1.6' } },
+                  protocol.split('\n').filter(l => l.trim()).map((l, i) => el('li', { key: i, style: { marginBottom: '4px' } }, l.replace(/^\d+\.\s*/, '')))
+                )
+              ]),
+
+              checklist.length > 0 && el('div', { style: { marginBottom: '20px' } }, [
+                el('label', { style: { display: 'block', fontSize: '11px', fontWeight: 700, color: '#0369a1', marginBottom: '8px', textTransform: 'uppercase' } }, __('Evidence Checklist')),
+                el('ol', { style: { margin: 0, padding: 0, listStyle: 'none' } },
+                  checklist.map((step, i) => el('li', { key: i, style: { fontSize: '12px', color: '#4b5563', display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '8px' } }, [
+                    el('input', { type: 'checkbox', style: { margin: '3px 0 0 0', width: '14px', height: '14px' } }),
+                    el('span', null, step)
+                  ]))
+                )
+              ]),
+
+              guideItems.length > 0 && el(GeneratedInterface, {
+                feature: { ...f, generated_schema: { ...schema, controls: guideItems } },
+                onUpdate: (data) => updateFeature(f.key, { implementation_data: data }),
+                isGuidePanel: true
+              })
+            ]),
+
+            // Assurance Badges
+            support.length > 0 && el('div', { style: { ...boxStyle, background: '#f0fdf4', border: '1px solid #bbf7d0' } }, [
+              el('h4', { style: { margin: '0 0 12px 0', fontSize: '12px', fontWeight: 700, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Verification & Assurance')),
+              el(GeneratedInterface, { feature: { ...f, generated_schema: { ...schema, controls: support } }, onUpdate: (data) => updateFeature(f.key, { implementation_data: data }) })
+            ])
+          ])
+        ]);
+      })())
     ]);
   };
 

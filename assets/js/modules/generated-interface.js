@@ -4,7 +4,7 @@
 
 (function () {
   const { createElement: el, useState, useEffect } = wp.element;
-  const { Button, TextControl, ToggleControl, SelectControl, TextareaControl, Modal, Icon } = wp.components;
+  const { Button, TextControl, ToggleControl, SelectControl, TextareaControl, Modal, Icon, Tooltip } = wp.components;
   const { __, sprintf } = wp.i18n;
 
   /**
@@ -399,11 +399,11 @@
       : control.label;
 
     return el('div', { className: 'vapt-test-runner', style: { padding: '15px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', marginBottom: '10px' } }, [
-      el('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' } }, [
-        el('strong', { style: { fontSize: '13px', color: '#334155' } }, displayLabel),
+      el('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' } }, [
+        el('strong', { style: { fontSize: '12px', color: '#334155' } }, displayLabel),
         el(Button, { isSecondary: true, isSmall: true, isBusy: status === 'running', onClick: runTest, disabled: status === 'running' }, 'Run Verify')
       ]),
-      el('p', { style: { margin: 0, fontSize: '12px', color: '#64748b' } }, control.help),
+      control.help && el('p', { style: { margin: '2px 0 0', fontSize: '11px', color: '#64748b', opacity: 0.8 } }, control.help),
 
       status !== 'idle' && status !== 'running' && result && el('div', {
         style: {
@@ -497,19 +497,25 @@
 
         case 'textarea':
         case 'code':
-          return el(TextareaControl, {
-            key: uniqueKey, label, help,
-            value: value,
-            rows: rows || 6,
-            onChange: (val) => handleChange(key, val),
-            style: type === 'code' ? { fontFamily: 'monospace', fontSize: '12px', background: '#f0f0f1' } : {}
-          });
+          return el('div', { key: uniqueKey, style: { marginBottom: '10px' } }, [
+            el('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' } }, [
+              el('label', { style: { fontSize: '12px', fontWeight: '600', color: '#334155' } }, label),
+              help && el(Tooltip, { text: help }, el(Icon, { icon: 'info-outline', size: 14, style: { color: '#94a3b8', cursor: 'help' } }))
+            ]),
+            el(TextareaControl, {
+              value: value,
+              rows: rows || (type === 'code' ? 4 : 3),
+              onChange: (val) => handleChange(key, val),
+              __nextHasNoMarginBottom: true,
+              style: type === 'code' ? { fontFamily: 'monospace', fontSize: '11px', background: '#f8fafc' } : { fontSize: '12px' }
+            })
+          ]);
 
         case 'header':
-          return el('h3', { key: uniqueKey, style: { fontSize: '16px', borderBottom: '1px solid #ddd', paddingBottom: '8px', marginTop: '10px' } }, label);
+          return el('h3', { key: uniqueKey, style: { fontSize: '14px', fontWeight: '700', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px', marginTop: '8px', marginBottom: '8px', color: '#1e293b' } }, label);
 
         case 'section':
-          return el('h4', { key: uniqueKey, style: { fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', color: '#666', marginTop: '15px' } }, label);
+          return el('h4', { key: uniqueKey, style: { fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: '#64748b', marginTop: '12px', marginBottom: '6px', letterSpacing: '0.025em' } }, label);
 
         case 'risk_indicators':
           return el('div', { key: uniqueKey, style: { padding: '10px 0' } }, [
@@ -536,7 +542,7 @@
 
         case 'info':
         case 'html':
-          return el('div', { key: uniqueKey, style: { padding: '10px', background: '#f0f9ff', borderLeft: '3px solid #0ea5e9', fontSize: '12px', color: '#0c4a6e', marginBottom: '10px' }, dangerouslySetInnerHTML: { __html: control.content || control.html || label } });
+          return el('div', { key: uniqueKey, style: { padding: '8px 12px', background: '#f0f9ff', borderLeft: '3px solid #0ea5e9', fontSize: '11px', color: '#0c4a6e', marginBottom: '8px', lineHeight: '1.4' }, dangerouslySetInnerHTML: { __html: control.content || control.html || label } });
 
         case 'warning':
         case 'alert':
