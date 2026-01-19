@@ -130,7 +130,7 @@ window.vaptScriptLoaded = true;
     const [newDomain, setNewDomain] = useState('');
     const [isWildcardNew, setIsWildcardNew] = useState(false);
     const [activeCategory, setActiveCategory] = useState('all');
-    const [statusFilters, setStatusFilters] = useState(['release']);
+    const [statusFilters, setStatusFilters] = useState(['develop', 'test', 'release']);
     const [sortConfig, setSortConfig] = useState({ key: 'domain', direction: 'asc' });
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [editDomainData, setEditDomainData] = useState({ id: '', domain: '', is_wildcard: false, is_enabled: true });
@@ -1332,7 +1332,7 @@ window.vaptScriptLoaded = true;
       ]),
 
       // Confirmation Modal for Rollbacks
-      el(vapt_ConfirmModal, {
+      el(VAPT_ConfirmModal, {
         isOpen: confirmState.isOpen,
         message: confirmState.type === 'undo'
           ? __('Are you sure you want to undo the last manual renewal?', 'vapt-builder')
@@ -1717,7 +1717,7 @@ window.vaptScriptLoaded = true;
         el('div', { style: { marginTop: '20px', textAlign: 'right' } }, [
           el(Button, { isPrimary: true, onClick: onClose }, __('Close', 'vapt-builder'))
         ]),
-        confirmState && el(vapt_ConfirmModal, {
+        confirmState && el(VAPT_ConfirmModal, {
           isOpen: true,
           message: confirmState.message,
           isDestructive: confirmState.isDestructive,
@@ -2309,13 +2309,13 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
         ]),
 
         // Render Shared Modals
-        alertState && el(vapt_AlertModal, {
+        alertState && el(VAPT_AlertModal, {
           isOpen: true,
           message: alertState.message,
           type: alertState.type,
           onClose: () => setAlertState(null)
         }),
-        confirmState && el(vapt_ConfirmModal, {
+        confirmState && el(VAPT_ConfirmModal, {
           isOpen: true,
           message: confirmState.message,
           isDestructive: confirmState.isDestructive,
@@ -2471,13 +2471,13 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
           ])
         ]),
         // Render Modals
-        alertState && el(vapt_AlertModal, {
+        alertState && el(VAPT_AlertModal, {
           isOpen: true,
           message: alertState.message,
           type: alertState.type,
           onClose: () => setAlertState(null)
         }),
-        confirmState && el(vapt_ConfirmModal, {
+        confirmState && el(VAPT_ConfirmModal, {
           isOpen: true,
           message: confirmState.message,
           isDestructive: confirmState.isDestructive,
@@ -2584,12 +2584,20 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
           el('div', { style: { flexGrow: 1, paddingBottom: '10px' } }, [
             el('p', { style: { fontWeight: '600', marginBottom: '10px' } }, sprintf(__('Moving "%s" to %s.', 'vapt-builder'), transitioning.key, transitioning.nextStatus)),
 
+            el('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' } }, [
+              el('label', { style: { fontWeight: '600', fontSize: '11px', textTransform: 'uppercase', color: '#64748b' } }, __('Change Note (Internal)', 'vapt-builder')),
+              el('div', { style: { display: 'flex', gap: '8px' } }, [
+                el(Button, { isSecondary: true, isSmall: true, onClick: onCancel }, __('Cancel', 'vapt-builder')),
+                el(Button, { isPrimary: true, isSmall: true, onClick: () => onConfirm(formValues) }, __('Confirm & Build', 'vapt-builder'))
+              ])
+            ]),
+
             el(TextareaControl, {
-              label: __('Change Note (Internal)', 'vapt-builder'),
               value: formValues.note,
               onChange: (val) => setFormValues({ ...formValues, note: val }),
               rows: Math.max(2, (formValues.note || '').split('\n').length),
-              autoFocus: true
+              autoFocus: true,
+              __nextHasNoMarginBottom: true
             }),
 
             transitioning.nextStatus === 'Develop' && el('div', {
@@ -2688,11 +2696,6 @@ Test Method: ${feature.test_method || 'None provided'}${includeGuidance ? `
                 ])
               ])
             ])
-          ]),
-
-          el('div', { style: { borderTop: '1px solid #ddd', paddingTop: '15px', textAlign: 'right' } }, [
-            el(Button, { isSecondary: true, onClick: onCancel, style: { marginRight: '10px' } }, __('Cancel', 'vapt-builder')),
-            el(Button, { isPrimary: true, onClick: () => onConfirm(formValues) }, __('Confirm & Build', 'vapt-builder'))
           ]),
 
           modalSaveStatus && el(Notice, {
