@@ -4,7 +4,11 @@
     "last_updated": "2024-01-19",
     "total_features": 87,
     "source": "WordPress VAPT Expert Skill - Extended",
-    "standards": ["OWASP Top 10 2021", "CWE Top 25", "PCI DSS"]
+    "standards": [
+      "OWASP Top 10 2021",
+      "CWE Top 25",
+      "PCI DSS"
+    ]
   },
   "features": [
     {
@@ -14,7 +18,7 @@
       "category": "Injection",
       "severity": "critical",
       "priority": 1,
-      "owasp": "A03:2021-Injection",
+      "owasp": "A03:2025-Injection",
       "cwe": "CWE-89",
       "implementation_methods": [
         ".htaccess",
@@ -81,7 +85,7 @@
       "category": "Authentication",
       "severity": "critical",
       "priority": 3,
-      "owasp": "A07:2021-Identification and Authentication Failures",
+      "owasp": "A07:2025-Identification and Authentication Failures",
       "cwe": "CWE-287",
       "implementation_methods": [
         "wp-config.php",
@@ -114,9 +118,13 @@
       "category": "Access Control",
       "severity": "high",
       "priority": 4,
-      "owasp": "A01:2021-Broken Access Control",
+      "owasp": "A01:2025-Broken Access Control",
       "cwe": "CWE-639",
-      "implementation_methods": ["functions.php", ".htaccess", "nginx"],
+      "implementation_methods": [
+        "functions.php",
+        ".htaccess",
+        "nginx"
+      ],
       "test_method": "Manual testing with privilege escalation attempts",
       "verification_steps": [
         "Test IDOR by changing numeric IDs in URLs: /user/123 → /user/124",
@@ -142,9 +150,12 @@
       "category": "Injection",
       "severity": "critical",
       "priority": 5,
-      "owasp": "A08:2017-Insecure Deserialization",
+      "owasp": "A08:2025-Insecure Deserialization",
       "cwe": "CWE-502",
-      "implementation_methods": ["functions.php", "input-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "input-validation"
+      ],
       "test_method": "Manual payload testing",
       "verification_steps": [
         "Identify serialized data in cookies, parameters, or files",
@@ -204,7 +215,11 @@
       "priority": 7,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-693",
-      "implementation_methods": [".htaccess", "nginx", "functions.php"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx",
+        "functions.php"
+      ],
       "test_method": "Automated header scanning",
       "verification_steps": [
         "Use curl -I to check headers",
@@ -232,7 +247,10 @@
       "priority": 8,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-352",
-      "implementation_methods": ["functions.php", "nonces"],
+      "implementation_methods": [
+        "functions.php",
+        "nonces"
+      ],
       "test_method": "Manual testing with token manipulation",
       "verification_steps": [
         "Identify state-changing actions",
@@ -260,7 +278,11 @@
       "priority": 9,
       "owasp": "A09:2021-Security Logging and Monitoring Failures",
       "cwe": "CWE-778",
-      "implementation_methods": ["wp-config.php", "functions.php", "log-files"],
+      "implementation_methods": [
+        "wp-config.php",
+        "functions.php",
+        "log-files"
+      ],
       "test_method": "Manual review & log analysis",
       "verification_steps": [
         "Check if failed login attempts are logged",
@@ -288,7 +310,9 @@
       "priority": 10,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-94",
-      "implementation_methods": ["wp-config.php"],
+      "implementation_methods": [
+        "wp-config.php"
+      ],
       "test_method": "Manual verification in admin panel",
       "verification_steps": [
         "Check wp-config.php for DISALLOW_FILE_EDIT",
@@ -314,7 +338,10 @@
       "priority": 11,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-20",
-      "implementation_methods": ["functions.php", "sanitization"],
+      "implementation_methods": [
+        "functions.php",
+        "sanitization"
+      ],
       "test_method": "Manual input testing with malformed data",
       "verification_steps": [
         "Test with malformed email addresses",
@@ -342,7 +369,11 @@
       "priority": 12,
       "owasp": "A07:2021-Identification and Authentication Failures",
       "cwe": "CWE-307",
-      "implementation_methods": ["nginx", "functions.php", "fail2ban"],
+      "implementation_methods": [
+        "nginx",
+        "functions.php",
+        "fail2ban"
+      ],
       "test_method": "Automated rate limit testing",
       "verification_steps": [
         "Test rapid login attempts",
@@ -369,7 +400,11 @@
       "priority": 13,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-200",
-      "implementation_methods": [".htaccess", "nginx", "functions.php"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx",
+        "functions.php"
+      ],
       "test_method": "Manual enumeration attempts",
       "verification_steps": [
         "Test author archives: /?author=1",
@@ -395,7 +430,10 @@
       "priority": 14,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-79",
-      "implementation_methods": [".htaccess", "nginx"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx"
+      ],
       "test_method": "Header analysis & policy testing",
       "verification_steps": [
         "Check for Content-Security-Policy header",
@@ -422,7 +460,11 @@
       "priority": 15,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-306",
-      "implementation_methods": [".htaccess", "nginx", "functions.php"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx",
+        "functions.php"
+      ],
       "test_method": "Manual API testing",
       "verification_steps": [
         "Test POST to /xmlrpc.php",
@@ -448,7 +490,11 @@
       "priority": 16,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-306",
-      "implementation_methods": [".htaccess", "nginx", "functions.php"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx",
+        "functions.php"
+      ],
       "test_method": "Manual API testing",
       "verification_steps": [
         "Test /wp-json/ endpoint",
@@ -505,7 +551,11 @@
       "priority": 18,
       "owasp": "A06:2021-Vulnerable and Outdated Components",
       "cwe": "CWE-1035",
-      "implementation_methods": ["monitoring", "updates", "wpscan"],
+      "implementation_methods": [
+        "monitoring",
+        "updates",
+        "wpscan"
+      ],
       "test_method": "Automated vulnerability scanning",
       "verification_steps": [
         "Run wp core version check",
@@ -565,7 +615,10 @@
       "priority": 20,
       "owasp": "A07:2021-Identification and Authentication Failures",
       "cwe": "CWE-613",
-      "implementation_methods": ["wp-config.php", "functions.php"],
+      "implementation_methods": [
+        "wp-config.php",
+        "functions.php"
+      ],
       "test_method": "Manual session testing & cookie analysis",
       "verification_steps": [
         "Check cookie attributes: HttpOnly, Secure, SameSite",
@@ -592,7 +645,10 @@
       "priority": 21,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-639",
-      "implementation_methods": ["functions.php", "authorization-checks"],
+      "implementation_methods": [
+        "functions.php",
+        "authorization-checks"
+      ],
       "test_method": "Manual ID manipulation testing",
       "verification_steps": [
         "Test numeric IDs in URLs",
@@ -618,7 +674,10 @@
       "priority": 22,
       "owasp": "A06:2021-Vulnerable and Outdated Components",
       "cwe": "CWE-200",
-      "implementation_methods": ["functions.php", "wp-config.php"],
+      "implementation_methods": [
+        "functions.php",
+        "wp-config.php"
+      ],
       "test_method": "Manual inspection & automated scanning",
       "verification_steps": [
         "View page source and search for 'generator' meta tag",
@@ -644,7 +703,10 @@
       "priority": 23,
       "owasp": "A07:2017-Identification and Authentication Failures",
       "cwe": "CWE-521",
-      "implementation_methods": ["functions.php", "wp-config.php"],
+      "implementation_methods": [
+        "functions.php",
+        "wp-config.php"
+      ],
       "test_method": "Manual testing & automated brute force",
       "verification_steps": [
         "Attempt to register or change password with weak passwords (123456, password, qwerty)",
@@ -671,7 +733,10 @@
       "priority": 24,
       "owasp": "A04:2017-XML External Entities (XXE)",
       "cwe": "CWE-611",
-      "implementation_methods": ["functions.php", "libxml-settings"],
+      "implementation_methods": [
+        "functions.php",
+        "libxml-settings"
+      ],
       "test_method": "Manual XML payload testing",
       "verification_steps": [
         "Identify XML input points (file uploads, API endpoints)",
@@ -698,7 +763,10 @@
       "priority": 25,
       "owasp": "A10:2021-Server-Side Request Forgery",
       "cwe": "CWE-918",
-      "implementation_methods": ["functions.php", "input-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "input-validation"
+      ],
       "test_method": "Manual payload testing",
       "verification_steps": [
         "Test URL parameters that fetch external resources",
@@ -726,7 +794,10 @@
       "priority": 26,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-434",
-      "implementation_methods": ["functions.php", "file-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "file-validation"
+      ],
       "test_method": "Manual file upload testing",
       "verification_steps": [
         "Upload files with different extensions: `.php`, `.phtml`, `.php5`",
@@ -755,7 +826,10 @@
       "priority": 27,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-22",
-      "implementation_methods": ["functions.php", "input-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "input-validation"
+      ],
       "test_method": "Manual path traversal testing",
       "verification_steps": [
         "Test file parameters: `?file=../../../etc/passwd`",
@@ -816,7 +890,11 @@
       "priority": 29,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-306",
-      "implementation_methods": [".htaccess", "nginx", "functions.php"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx",
+        "functions.php"
+      ],
       "test_method": "Manual API testing & automated scanning",
       "verification_steps": [
         "Check if XML-RPC is enabled: `curl -X POST -d '<methodCall><methodName>system.listMethods</methodName></methodCall>' http://site.com/xmlrpc.php`",
@@ -843,7 +921,11 @@
       "priority": 30,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-306",
-      "implementation_methods": [".htaccess", "nginx", "functions.php"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx",
+        "functions.php"
+      ],
       "test_method": "Manual API testing & automated scanning",
       "verification_steps": [
         "Discover endpoints: `curl http://site.com/wp-json/`",
@@ -872,7 +954,11 @@
       "priority": 31,
       "owasp": "A07:2021-Identification and Authentication Failures",
       "cwe": "CWE-307",
-      "implementation_methods": ["functions.php", "plugins", "rate-limiting"],
+      "implementation_methods": [
+        "functions.php",
+        "plugins",
+        "rate-limiting"
+      ],
       "test_method": "Automated brute force testing",
       "verification_steps": [
         "Test multiple failed login attempts on same account",
@@ -901,7 +987,10 @@
       "priority": 32,
       "owasp": "A02:2021-Cryptographic Failures",
       "cwe": "CWE-326",
-      "implementation_methods": ["server-config", "certificate-management"],
+      "implementation_methods": [
+        "server-config",
+        "certificate-management"
+      ],
       "test_method": "Automated SSL scanning",
       "verification_steps": [
         "Test with SSL Labs: `https://www.ssllabs.com/ssltest/`",
@@ -930,7 +1019,10 @@
       "priority": 33,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-521",
-      "implementation_methods": ["wp-config.php", "database-config"],
+      "implementation_methods": [
+        "wp-config.php",
+        "database-config"
+      ],
       "test_method": "Configuration review & manual testing",
       "verification_steps": [
         "Check database user permissions (SELECT only needed)",
@@ -959,7 +1051,10 @@
       "priority": 34,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-732",
-      "implementation_methods": ["server-config", "file-system"],
+      "implementation_methods": [
+        "server-config",
+        "file-system"
+      ],
       "test_method": "Manual permission checking",
       "verification_steps": [
         "Check WordPress directory permissions: `ls -la /var/www/html/`",
@@ -988,7 +1083,10 @@
       "priority": 35,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-522",
-      "implementation_methods": ["wp-config.php", "server-config"],
+      "implementation_methods": [
+        "wp-config.php",
+        "server-config"
+      ],
       "test_method": "Configuration review & direct access testing",
       "verification_steps": [
         "Attempt to access directly: `http://site.com/wp-config.php`",
@@ -1017,7 +1115,10 @@
       "priority": 36,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-16",
-      "implementation_methods": [".htaccess", "nginx-config"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx-config"
+      ],
       "test_method": "Configuration review",
       "verification_steps": [
         "Check if .htaccess exists in WordPress root",
@@ -1046,7 +1147,9 @@
       "priority": 37,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-12",
-      "implementation_methods": ["wp-config.php"],
+      "implementation_methods": [
+        "wp-config.php"
+      ],
       "test_method": "Configuration review & error testing",
       "verification_steps": [
         "Check wp-config.php for `define('WP_DEBUG', true);`",
@@ -1074,7 +1177,10 @@
       "priority": 38,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-209",
-      "implementation_methods": ["wp-config.php", "php-config"],
+      "implementation_methods": [
+        "wp-config.php",
+        "php-config"
+      ],
       "test_method": "Manual error triggering",
       "verification_steps": [
         "Trigger SQL errors with invalid queries",
@@ -1103,7 +1209,10 @@
       "priority": 39,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-12",
-      "implementation_methods": ["php.ini", "wp-config.php"],
+      "implementation_methods": [
+        "php.ini",
+        "wp-config.php"
+      ],
       "test_method": "Configuration review & error testing",
       "verification_steps": [
         "Create a PHP file with `<?php echo ini_get('display_errors'); ?>`",
@@ -1131,7 +1240,10 @@
       "priority": 40,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-548",
-      "implementation_methods": [".htaccess", "nginx-config"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx-config"
+      ],
       "test_method": "Manual directory access testing",
       "verification_steps": [
         "Access directories without index files: `/wp-content/uploads/`",
@@ -1159,7 +1271,10 @@
       "priority": 41,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-530",
-      "implementation_methods": ["file-cleanup", "access-controls"],
+      "implementation_methods": [
+        "file-cleanup",
+        "access-controls"
+      ],
       "test_method": "Automated file discovery",
       "verification_steps": [
         "Scan for common backup extensions: `.bak`, `.backup`, `.old`, `.save`",
@@ -1187,7 +1302,10 @@
       "priority": 42,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-522",
-      "implementation_methods": ["access-controls", "file-permissions"],
+      "implementation_methods": [
+        "access-controls",
+        "file-permissions"
+      ],
       "test_method": "Automated file discovery",
       "verification_steps": [
         "Test access to `wp-config.php` directly",
@@ -1215,7 +1333,10 @@
       "priority": 43,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-532",
-      "implementation_methods": ["access-controls", "log-management"],
+      "implementation_methods": [
+        "access-controls",
+        "log-management"
+      ],
       "test_method": "Manual file discovery",
       "verification_steps": [
         "Check for common log file locations",
@@ -1243,7 +1364,10 @@
       "priority": 44,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-540",
-      "implementation_methods": ["server-config", "file-handling"],
+      "implementation_methods": [
+        "server-config",
+        "file-handling"
+      ],
       "test_method": "Manual testing & file access attempts",
       "verification_steps": [
         "Test for PHP source disclosure via path manipulation",
@@ -1271,7 +1395,11 @@
       "priority": 45,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-1021",
-      "implementation_methods": [".htaccess", "nginx", "functions.php"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx",
+        "functions.php"
+      ],
       "test_method": "Header analysis & manual testing",
       "verification_steps": [
         "Check HTTP headers for X-Frame-Options",
@@ -1299,7 +1427,11 @@
       "priority": 46,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-434",
-      "implementation_methods": [".htaccess", "nginx", "functions.php"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx",
+        "functions.php"
+      ],
       "test_method": "Header analysis",
       "verification_steps": [
         "Check HTTP headers for X-Content-Type-Options",
@@ -1327,7 +1459,10 @@
       "priority": 47,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-942",
-      "implementation_methods": [".htaccess", "functions.php"],
+      "implementation_methods": [
+        ".htaccess",
+        "functions.php"
+      ],
       "test_method": "Manual CORS testing",
       "verification_steps": [
         "Check for Access-Control-Allow-Origin header",
@@ -1355,7 +1490,10 @@
       "priority": 48,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-829",
-      "implementation_methods": ["html-markup", "functions.php"],
+      "implementation_methods": [
+        "html-markup",
+        "functions.php"
+      ],
       "test_method": "Manual HTML inspection",
       "verification_steps": [
         "Check script and link tags for integrity attribute",
@@ -1383,7 +1521,10 @@
       "priority": 49,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-749",
-      "implementation_methods": [".htaccess", "nginx-config"],
+      "implementation_methods": [
+        ".htaccess",
+        "nginx-config"
+      ],
       "test_method": "Manual HTTP method testing",
       "verification_steps": [
         "Use OPTIONS method to discover allowed methods",
@@ -1411,7 +1552,10 @@
       "priority": 50,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-640",
-      "implementation_methods": ["functions.php", "server-config"],
+      "implementation_methods": [
+        "functions.php",
+        "server-config"
+      ],
       "test_method": "Manual header manipulation testing",
       "verification_steps": [
         "Test Host header manipulation",
@@ -1439,7 +1583,10 @@
       "priority": 51,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-601",
-      "implementation_methods": ["functions.php", "input-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "input-validation"
+      ],
       "test_method": "Manual redirect testing",
       "verification_steps": [
         "Test URL parameters for redirects (redirect, return, url)",
@@ -1467,7 +1614,10 @@
       "priority": 52,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-98",
-      "implementation_methods": ["functions.php", "input-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "input-validation"
+      ],
       "test_method": "Manual path traversal testing",
       "verification_steps": [
         "Test file parameters with directory traversal",
@@ -1495,7 +1645,10 @@
       "priority": 53,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-98",
-      "implementation_methods": ["php-config", "input-validation"],
+      "implementation_methods": [
+        "php-config",
+        "input-validation"
+      ],
       "test_method": "Manual URL inclusion testing",
       "verification_steps": [
         "Test file parameters with external URLs",
@@ -1523,7 +1676,10 @@
       "priority": 54,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-78",
-      "implementation_methods": ["functions.php", "input-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "input-validation"
+      ],
       "test_method": "Manual command payload testing",
       "verification_steps": [
         "Test input fields with command separators: `;`, `|`, `&`",
@@ -1551,7 +1707,10 @@
       "priority": 55,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-1336",
-      "implementation_methods": ["functions.php", "template-security"],
+      "implementation_methods": [
+        "functions.php",
+        "template-security"
+      ],
       "test_method": "Manual template payload testing",
       "verification_steps": [
         "Identify template engines used (Twig, Smarty, Blade)",
@@ -1579,7 +1738,10 @@
       "priority": 56,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-93",
-      "implementation_methods": ["functions.php", "email-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "email-validation"
+      ],
       "test_method": "Manual email header testing",
       "verification_steps": [
         "Test contact form fields with newlines and headers",
@@ -1607,7 +1769,10 @@
       "priority": 57,
       "owasp": "A07:2021-Identification and Authentication Failures",
       "cwe": "CWE-640",
-      "implementation_methods": ["functions.php", "token-security"],
+      "implementation_methods": [
+        "functions.php",
+        "token-security"
+      ],
       "test_method": "Manual password reset testing",
       "verification_steps": [
         "Test password reset token generation",
@@ -1635,7 +1800,10 @@
       "priority": 58,
       "owasp": "A07:2021-Identification and Authentication Failures",
       "cwe": "CWE-620",
-      "implementation_methods": ["functions.php", "email-security"],
+      "implementation_methods": [
+        "functions.php",
+        "email-security"
+      ],
       "test_method": "Manual email change testing",
       "verification_steps": [
         "Test email change without confirmation",
@@ -1663,7 +1831,10 @@
       "priority": 59,
       "owasp": "A07:2021-Identification and Authentication Failures",
       "cwe": "CWE-384",
-      "implementation_methods": ["functions.php", "session-security"],
+      "implementation_methods": [
+        "functions.php",
+        "session-security"
+      ],
       "test_method": "Manual session testing",
       "verification_steps": [
         "Test if session ID changes after login",
@@ -1691,7 +1862,10 @@
       "priority": 60,
       "owasp": "A07:2021-Identification and Authentication Failures",
       "cwe": "CWE-613",
-      "implementation_methods": ["functions.php", "wp-config.php"],
+      "implementation_methods": [
+        "functions.php",
+        "wp-config.php"
+      ],
       "test_method": "Manual session duration testing",
       "verification_steps": [
         "Test session expiration after inactivity",
@@ -1719,7 +1893,10 @@
       "priority": 61,
       "owasp": "A07:2021-Identification and Authentication Failures",
       "cwe": "CWE-384",
-      "implementation_methods": ["functions.php", "session-tracking"],
+      "implementation_methods": [
+        "functions.php",
+        "session-tracking"
+      ],
       "test_method": "Manual concurrent session testing",
       "verification_steps": [
         "Test logging in from multiple devices/browsers",
@@ -1747,7 +1924,10 @@
       "priority": 62,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-598",
-      "implementation_methods": ["functions.php", "session-management"],
+      "implementation_methods": [
+        "functions.php",
+        "session-management"
+      ],
       "test_method": "URL parameter analysis",
       "verification_steps": [
         "Check for session IDs in URLs",
@@ -1775,7 +1955,10 @@
       "priority": 63,
       "owasp": "A09:2021-Security Logging and Monitoring Failures",
       "cwe": "CWE-532",
-      "implementation_methods": ["functions.php", "log-configuration"],
+      "implementation_methods": [
+        "functions.php",
+        "log-configuration"
+      ],
       "test_method": "Log file analysis",
       "verification_steps": [
         "Check application logs for sensitive data",
@@ -1803,7 +1986,10 @@
       "priority": 64,
       "owasp": "A02:2021-Cryptographic Failures",
       "cwe": "CWE-311",
-      "implementation_methods": ["encryption-libraries", "database-encryption"],
+      "implementation_methods": [
+        "encryption-libraries",
+        "database-encryption"
+      ],
       "test_method": "Configuration review & data inspection",
       "verification_steps": [
         "Check database for encrypted sensitive fields",
@@ -1831,7 +2017,10 @@
       "priority": 65,
       "owasp": "A02:2021-Cryptographic Failures",
       "cwe": "CWE-319",
-      "implementation_methods": ["ssl-certificates", "server-config"],
+      "implementation_methods": [
+        "ssl-certificates",
+        "server-config"
+      ],
       "test_method": "Automated SSL scanning",
       "verification_steps": [
         "Verify HTTPS is enforced site-wide",
@@ -1859,7 +2048,10 @@
       "priority": 66,
       "owasp": "A02:2021-Cryptographic Failures",
       "cwe": "CWE-327",
-      "implementation_methods": ["functions.php", "crypto-libraries"],
+      "implementation_methods": [
+        "functions.php",
+        "crypto-libraries"
+      ],
       "test_method": "Configuration review & code analysis",
       "verification_steps": [
         "Check for MD5, SHA1 hash usage",
@@ -1887,7 +2079,10 @@
       "priority": 67,
       "owasp": "A02:2021-Cryptographic Failures",
       "cwe": "CWE-338",
-      "implementation_methods": ["functions.php", "crypto-functions"],
+      "implementation_methods": [
+        "functions.php",
+        "crypto-functions"
+      ],
       "test_method": "Code review & randomness testing",
       "verification_steps": [
         "Check token generation randomness",
@@ -1915,7 +2110,10 @@
       "priority": 68,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-840",
-      "implementation_methods": ["functions.php", "business-rules"],
+      "implementation_methods": [
+        "functions.php",
+        "business-rules"
+      ],
       "test_method": "Manual business logic testing",
       "verification_steps": [
         "Test for price manipulation in e-commerce",
@@ -1943,7 +2141,10 @@
       "priority": 69,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-362",
-      "implementation_methods": ["functions.php", "database-transactions"],
+      "implementation_methods": [
+        "functions.php",
+        "database-transactions"
+      ],
       "test_method": "Concurrent request testing",
       "verification_steps": [
         "Test concurrent balance transfers",
@@ -1971,7 +2172,10 @@
       "priority": 70,
       "owasp": "A07:2021-Identification and Authentication Failures",
       "cwe": "CWE-307",
-      "implementation_methods": ["functions.php", "rate-limiting"],
+      "implementation_methods": [
+        "functions.php",
+        "rate-limiting"
+      ],
       "test_method": "Automated rate limit testing",
       "verification_steps": [
         "Test API endpoints without rate limits",
@@ -1999,7 +2203,10 @@
       "priority": 71,
       "owasp": "A06:2021-Vulnerable and Outdated Components",
       "cwe": "CWE-400",
-      "implementation_methods": ["server-config", "firewall"],
+      "implementation_methods": [
+        "server-config",
+        "firewall"
+      ],
       "test_method": "Load testing & resource exhaustion testing",
       "verification_steps": [
         "Test for resource exhaustion attacks",
@@ -2027,7 +2234,10 @@
       "priority": 72,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-693",
-      "implementation_methods": ["waf-configuration", "security-monitoring"],
+      "implementation_methods": [
+        "waf-configuration",
+        "security-monitoring"
+      ],
       "test_method": "Manual WAF evasion testing",
       "verification_steps": [
         "Test SQLi payloads with various encodings",
@@ -2055,7 +2265,10 @@
       "priority": 73,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-20",
-      "implementation_methods": ["functions.php", "input-sanitization"],
+      "implementation_methods": [
+        "functions.php",
+        "input-sanitization"
+      ],
       "test_method": "Manual input manipulation testing",
       "verification_steps": [
         "Test with null byte injection",
@@ -2083,7 +2296,10 @@
       "priority": 74,
       "owasp": "A07:2021-Identification and Authentication Failures",
       "cwe": "CWE-287",
-      "implementation_methods": ["functions.php", "authentication-security"],
+      "implementation_methods": [
+        "functions.php",
+        "authentication-security"
+      ],
       "test_method": "Manual authentication testing",
       "verification_steps": [
         "Test for SQL injection in login forms",
@@ -2111,7 +2327,10 @@
       "priority": 75,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-285",
-      "implementation_methods": ["functions.php", "access-controls"],
+      "implementation_methods": [
+        "functions.php",
+        "access-controls"
+      ],
       "test_method": "Manual access control testing",
       "verification_steps": [
         "Test direct access to admin URLs",
@@ -2139,7 +2358,10 @@
       "priority": 76,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-269",
-      "implementation_methods": ["functions.php", "authorization-checks"],
+      "implementation_methods": [
+        "functions.php",
+        "authorization-checks"
+      ],
       "test_method": "Manual privilege testing",
       "verification_steps": [
         "Test user role manipulation",
@@ -2167,7 +2389,10 @@
       "priority": 77,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-915",
-      "implementation_methods": ["functions.php", "input-filtering"],
+      "implementation_methods": [
+        "functions.php",
+        "input-filtering"
+      ],
       "test_method": "Manual parameter tampering",
       "verification_steps": [
         "Test form submissions with extra parameters",
@@ -2195,7 +2420,10 @@
       "priority": 78,
       "owasp": "A01:2021-Broken Access Control",
       "cwe": "CWE-639",
-      "implementation_methods": ["functions.php", "access-controls"],
+      "implementation_methods": [
+        "functions.php",
+        "access-controls"
+      ],
       "test_method": "Manual ID manipulation testing",
       "verification_steps": [
         "Test numeric IDs in URLs (user/123 → user/124)",
@@ -2223,7 +2451,10 @@
       "priority": 79,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-22",
-      "implementation_methods": ["functions.php", "input-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "input-validation"
+      ],
       "test_method": "Manual path traversal testing",
       "verification_steps": [
         "Test file download parameters with ../",
@@ -2251,7 +2482,10 @@
       "priority": 80,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-434",
-      "implementation_methods": ["functions.php", "file-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "file-validation"
+      ],
       "test_method": "Manual file upload testing",
       "verification_steps": [
         "Upload PHP files with various extensions",
@@ -2279,7 +2513,10 @@
       "priority": 81,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-20",
-      "implementation_methods": ["functions.php", "validation-security"],
+      "implementation_methods": [
+        "functions.php",
+        "validation-security"
+      ],
       "test_method": "Manual validation bypass testing",
       "verification_steps": [
         "Test with modified client-side validation",
@@ -2307,7 +2544,10 @@
       "priority": 82,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-602",
-      "implementation_methods": ["functions.php", "server-validation"],
+      "implementation_methods": [
+        "functions.php",
+        "server-validation"
+      ],
       "test_method": "Manual JavaScript bypass testing",
       "verification_steps": [
         "Disable JavaScript to bypass client validation",
@@ -2335,7 +2575,10 @@
       "priority": 83,
       "owasp": "A06:2021-Vulnerable and Outdated Components",
       "cwe": "CWE-441",
-      "implementation_methods": ["functions.php", "api-security"],
+      "implementation_methods": [
+        "functions.php",
+        "api-security"
+      ],
       "test_method": "Integration testing & configuration review",
       "verification_steps": [
         "Test payment gateway callback security",
@@ -2363,7 +2606,10 @@
       "priority": 84,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-522",
-      "implementation_methods": ["access-controls", "file-cleanup"],
+      "implementation_methods": [
+        "access-controls",
+        "file-cleanup"
+      ],
       "test_method": "Automated scanning & manual access testing",
       "verification_steps": [
         "Scan for adminer.php, phpmyadmin directories",
@@ -2391,7 +2637,10 @@
       "priority": 85,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-94",
-      "implementation_methods": ["wp-config.php", "access-controls"],
+      "implementation_methods": [
+        "wp-config.php",
+        "access-controls"
+      ],
       "test_method": "Configuration review & access testing",
       "verification_steps": [
         "Check wp-config.php for DISALLOW_FILE_EDIT",
@@ -2419,7 +2668,10 @@
       "priority": 86,
       "owasp": "A03:2021-Injection",
       "cwe": "CWE-94",
-      "implementation_methods": ["functions.php", "editor-security"],
+      "implementation_methods": [
+        "functions.php",
+        "editor-security"
+      ],
       "test_method": "Manual editor testing",
       "verification_steps": [
         "Test plugin editor for file write vulnerabilities",
@@ -2447,7 +2699,10 @@
       "priority": 87,
       "owasp": "A05:2021-Security Misconfiguration",
       "cwe": "CWE-400",
-      "implementation_methods": ["wp-config.php", "cron-security"],
+      "implementation_methods": [
+        "wp-config.php",
+        "cron-security"
+      ],
       "test_method": "Manual cron testing",
       "verification_steps": [
         "Test wp-cron.php for DoS vulnerabilities",

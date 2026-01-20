@@ -272,10 +272,24 @@ class VAPT_Hook_Driver
   /**
    * Hide WordPress Version
    */
+  /**
+   * Hide WordPress Version
+   */
   private static function hide_wp_version($key = 'unknown')
   {
+    // 1. Remove Generator Tag
     remove_action('wp_head', 'wp_generator');
     add_filter('the_generator', '__return_empty_string');
+
+    // 2. Add Enforcement Headers (Robust)
+    add_filter('wp_headers', function ($headers) use ($key) {
+      $headers['X-VAPT-Enforced'] = 'php-version-hide';
+      $headers['X-VAPT-Feature'] = $key;
+      $headers['Access-Control-Expose-Headers'] = 'X-VAPT-Enforced, X-VAPT-Feature';
+      return $headers;
+    });
+
+    // 3. Fallback for headers (if not filtered)
     add_action('init', function () use ($key) {
       if (!headers_sent()) {
         header('X-VAPT-Enforced: php-version-hide');

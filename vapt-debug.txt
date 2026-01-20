@@ -631,3 +631,1197 @@ Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardenin
 VAPT Enforcement Run at 2026-01-20 01:36:13
 Feature: wordpress-version-disclosure
 Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:37:13
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:37:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:37:44
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:37:44
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:39:17
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:39:19
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:39:45
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:39:45
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:40:14
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:40:14
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:41:50
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:41:50
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:42:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:42:15
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:43:51
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:43:51
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 01:44:16
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 01:44:16
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:36:52
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:36:52
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:36:52
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:36:52
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:36:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:37:00
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:37:08
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:37:08
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:37:08
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:37:08
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:37:08
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:37:09
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:37:36
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:37:36
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:37:37
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:37:37
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:37:38
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:37:38
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:37:38
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:37:38
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:37:39
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:38:09
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:38:09
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:38:14
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:38:14
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:38:14
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:38:14
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:38:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:38:15
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:38:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:38:15
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:38:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:38:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:38:15
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:38:15
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:38:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:38:15
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:38:39
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:38:39
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:39:19
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:39:19
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:39:39
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:39:39
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:40:10
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:40:10
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:40:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:40:43
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:41:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:41:15
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:41:39
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:41:39
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:42:15
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:42:15
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:43:20
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:43:20
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:43:40
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:43:40
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:44:12
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:44:12
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:45:21
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:45:23
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:45:41
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:45:41
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:46:13
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:46:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:47:22
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:47:22
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:47:42
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:47:42
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:48:14
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:48:14
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:49:23
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:49:23
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:49:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:49:43
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:51:24
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:51:24
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:53:25
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:53:27
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:55:26
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:55:26
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:57:27
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:57:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 09:59:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 09:59:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:01:29
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:01:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:03:30
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:03:32
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:05:31
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:05:31
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:07:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:07:34
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:09:33
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:09:35
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:11:34
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:11:34
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:13:35
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:13:35
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:15:36
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:15:36
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:17:37
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:17:37
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:19:38
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:19:38
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:21:39
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:21:39
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:21:39
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:21:46
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:21:46
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:21:47
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:21:47
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:21:47
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:21:47
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:22:11
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:22:11
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:22:12
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:22:12
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:22:12
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:22:12
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:22:27
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:22:27
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:22:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:22:28
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:22:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:22:28
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:23:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:23:32
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:23:36
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:23:36
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:24:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:24:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:25:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:25:34
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:25:37
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:25:37
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:26:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:26:28
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:27:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:27:34
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:27:38
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:27:38
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:28:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:28:28
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:29:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:29:43
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:30:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:30:28
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:31:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:31:34
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:31:40
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:31:40
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:33:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:33:32
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:33:41
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:33:41
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:34:28
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:34:28
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:35:46
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:35:46
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:36:25
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:36:25
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:36:29
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:36:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:36:29
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:36:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:36:29
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:36:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:36:51
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:36:51
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:36:56
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":false,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:36:56
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:37:01
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:37:01
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:37:30
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:37:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:37:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:37:43
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:37:44
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:37:44
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:37:44
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:37:44
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:37:44
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:37:44
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:37:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:37:59
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"","verify_version_hidden":null,"verify_readme_blocked":null,"verify_rest_version":null}
+VAPT Enforcement Run at 2026-01-20 10:38:17
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:38:20
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:38:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:38:45
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:39:47
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:39:50
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:39:55
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:39:55
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:39:57
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:39:57
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:39:57
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:39:57
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:39:57
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:39:57
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:40:24
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:40:24
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:40:31
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:40:31
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:40:44
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:40:44
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:40:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:40:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:40:59
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:40:59
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:41:00
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:41:00
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:41:03
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:41:03
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:41:17
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:41:17
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":true,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:41:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:41:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":false,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:42:49
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:42:49
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":false,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:42:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:42:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":false,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:44:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:44:04
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":false,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:44:46
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:44:46
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":false,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:45:38
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:45:38
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":false,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:45:47
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:45:47
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":false,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:46:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:02
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"remove_readme_files":false,"disable_error_version":false,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities.","manual_verification":null,"verif_hide_version":null,"verif_readme_blocked":null,"verif_error_suppression":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:46:09
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:09
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:46:10
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:10
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:46:10
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:10
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:46:23
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:23
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:46:29
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:29
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:46:30
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:30
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:46:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:32
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:46:34
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:34
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:46:36
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:39
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:41
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:46:51
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:47:10
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:48:14
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:48:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:48:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:48:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:48:48
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:49:37
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:50:33
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:50:53
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:51:33
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:52:54
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:53:33
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:54:55
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:55:05
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:56:09
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:56:17
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:56:19
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:56:19
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:57:23
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:57:52
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:57:54
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:57:57
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:57:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:57:59
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:58:01
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:58:01
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:58:19
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:58:19
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:59:23
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:59:23
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:59:31
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:59:31
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:59:31
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:59:31
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 10:59:31
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 10:59:31
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:00:36
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:00:38
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:00:54
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:00:54
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:00:55
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:00:55
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:00:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:00:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:01:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:01:32
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:02:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:02:02
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:02:13
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:02:13
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:02:32
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:02:32
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:02:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:02:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:03:37
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:03:37
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:03:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:03:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:05:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:05:04
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:05:34
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:05:34
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:05:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:05:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:06:36
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:06:36
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:06:42
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:06:42
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:06:45
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:06:45
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:06:46
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:06:46
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:06:46
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:06:46
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:06:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:06:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:07:16
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:07:16
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:07:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:07:43
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:07:46
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:07:46
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:07:47
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:07:47
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:08:05
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:08:05
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:08:50
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:08:50
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:08:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:08:59
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:09:46
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:09:46
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:11:04
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:11:04
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:11:06
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:11:06
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:13:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:13:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:13:02
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:13:02
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:13:58
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:13:58
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:15:02
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:15:02
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:15:59
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:15:59
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:18:04
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:18:04
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:20:05
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:20:05
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:22:06
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:22:08
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:24:07
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:24:07
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 11:26:08
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 11:26:09
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 12:16:42
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 12:16:42
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 12:18:42
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 12:18:42
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 12:20:43
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 12:20:43
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 12:22:44
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 12:22:44
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 12:24:45
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 12:24:47
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}
+VAPT Enforcement Run at 2026-01-20 12:26:46
+Feature: ssl-tls-configuration
+Applying rules with Data: {"status":true,"operational_notes":"SSL\/TLS hardening requires both server-level (Nginx\/Apache) protocol\/cipher configuration and application-level transport headers. Ensure TLS 1.0\/1.1 are disabled and a strong RSA 2048+ certificate is active.","v1":null}
+VAPT Enforcement Run at 2026-01-20 12:26:48
+Feature: wordpress-version-disclosure
+Applying rules with Data: {"hide_wp_version":true,"operational_notes":"This feature addresses A6:2021-Vulnerable and Outdated Components by preventing version disclosure that could help attackers target known vulnerabilities. The implementation removes generator meta tags and adds security headers.","manual_verification":null,"verif_version_hiding":null,"verif_rest_api_hiding":null,"evidence_requirements":null}

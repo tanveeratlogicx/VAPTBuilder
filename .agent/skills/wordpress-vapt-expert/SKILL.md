@@ -17,6 +17,26 @@ This skill helps implement comprehensive security protections for WordPress webs
 
 **Keywords that trigger this skill**: WordPress security, VAPT, vulnerability assessment, penetration testing, SQL injection, XSS, authentication, access control, security headers, OWASP, hardening, evidence generation, .htaccess security, nginx security
 
+## Automated Implementation with VAPTBuilder Plugin
+
+For production WordPress environments, the **VAPTBuilder plugin** provides automated implementation, enforcement, and verification of all 87 VAPT features. This is the recommended approach for efficiency and reliability.
+
+### Why Use VAPTBuilder?
+- **Automated Enforcement**: Features are enforced via PHP hooks or .htaccess rules without manual coding.
+- **Dynamic UI Generation**: The plugin generates interactive dashboards with controls, tests, and verification probes.
+- **Centralized Management**: Manage domains, features, and evidence in a single admin interface.
+- **Real-Time Verification**: Built-in probes (e.g., universal_probe, spam_requests) test protections automatically.
+- **Evidence Generation**: Automatic header-based verification (e.g., `X-VAPT-Enforced`) and reporting.
+
+### Quick Setup
+1. Install the VAPTBuilder plugin in your WordPress site.
+2. Access the admin dashboard at `/wp-admin/admin.php?page=vapt-builder` (client) or `/wp-admin/admin.php?page=vapt-domain-admin` (superadmin).
+3. Enable desired features from the 87 available in `resources/features-database.json`.
+4. Use built-in verification tests to confirm protections are active.
+5. Generate reports with enforcement headers and probe results.
+
+**Note**: The `features-database.json` file is the authoritative source for all feature definitions, implementation methods, and testing procedures. Always reference it for the latest details.
+
 ## Feature Categories Covered
 
 **📊 Quick Reference:** See `/resources/features-database.json` for the complete database of all 87 features with detailed implementation methods, testing procedures, and evidence requirements.
@@ -440,6 +460,17 @@ Create PHP scripts that:
 
 ## Testing Methodology
 
+### Automated Verification via VAPTBuilder Plugin
+
+When using the VAPTBuilder plugin, leverage its built-in verification system:
+
+- **Probe Registry**: Use probes like `universal_probe`, `spam_requests`, `check_headers`, `block_xmlrpc` for automated testing.
+- **Header Verification**: Check for `X-VAPT-Enforced` headers to confirm plugin enforcement.
+- **Generated Interface**: UI controls automatically include test actions with real-time results.
+- **Evidence Collection**: Plugin generates reports with header analysis and probe outcomes.
+
+For manual verification when not using the plugin, follow the steps below.
+
 ### Verification Steps for Each Feature
 
 1. **Pre-Implementation Baseline**
@@ -698,6 +729,11 @@ This skill includes the following resources in the skill folder:
 - `vapt-checklist.md` - Comprehensive implementation checklist organized by priority
 - `evidence-template.md` - Professional evidence documentation template for compliance reporting
 
+### Plugin Files for Reference (in VAPTBuilder plugin)
+- `includes/enforcers/class-vapt-hook-driver.php` - PHP-based enforcement driver for hook-based features
+- `assets/js/modules/generated-interface.js` - UI generation and PROBE_REGISTRY for automated testing
+- `vapt-builder.php` - Main plugin file with database setup and feature enforcement
+
 ### How to Use These Resources
 
 **When implementing a VAPT feature:**
@@ -709,6 +745,61 @@ This skill includes the following resources in the skill folder:
 6. **Track progress** with `vapt-checklist.md`
 
 **Important:** The agent should read these files as needed to provide accurate implementations, but should not include entire file contents in responses unless specifically requested. Instead, extract relevant sections and customize for the specific feature being implemented.
+
+## Interface & Schema Generation
+
+When generating the `generated_schema` JSON for the VAPT Workbench, you **MUST** adhere to the following strict layout and control guidelines to ensure consistency with the dashboard UI.
+
+### 1. Dashboard Layout Structure (Two-Column + Full Width)
+
+The Workbench processes the JSON schema into a specific layout. Your meaningful controls must be categorized correctly to appear in the right place:
+
+*   **Left Column (Functional Implementation)**:
+    *   **Content**: All configuration inputs (`toggle`, `input`, `select`, etc.).
+    *   **Purpose**: Controls that change *how* the feature works.
+*   **Right Column (Automated Verification)**:
+    *   **Content**: Controls with `type: "test_action"`.
+    *   **Purpose**: "Run Verify" buttons and automated checks.
+*   **Bottom Row (Full Width - Below Grid)**:
+    *   **Content**: Controls with `key: "operational_notes"` (or label "Operational Notes").
+    *   **Purpose**: Contextual guidance, warnings, or implementation details. Should use `type: "textarea"` with `rows: 3` and `read_only: (optional)`.
+
+### 2. Manual Verification Modal
+
+The "Functional Verification" button (on the dashboard) opens a modal dedicated **ONLY** to manual protocols. Do **NOT** put automated tests here.
+
+*   **Content**:
+    *   `test_method`: The manual protocol text (from Feature Meta).
+    *   `verification_steps`: The evidence checklist (from Feature Meta).
+    *   `type: "risk_indicators"`: Threat model summary.
+    *   `type: "assurance_badges"`: Visual confirmation status.
+
+### 3. Verification Logic Guidelines
+
+*   **Automated Tests**:
+    *   Use `test_logic: "universal_probe"` whenever possible.
+    *   **MUST** include `expected_headers` validation (e.g., `X-VAPT-Enforced: php-feature-key`) to prove the VAPT plugin is the one enforcing the rule (vs. another plugin).
+    *   **Probe Logic**: Ensure the probe actually triggers the protection (e.g., accesses a blocked file, sends a banned header) and checks for the expected block response (403/404).
+
+### 4. Schema Example
+
+```json
+{
+  "controls": [
+    { "type": "section", "label": "Functional Implementation" },
+    { "type": "toggle", "label": "Enable Feature", "key": "status", "default": true },
+    { "type": "input", "label": "Threshold", "key": "limit", "default": "5" },
+
+    { "type": "test_action", "label": "Verify Blocking", "key": "verify_block", "test_logic": "universal_probe", "test_config": { ... } },
+
+    { "type": "textarea", "label": "Operational Notes", "key": "operational_notes", "default": "Notes here...", "help": "Contextual guide." },
+
+    { "type": "risk_indicators", "label": "Risks", "items": [...] },
+    { "type": "assurance_badges", "label": "Assurance", "items": [...] }
+  ],
+  "enforcement": { ... }
+}
+```
 
 ## Response Format
 
