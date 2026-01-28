@@ -55,6 +55,12 @@ class VAPT_REST
       'permission_callback' => array($this, 'check_permission'),
     ));
 
+    register_rest_route('vapt/v1', '/debug-read', array(
+      'methods' => 'GET',
+      'callback' => array($this, 'debug_read_file'),
+      'permission_callback' => array($this, 'check_permission'),
+    ));
+
     register_rest_route('vapt/v1', '/features/transition', array(
       'methods'  => 'POST',
       'callback' => array($this, 'transition_feature'),
@@ -186,40 +192,18 @@ class VAPT_REST
 
   public function get_features($request)
   {
-    $default_file = get_option('vapt_active_feature_file', 'vapt-builder-features.json');
-    $file = $request->get_param('file') ?: $default_file;
-    $json_path = VAPT_PATH . 'data/' . sanitize_file_name($file);
-
-    if (! file_exists($json_path)) {
-      return new WP_REST_Response(array('error' => 'JSON file not found: ' . $file), 404);
+    $file = $request->get_param('file');
+    error_log('VAPT Builder API: Loading features from file: ' . ($file ?: 'default'));
+    $result = VAPT_Features::get_features($file);
+    if (isset($result['error'])) {
+      error_log('VAPT Builder API ERROR: ' . $result['error']);
+      return new WP_REST_Response($result, 404);
     }
+    error_log('VAPT Builder API: Successfully loaded ' . count($result['features']) . ' features');
 
-    $content = file_get_contents($json_path);
-    $raw_data = json_decode($content, true);
-
-    if (! is_array($raw_data)) {
-      return new WP_REST_Response(array('error' => 'Invalid JSON format'), 400);
-    }
-
-    $features = [];
-    $schema = [];
-
-    if (isset($raw_data['wordpress_vapt']) && is_array($raw_data['wordpress_vapt'])) {
-      $features = $raw_data['wordpress_vapt'];
-      $schema = isset($raw_data['schema']) ? $raw_data['schema'] : [];
-    } elseif (isset($raw_data['features']) && is_array($raw_data['features'])) {
-      $features = $raw_data['features'];
-      $schema = isset($raw_data['schema']) ? $raw_data['schema'] : [];
-    } else {
-      $features = $raw_data;
-    }
-
-    // Default schema if missing
-    if (empty($schema)) {
-      $schema = array(
-        'item_fields' => array('id', 'category', 'title', 'severity', 'description')
-      );
-    }
+    $features = $result['features'];
+    $schema   = $result['schema'];
+    $metadata = $result['metadata'];
 
     $statuses = VAPT_DB::get_feature_statuses_full();
     $status_map = [];
@@ -273,7 +257,19 @@ class VAPT_REST
       if ($norm_status === 'available')   $norm_status = 'draft';
       $feature['normalized_status'] = $norm_status;
 
-      $meta = VAPT_DB::get_feature_meta($key);
+      // Batch pre-fetch is done outside the loop now
+    }
+
+    // Pre-fetch metadata in a single batch
+    $all_keys = array_column($features, 'key');
+    $placeholders = implode(',', array_fill(0, count($all_keys), '%s'));
+    $meta_table = $wpdb->prefix . 'vapt_feature_meta';
+    $all_meta = $wpdb->get_results($wpdb->prepare("SELECT * FROM $meta_table WHERE feature_key IN ($placeholders)", $all_keys), OBJECT_K);
+
+    foreach ($features as &$feature) {
+      $key = $feature['key'];
+      $meta = isset($all_meta[$key]) ? (array) $all_meta[$key] : null;
+
       if ($meta) {
         $feature['include_test_method'] = (bool) $meta['include_test_method'];
         $feature['include_verification'] = (bool) $meta['include_verification'];
@@ -434,7 +430,7 @@ class VAPT_REST
     return new WP_REST_Response(array(
       'features' => $features,
       'schema' => $schema,
-      'design_prompt' => isset($raw_data['design_prompt']) ? $raw_data['design_prompt'] : null
+      'design_prompt' => isset($metadata['design_prompt']) ? $metadata['design_prompt'] : null
     ), 200);
   }
 
@@ -447,7 +443,7 @@ class VAPT_REST
     $json_files = [];
 
     $hidden_files = get_option('vapt_hidden_json_files', array());
-    $active_file  = get_option('vapt_active_feature_file', 'vapt-builder-features.json');
+    $active_file  = get_option('vapt_active_feature_file', 'Feature-List-99.json');
 
     $hidden_normalized = array_map('sanitize_file_name', $hidden_files);
     $active_normalized = sanitize_file_name($active_file);
@@ -1217,8 +1213,32 @@ class VAPT_REST
     }
 
     return new WP_REST_Response(array(
-      'active_file' => get_option('vapt_active_feature_file', 'vapt-builder-features.json')
+      'active_file' => get_option('vapt_active_feature_file', 'Feature-List-99.json')
     ), 200);
+  }
+
+  public function debug_read_file($request)
+  {
+    $file = $request->get_param('file');
+    if (!$file) $file = 'VAPT-Complete-Risk-Catalog-99.json';
+    $json_path = VAPT_PATH . 'data/' . sanitize_file_name($file);
+
+    $res = [
+      'file' => $file,
+      'path' => $json_path,
+      'exists' => file_exists($json_path),
+      'readable' => is_readable($json_path),
+      'size' => file_exists($json_path) ? filesize($json_path) : 0,
+      'content_preview' => ''
+    ];
+
+    if ($res['readable']) {
+       $content = file_get_contents($json_path);
+       $res['content_preview'] = substr($content, 0, 100);
+       $res['json_valid'] = (json_decode($content) !== null);
+    }
+
+    return new WP_REST_Response($res, 200);
   }
 }
 
