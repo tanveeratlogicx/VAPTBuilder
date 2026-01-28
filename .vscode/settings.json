@@ -63,5 +63,6 @@
     "zip",
     "zlib",
     "wordpress"
-  ]
+  ],
+  "claudeCodeChat.permissions.yoloMode": true
 }

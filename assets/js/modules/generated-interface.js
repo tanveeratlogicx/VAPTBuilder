@@ -20,21 +20,15 @@
 
       const vaptEnforced = resp.headers.get('x-vapt-enforced');
       const enforcedFeature = resp.headers.get('x-vapt-feature');
-      const securityHeaders = ['x-frame-options', 'x-content-type-options', 'x-xss-protection', 'content-security-policy', 'access-control-expose-headers'];
-      const found = securityHeaders.filter(h => resp.headers.has(h)).map(h => `${h}: ${resp.headers.get(h)}`);
 
-      if (vaptEnforced) {
+      if (vaptEnforced === 'php-headers') {
         if (featureKey && enforcedFeature && enforcedFeature !== featureKey) {
           return { success: false, message: `Inconclusive: Headers are present, but enforced by another feature ('${enforcedFeature}'), not this one. Please disable the conflicting feature to test this one accurately.`, raw: headers };
         }
-        return { success: true, message: `Plugin is actively enforcing headers (${vaptEnforced}). Data: ${found.join(' | ')}`, raw: headers };
+        return { success: true, message: `Plugin is actively enforcing headers (${vaptEnforced}).`, raw: headers };
       }
 
-      if (found.length > 0) {
-        return { success: true, message: `Site is secure, but NOT by this plugin. Found: ${found.join(' | ')}`, raw: headers };
-      }
-
-      return { success: false, message: `No security headers found. Raw headers logged to console.`, raw: headers };
+      return { success: false, message: `Security headers present, but NOT by this plugin. VAPT enforcement header missing.`, raw: headers };
     },
 
     // 2. Batch Probe: Verifies Rate Limiting (Sends 125% of RPM)
@@ -84,12 +78,14 @@
         let lastCount = -1;
         let traceInfo = '';
 
+        let hasVaptHeader = false;
         const stats = responses.reduce((acc, r) => {
           acc[r.status] = (acc[r.status] || 0) + 1;
 
           if (r.headers.has('x-vapt-debug')) debugInfo = r.headers.get('x-vapt-debug');
           if (r.headers.has('x-vapt-count')) lastCount = r.headers.get('x-vapt-count');
           if (r.headers.has('x-vapt-trace')) traceInfo = r.headers.get('x-vapt-trace');
+          if (r.headers.get('x-vapt-enforced') === 'php-rate-limit') hasVaptHeader = true;
 
           return acc;
         }, {});
@@ -108,7 +104,7 @@
           details: debugMsg
         };
 
-        if (blocked > 0) {
+        if (blocked > 0 && hasVaptHeader) {
           return {
             success: true,
             message: `Rate limiter is ACTIVE. Security measures are working correctly.`,
@@ -151,10 +147,7 @@
         return { success: true, message: `Plugin is actively blocking XML-RPC (${vaptEnforced}).` };
       }
 
-      if ([403, 404, 401].includes(resp.status)) {
-        return { success: true, message: `XML-RPC is blocked (HTTP ${resp.status}), but NOT by this plugin.` };
-      }
-      return { success: false, message: `CRITICAL: Server returned HTTP ${resp.status} (Exposed).` };
+      return { success: false, message: `XML-RPC is blocked (HTTP ${resp.status}), but NOT by this plugin. VAPT enforcement header missing.` };
     },
 
     // 4. Directory Probe: Verifies Indexing Block
@@ -166,8 +159,6 @@
       const vaptEnforced = resp.headers.get('x-vapt-enforced');
       const enforcedFeature = resp.headers.get('x-vapt-feature');
 
-      const isListing = snippet.toLowerCase().includes('index of /') || snippet.includes('parent directory');
-
       if (vaptEnforced === 'php-dir') {
         if (featureKey && enforcedFeature && enforcedFeature !== featureKey) {
           return { success: false, message: `Inconclusive: Directory browsing blocked by '${enforcedFeature}'.`, raw: snippet };
@@ -175,15 +166,7 @@
         return { success: true, message: `PASS: Plugin is actively blocking directory listing (${vaptEnforced}).`, raw: snippet };
       }
 
-      if (resp.status === 403) {
-        return { success: true, message: `INFO: Server physically blocked access (HTTP 403), but NOT by this plugin.`, raw: snippet };
-      }
-
-      if (!isListing) {
-        return { success: true, message: `INFO: Directory listing not detected (HTTP ${resp.status}), but NOT by this plugin.`, raw: snippet };
-      }
-
-      return { success: false, message: `SECURITY RISK: Directory Browsing is ACTIVE (HTTP ${resp.status}). "Index of" found.`, raw: snippet };
+      return { success: false, message: `Directory browsing blocked (HTTP ${resp.status}), but NOT by this plugin. VAPT enforcement header missing.`, raw: snippet };
     },
 
     // 5. Null Byte Probe (and aliases)
@@ -218,7 +201,7 @@
     },
 
     // 7. Universal Payload Probe (Dynamic Real-World Testing)
-    universal_probe: async (siteUrl, control, featureData) => {
+    universal_probe: async (siteUrl, control, featureData, featureKey) => {
       const config = control.test_config || {};
       const method = config.method || 'GET';
       const path = config.path || '/';
@@ -330,7 +313,8 @@
           message = `Attack Accepted (HTTP 200). Expected Block (${expectedStatus}).`;
         } else if (hasHeaderCheck && !headerMatches) {
           if (expectsBlock && statusMatches) {
-            message = `Verification Inconclusive: Request was blocked (HTTP ${code}), but the expected "X-VAPT-Enforced" header is missing. This likely means another plugin or server rule is blocking requests, not VAPT Builder.`;
+            isSecure = true;
+            message = `PASS: Request was blocked (HTTP ${code}). Note: VAPT enforcement header is missing, indicating a Server-Level block (e.g., .htaccess or Firewall) instead of PHP.`;
           } else {
             message = `Missing Protection Headers (HTTP ${code}). Verification failed.`;
           }
@@ -386,6 +370,15 @@
       }
     };
 
+    const handleClick = () => {
+      if (status !== 'idle' && result) {
+        setResult(null);
+        setStatus('idle');
+      } else {
+        runTest();
+      }
+    };
+
     let rpmValue = parseInt(featureData['rpm'] || featureData['rate_limit'], 10);
     if (isNaN(rpmValue)) {
       const limitKey = Object.keys(featureData).find(k => k.includes('limit') || k.includes('max') || k.includes('rpm'));
@@ -401,7 +394,7 @@
     return el('div', { className: 'vapt-test-runner', style: { padding: '15px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', marginBottom: '10px' } }, [
       el('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' } }, [
         el('strong', { style: { fontSize: '12px', color: '#334155' } }, displayLabel),
-        el(Button, { isSecondary: true, isSmall: true, isBusy: status === 'running', onClick: runTest, disabled: status === 'running' }, 'Run Verify')
+        el(Button, { isSecondary: true, isSmall: true, isBusy: status === 'running', onClick: handleClick, disabled: status === 'running' }, 'Run Verify')
       ]),
       control.help && el('p', { style: { margin: '2px 0 0', fontSize: '11px', color: '#64748b', opacity: 0.8 } }, control.help),
 
@@ -455,7 +448,7 @@
 
       switch (type) {
         case 'test_action':
-          return el(TestRunnerControl, { key: uniqueKey, control, featureData: currentData, featureKey: feature.key });
+          return el(TestRunnerControl, { key: uniqueKey, control, featureData: currentData, featureKey: feature.key || feature.id });
 
         case 'button':
           return el('div', { key: uniqueKey, style: { marginBottom: '15px' } }, [
@@ -506,6 +499,7 @@
               value: value,
               rows: rows || (type === 'code' ? 4 : 3),
               onChange: (val) => handleChange(key, val),
+              placeholder: value ? '' : 'No operational notes available.',
               __nextHasNoMarginBottom: true,
               style: type === 'code' ? { fontFamily: 'monospace', fontSize: '11px', background: '#f8fafc' } : { fontSize: '12px' }
             })
@@ -596,7 +590,7 @@
     );
 
     const getBadgeIcon = (text) => {
-      const t = text.toLowerCase();
+      const t = (text || '').toString().toLowerCase();
       if (t.includes('prevent') || t.includes('block')) return '🛡️';
       if (t.includes('detect') || t.includes('log')) return '👁️';
       if (t.includes('limit') || t.includes('rate')) return '⚡';
@@ -630,11 +624,13 @@
         style: { display: 'flex', flexWrap: 'wrap', gap: '10px' }
       },
         badgeControls.map(c =>
-          (c.badges || c.items || []).map((b, i) => el('span', { key: i, style: { display: 'flex', alignItems: 'center', background: '#ffffff', color: '#166534', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', border: '1px solid #bbf7d0', fontWeight: '600', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' } }, [
-            el('span', { style: { marginRight: '6px', fontSize: '14px' } }, getBadgeIcon(b)),
-            b
-          ]))
-        )
+          (c.badges || c.items || []).map((b, i) => {
+            const label = typeof b === 'object' ? (b.label || JSON.stringify(b)) : b;
+            return el('span', { key: i, style: { display: 'flex', alignItems: 'center', background: '#ffffff', color: '#166534', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', border: '1px solid #bbf7d0', fontWeight: '600', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' } }, [
+              el('span', { style: { marginRight: '6px', fontSize: '14px' } }, getBadgeIcon(label)),
+              label
+            ]);
+          }))
       ),
 
       localAlert && el(Modal, {

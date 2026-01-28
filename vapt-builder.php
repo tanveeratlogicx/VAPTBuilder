@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version: 2.5.4
+ * Version: 2.5.5
  * Author: Tan Malik
  * Text Domain: vapt-builder
  */
@@ -13,7 +13,7 @@ if (! defined('ABSPATH')) {
 }
 
 // Plugin Constants (Builder-specific)
-define('VAPT_VERSION', '2.5.4');
+define('VAPT_VERSION', '2.5.5');
 define('VAPT_PATH', plugin_dir_path(__FILE__));
 define('VAPT_URL', plugin_dir_url(__FILE__));
 define('VAPT_SUPERADMIN_EMAIL', 'tanveer@logicx.io'); // Default fallback
@@ -33,7 +33,8 @@ require_once VAPT_PATH . 'includes/class-vapt-db.php';
 require_once VAPT_PATH . 'includes/class-vapt-workflow.php';
 require_once VAPT_PATH . 'includes/class-vapt-build.php';
 require_once VAPT_PATH . 'includes/class-vapt-enforcer.php';
-// require_once VAPT_PATH . 'includes/class-vapt-admin.php';
+require_once VAPT_PATH . 'includes/class-vapt-scanner.php';
+require_once VAPT_PATH . 'includes/class-vapt-admin.php';
 
 // Initialize Global Services (deferred to plugins_loaded to avoid DB access during activation)
 add_action('plugins_loaded', array('VAPT_Enforcer', 'init'));
@@ -49,6 +50,20 @@ function vapt_initialize_services()
     // Auth may provide static helpers but instantiate to register hooks if needed
     new VAPT_Auth();
   }
+  if (class_exists('VAPT_Admin')) {
+    new VAPT_Admin();
+  }
+  if (class_exists('VAPT_Scanner')) {
+    new VAPT_Scanner();
+  }
+}
+
+// Add cron hook for scans
+add_action('vapt_run_scan', 'vapt_execute_scan', 10, 2);
+function vapt_execute_scan($scan_id, $target_url)
+{
+  $scanner = new VAPT_Scanner();
+  $scanner->run_scan($scan_id, $target_url);
 }
 
 /**
@@ -130,12 +145,45 @@ function vapt_activate_plugin()
         PRIMARY KEY  (id),
         KEY domain (domain)
     ) $charset_collate;";
+  // Scans Table
+  $table_scans = "CREATE TABLE {$wpdb->prefix}vapt_scans (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        target_url VARCHAR(500) NOT NULL,
+        status ENUM('pending', 'running', 'completed', 'failed') DEFAULT 'pending',
+        started_at DATETIME DEFAULT NULL,
+        completed_at DATETIME DEFAULT NULL,
+        user_id BIGINT(20) UNSIGNED DEFAULT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY  (id),
+        KEY target_url (target_url),
+        KEY status (status)
+    ) $charset_collate;";
+  // Scan Results Table
+  $table_scan_results = "CREATE TABLE {$wpdb->prefix}vapt_scan_results (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        scan_id BIGINT(20) UNSIGNED NOT NULL,
+        vulnerability_id VARCHAR(100) NOT NULL,
+        severity ENUM('critical', 'high', 'medium', 'low') NOT NULL,
+        affected_url VARCHAR(500),
+        description TEXT,
+        impact TEXT,
+        recommendation TEXT,
+        steps_to_reproduce TEXT,
+        evidence_url VARCHAR(500),
+        screenshot_path VARCHAR(500),
+        found_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY  (id),
+        KEY scan_id (scan_id),
+        KEY severity (severity)
+    ) $charset_collate;";
   dbDelta($table_domains);
   dbDelta($table_features);
   dbDelta($table_status);
   dbDelta($table_meta);
   dbDelta($table_history);
   dbDelta($table_builds);
+  dbDelta($table_scans);
+  dbDelta($table_scan_results);
   // Ensure data directory exists
   if (! file_exists(VAPT_PATH . 'data')) {
     wp_mkdir_p(VAPT_PATH . 'data');

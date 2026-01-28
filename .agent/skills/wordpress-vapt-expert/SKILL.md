@@ -35,7 +35,23 @@ For production WordPress environments, the **VAPTBuilder plugin** provides autom
 4. Use built-in verification tests to confirm protections are active.
 5. Generate reports with enforcement headers and probe results.
 
-**Note**: The `features-database.json` file is the authoritative source for all feature definitions, implementation methods, and testing procedures. Always reference it for the latest details.
+**Note**: The `features-database.json` file is the authoritative source for feature definitions. The plugin uses `generated_schema` JSON to drive enforcement.
+
+## 🚀 Core Philosophy: Configuration Over Implementation
+
+**Do NOT write custom PHP code or .htaccess rules manually unless absolutely necessary.**
+
+The VAPTBuilder plugin provides robust **Drivers** that handle the heavy lifting. Your job is to **configure** these drivers via JSON schemas.
+
+### The Driver System
+1.  **VAPT_Hook_Driver**: Enforces security via WordPress hooks (API, Headers, Auth).
+    *   *Usage*: Map a control key to a driver method (e.g., `block_xmlrpc`, `limit_login_attempts`).
+2.  **VAPT_Htaccess_Driver**: Manages .htaccess rules safely.
+    *   *Usage*: Map a control key to a raw rule string or preset.
+
+### The Goal
+Instead of writing a 50-line PHP script to block XML-RPC, you generate a **15-line JSON Schema** that tells the plugin:
+"Render a toggle. If ON, tell the Hook Driver to run `block_xmlrpc`."
 
 ## Feature Categories Covered
 
@@ -117,91 +133,96 @@ For production WordPress environments, the **VAPTBuilder plugin** provides autom
     - Insecure Third-Party Integrations
     - Component Version Management
 
-## How to approach VAPT implementation
+## How to Implement Features (The "Builder" Way)
 
-### Step 1: Understand the Feature Request
+### Step 1: Identify the Driver Strategy
+Consult `resources/features-database.json` to understand the feature. Then decide on the driver:
 
-When given a VAPT feature title or ID, **first consult the features database** at `/resources/features-database.json`:
+| Feature Type | Preferred Driver | Examples |
+| :--- | :--- | :--- |
+| **Logic/Auth/API** | **Hook Driver** | Rate Limiting, User Checks, Header Injection, XML-RPC Blocking |
+| **Server/File Access** | **Htaccess Driver** | Directory Listing, File Blocking, Hotlink Protection |
+| **Manual/Ops** | **Manual/None** | File Permissions, Weak Passwords (policy only) |
 
-```javascript
-// Example: Look up a feature by ID or name
-const featuresDB = JSON.parse(readFile('resources/features-database.json'));
-const feature = featuresDB.features.find(f => f.id === 'sql-injection' || f.name.includes('SQL Injection'));
+### Step 2: Construct the JSON Schema
+You must generate a valid `generated_schema` JSON object. This schema defines the UI controls AND the backend enforcement logic.
+
+#### Schema Structure
+```json
+{
+  "controls": [
+    // UI Controls (Toggles, Inputs, Tests)
+    { "type": "toggle", "label": "Enable Protection", "key": "enable_protection" },
+    { "type": "test_action", "label": "Verify", "key": "verify_it", "test_logic": "universal_probe", "test_config": { ... } }
+  ],
+  "enforcement": {
+    "driver": "hook", // or "htaccess"
+    "mappings": {
+      "enable_protection": "driver_method_name" // or "Actual .htaccess Rule"
+    }
+  }
+}
 ```
 
-From the database entry, identify:
-- **Feature ID** and **name** (for consistent reference)
-- **Category** (Injection, Authentication, Access Control, etc.)
-- **Severity level** (Critical, High, Medium, Low)
-- **Priority** (1-87, lower is higher priority)
-- **OWASP reference** (e.g., A03:2021-Injection)
-- **CWE reference** (e.g., CWE-89)
-- **Implementation methods** available (.htaccess, nginx, functions.php, wp-config.php)
-- **Test method** (automated scanning, manual testing, etc.)
-- **Verification steps** (specific test procedures)
-- **Remediation** approach
-- **Evidence requirements** (what to collect to prove protection works)
+### Step 3: Implement & Verify
+1.  **Generate**: Create the schema based on the feature requirements.
+2.  **Apply**: Update the `vapt_feature_meta` table (or ask the user to save it).
+3.  **Verify**: Use the generated "Verify" button in the UI to confirm it works.
 
-### Step 2: Choose Implementation Method
+## Driver Reference
 
-**Decision tree for implementation:**
+### 🔌 VAPT_Hook_Driver Methods
+Use these method names in your `enforcement.mappings` when `driver` is `hook`.
 
+*   `block_xmlrpc` - Blocks access to `xmlrpc.php`.
+*   `add_security_headers` - Adds strict security headers (X-Frame, X-XSS, etc.).
+*   `disable_directory_browsing` - (Legacy hook) Prefer htaccess for this.
+*   `limit_login_attempts` - Enforces rate limiting on login/API. Requires `limit` or `rpm` in data.
+*   `hide_wp_version` - Removes generator tags.
+*   `block_user_enumeration` - Blocks `/?author=1` scans.
+*   `disable_file_editors` - Disables Theme/Plugin editors.
+
+### 📝 VAPT_Htaccess_Driver Rules
+When `driver` is `htaccess`, the value in `mappings` is the **actual Apache directive**.
+
+*   **Security Restrictions**: The driver validates rules.
+    *   *Allowed*: `Options`, `Deny`, `Allow`, `RewriteRule`, `Header`.
+    *   *Blocked*: `php_value`, `php_flag`, suspicious `cmd` execution.
+    *   *Wrappers*: The driver automatically wraps rules in markers. Do NOT add `# BEGIN VAPT`.
+
+## Verification Reference (PROBE_REGISTRY)
+
+The frontend `generated-interface.js` has a built-in `PROBE_REGISTRY`. You **MUST** use these for the `test_logic` field.
+
+### `universal_probe` (Recommended)
+Flexible HTTP tester.
+*   `test_config`:
+    *   `method`: "GET" (default), "POST", "HEAD"
+    *   `path`: Relative path (e.g., `/wp-content/debug.log`)
+    *   `expected_status`: 403, 404, 200 (Integer)
+    *   `expected_headers`: `{ "X-VAPT-Enforced": "feature-key" }`
+    *   `expected_text`: "Forbidden string"
+
+### Special Probes
+*   `spam_requests`: Sends burst traffic. Requires `rpm` or `limit` in feature data.
+*   `check_headers`: Checks for general security headers.
+*   `block_xmlrpc`: Specific ping to XML-RPC.
+*   `hide_wp_version`: Scans source code for version tags.
+
+### Example: Universal Probe Configuration
+```json
+{
+  "type": "test_action",
+  "label": "Test Debug Log Block",
+  "key": "verify_debug_log",
+  "test_logic": "universal_probe",
+  "test_config": {
+    "path": "/wp-content/debug.log",
+    "expected_status": 403,
+    "expected_headers": { "X-VAPTC-Enforced": "php-debug-exposure" }
+  }
+}
 ```
-Is the feature fixable via web server configuration?
-├─ YES → Prefer .htaccess (Apache) or nginx config
-│   └─ Reasons: Fewer security risks, no PHP execution, server-level protection
-└─ NO → Use WordPress-specific methods
-    ├─ wp-config.php for configuration constants
-    ├─ functions.php for filters/hooks
-    └─ Custom validation/sanitization functions
-```
-
-**Priority order:**
-1. **.htaccess / nginx** - For blocking, redirects, headers, file access
-2. **wp-config.php** - For WordPress constants and configuration
-3. **functions.php** - For WordPress hooks, filters, and custom logic
-4. **Custom plugins** - Only when absolutely necessary (avoid creating actual plugins in this skill)
-
-### Step 3: Create Implementation Artifacts
-
-For each feature, create **self-contained** artifacts that include:
-
-#### A. Protection Implementation
-- Complete code in a single file
-- All necessary components included
-- No external dependencies
-- Comments explaining each section
-
-#### B. Evidence Generation Script
-- Automated testing script
-- Log file analysis
-- Configuration verification
-- Proof of protection working
-
-#### C. Deployment Instructions
-- Exact file paths
-- Backup procedures
-- Testing steps
-- Rollback procedures
-
-### Step 4: Handle Multiple Features Simultaneously
-
-When implementing multiple VAPT features:
-
-1. **Group by implementation method**
-   - Combine all .htaccess rules into one artifact
-   - Combine all nginx rules into one artifact
-   - Separate functions.php additions into logical groups
-
-2. **Avoid conflicts**
-   - Check for overlapping rules
-   - Ensure proper directive order
-   - Test combined configurations
-
-3. **Prioritize by severity**
-   - Implement Critical features first
-   - Then High, Medium, Low
-   - Document dependencies between features
 
 ## Implementation Patterns
 

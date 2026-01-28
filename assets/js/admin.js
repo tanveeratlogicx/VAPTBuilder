@@ -1545,7 +1545,7 @@ window.vaptScriptLoaded = true;
           }
         }
       }
-      updateFeature(feature.key, updates);
+      updateFeature(feature.key || feature.id, updates);
     };
 
     // 1. Analytics (Moved below filtering for scope)
@@ -1655,13 +1655,13 @@ window.vaptScriptLoaded = true;
       const [loading, setLoading] = useState(true);
 
       useEffect(() => {
-        apiFetch({ path: `vapt/v1/features/${feature.key}/history` })
+        apiFetch({ path: `vapt/v1/features/${feature.key || feature.id}/history` })
           .then(res => {
             setHistory(res);
             setLoading(false);
           })
           .catch(() => setLoading(false));
-      }, [feature.key]);
+      }, [feature.key || feature.id]);
 
       const [confirmState, setConfirmState] = useState(null);
 
@@ -1672,7 +1672,7 @@ window.vaptScriptLoaded = true;
           onConfirm: () => {
             setConfirmState(null);
             setLoading(true);
-            updateFeature(feature.key, {
+            updateFeature(feature.key || feature.id, {
               status: 'Draft',
               reset_history: true,
               has_history: false,
@@ -1766,7 +1766,7 @@ window.vaptScriptLoaded = true;
 
       // New: Toggle for Verification Guidance
       // New: Toggle for Verification Guidance
-      const [includeGuidance, setIncludeGuidance] = useState(feature.include_verification_guidance !== undefined ? feature.include_verification_guidance == 1 : true);
+      const [includeGuidance, setIncludeGuidance] = useState((feature.include_verification_guidance === undefined || feature.include_verification_guidance === null) ? true : feature.include_verification_guidance == 1);
       // New: Hover state for paste logic
       const [isHoveringSchema, setIsHoveringSchema] = useState(false);
 
@@ -1786,6 +1786,15 @@ window.vaptScriptLoaded = true;
         window.addEventListener('paste', handleGlobalPaste);
         return () => window.removeEventListener('paste', handleGlobalPaste);
       }, [isHoveringSchema]);
+
+      // Prevent body scroll when modal is open
+      useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+          document.body.style.overflow = originalOverflow;
+        };
+      }, []);
 
       // State for Alerts and Confirms
       const [alertState, setAlertState] = useState(null);
@@ -1812,7 +1821,7 @@ window.vaptScriptLoaded = true;
           const hasTestActions = parsed.controls && parsed.controls.some(c => c.type === 'test_action');
 
           setIsSaving(true);
-          updateFeature(feature.key, {
+          updateFeature(feature.key || feature.id, {
             generated_schema: JSON.stringify(parsed),
             include_verification_engine: hasTestActions ? 1 : 0,
             include_verification_guidance: includeGuidance ? 1 : 0,
@@ -1830,7 +1839,7 @@ window.vaptScriptLoaded = true;
 
       const handleRemoveConfirm = () => {
         setIsSaving(true);
-        updateFeature(feature.key, {
+        updateFeature(feature.key || feature.id, {
           status: 'Draft',
           generated_schema: null,
           implementation_data: null,
@@ -1874,6 +1883,7 @@ window.vaptScriptLoaded = true;
             "design_prompt": {
               "interface_type": "Interactive Security Assessment Interface",
               "schema_definition": "WordPress VAPT schema with standardized control fields",
+              "id": "{{id}}",
               "title": "{{title}}",
               "description": "{{description}}",
               "severity": "{{severity}}",
@@ -1941,7 +1951,8 @@ window.vaptScriptLoaded = true;
           return str.split(`{{${key}}}`).join(value).split(`{${key}}`).join(value);
         };
 
-        contextJson = replaceAll(contextJson, 'title', feature.label || feature.title || '');
+        contextJson = replaceAll(contextJson, 'id', feature.id || 'N/A');
+        contextJson = replaceAll(contextJson, 'title', feature.name || feature.label || feature.title || '');
         contextJson = replaceAll(contextJson, 'category', feature.category || 'General');
         contextJson = replaceAll(contextJson, 'description', feature.description || 'None provided');
         contextJson = replaceAll(contextJson, 'severity', feature.severity || 'Medium');
@@ -2027,7 +2038,8 @@ INSTRUCTIONS & CRITICAL RULES:
      }
    }
 
-Feature Name: ${feature.label || feature.title}
+Feature Name: ${feature.name || feature.label || feature.title}
+Feature ID: ${feature.id || 'N/A'}
 CWE: ${feature.cwe || 'N/A'}
 Remediation (Core Logic): ${Array.isArray(feature.remediation) ? feature.remediation.join('\n- ') : (feature.remediation || 'None provided')}
 Protection Against (Risks): ${Array.isArray(feature.assurance_against) ? feature.assurance_against.join('\n- ') : (feature.owasp || 'None provided')}
@@ -2174,8 +2186,8 @@ Test Method: ${feature.test_method || 'None provided'}
           ]),
 
           // Right Side: Live Preview
-          el('div', { style: { background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' } }, [
-            el('div', { style: { padding: '10px 15px', borderBottom: '1px solid #e5e7eb', background: '#fff', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' } }, [
+          el('div', { style: { background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' } }, [
+            el('div', { style: { padding: '10px 15px', borderBottom: '1px solid #e5e7eb', background: '#fff', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', flexShrink: 0 } }, [
               el('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
                 el(Icon, { icon: 'visibility', size: 16 }),
                 el('strong', { style: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#4b5563' } }, __('Live Implementation Preview'))
@@ -2186,14 +2198,15 @@ Test Method: ${feature.test_method || 'None provided'}
                 el(Button, { isPrimary: true, isSmall: true, onClick: handleSave, isBusy: isSaving }, __('Save & Deploy', 'vapt-builder'))
               ])
             ]),
-            el('div', { style: { padding: '15px', flexGrow: 1 } }, [
+            el('div', { style: { padding: '15px', flex: '1 1 auto', overflowY: 'auto', minHeight: 0 } }, [
               (() => {
                 const schema = parsedSchema || { controls: [] };
                 const [isPreviewVerifOpen, setIsPreviewVerifOpen] = useState(false);
 
                 // Split Controls
-                const implControls = schema.controls ? schema.controls.filter(c => !['test_action', 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'].includes(c.type) && !c.label?.toLowerCase().includes('notes')) : [];
-                const verifActions = schema.controls ? schema.controls.filter(c => c.type === 'test_action' || c.label?.toLowerCase().includes('notes')) : [];
+                const isNoteOrContext = (c) => c.label?.toLowerCase().includes('notes') || c.label?.toLowerCase().includes('context') || c.label?.toLowerCase().includes('guidance');
+                const implControls = schema.controls ? schema.controls.filter(c => !['test_action', 'button', 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'].includes(c.type) && !isNoteOrContext(c)) : [];
+                const verifActions = schema.controls ? schema.controls.filter(c => ['test_action', 'button'].includes(c.type) || isNoteOrContext(c)) : [];
                 const supportControls = schema.controls ? schema.controls.filter(c => ['risk_indicators', 'assurance_badges'].includes(c.type)) : [];
 
                 const boxStyle = { padding: '15px', background: '#fff', borderRadius: '8px', border: '1px solid #eee', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' };
@@ -2210,22 +2223,15 @@ Test Method: ${feature.test_method || 'None provided'}
                         })
                         : el('p', null, __('Loading Preview Interface...', 'vapt-builder')),
 
-                      el('div', { style: { marginTop: '20px', display: 'flex', gap: '10px' } }, [
-                        el(Button, {
-                          isSecondary: true,
-                          isSmall: true,
-                          onClick: () => setIsPreviewVerifOpen(!isPreviewVerifOpen),
-                          icon: 'shield'
-                        }, __('Functional Verification', 'vapt-builder'))
-                      ]),
+
 
                       el('div', { style: { marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '10px', fontSize: '10px', color: '#888' } },
-                        `Feature Reference: ${feature.key ? feature.key.toUpperCase() : 'N/A'}`
+                        `Feature Reference: ${(feature.key || feature.id || '').toUpperCase()}`
                       )
                     ]),
 
-                    // 2. Verification Preview (Toggleable)
-                    isPreviewVerifOpen && el('div', {
+                    // 2. Verification Preview (Always Visible)
+                    (verifActions.length > 0 || supportControls.length > 0 || feature.test_method || feature.verification_steps.length > 0) && el('div', {
                       style: {
                         marginTop: '10px', padding: '15px', background: '#f8fafc', borderRadius: '8px', border: '2px solid #e2e8f0',
                         display: 'grid', gridTemplateColumns: '1fr', gap: '20px'
@@ -2247,7 +2253,7 @@ Test Method: ${feature.test_method || 'None provided'}
 
                       // Manual
                       (() => {
-                        const protocol = feature.test_method || '';
+                        const protocol = (feature.test_method || '').trim();
                         const checklist = typeof feature.verification_steps === 'string' ? JSON.parse(feature.verification_steps) : (feature.verification_steps || []);
                         const guideItems = schema.controls ? schema.controls.filter(c => ['test_checklist', 'evidence_list'].includes(c.type)) : [];
 
@@ -2743,7 +2749,7 @@ Test Method: ${feature.test_method || 'None provided'}
           }, [
             el('input', {
               type: 'radio',
-              name: `lifecycle_${feature.key}_${Math.random()}`,
+              name: `lifecycle_${feature.key || feature.id}_${Math.random()}`,
               checked: isChecked,
               onChange: () => onChange(step.id),
               style: { margin: 0 }

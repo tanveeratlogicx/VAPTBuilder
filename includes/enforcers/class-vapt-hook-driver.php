@@ -73,6 +73,12 @@ class VAPT_Hook_Driver
         case 'block_debug_exposure':
           self::block_debug_exposure($value, $key);
           break;
+        case 'block_author_enumeration':
+          self::block_author_enumeration($key);
+          break;
+        case 'disable_xmlrpc_pingback':
+          self::disable_xmlrpc_pingback($key);
+          break;
       }
     }
   }
@@ -347,5 +353,41 @@ class VAPT_Hook_Driver
       header('X-VAPT-Feature: ' . $key);
       header('Access-Control-Expose-Headers: X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, X-VAPT-Enforced, X-VAPT-Feature');
     }
+  }
+
+  /**
+   * Block Author Enumeration
+   */
+  private static function block_author_enumeration($key = 'unknown')
+  {
+    add_action('init', function () use ($key) {
+      if (isset($_GET['author']) && is_numeric($_GET['author'])) {
+        status_header(403);
+        header('X-VAPT-Enforced: php-author-enum');
+        header('X-VAPT-Feature: ' . $key);
+        header('Access-Control-Expose-Headers: X-VAPT-Enforced, X-VAPT-Feature');
+        wp_die('VAPT: Author Enumeration is Blocked for Security.');
+      }
+    });
+  }
+
+  /**
+   * Disable XML-RPC Pingback
+   */
+  private static function disable_xmlrpc_pingback($key = 'unknown')
+  {
+    add_filter('xmlrpc_methods', function ($methods) use ($key) {
+      unset($methods['pingback.ping']);
+      unset($methods['pingback.extensions.getPingbacks']);
+      return $methods;
+    });
+
+    add_action('init', function () use ($key) {
+      if (strpos($_SERVER['REQUEST_URI'], 'xmlrpc.php') !== false) {
+        header('X-VAPT-Enforced: php-pingback');
+        header('X-VAPT-Feature: ' . $key);
+        header('Access-Control-Expose-Headers: X-VAPT-Enforced, X-VAPT-Feature');
+      }
+    });
   }
 }

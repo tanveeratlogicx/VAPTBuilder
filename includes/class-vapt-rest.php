@@ -150,6 +150,25 @@ class VAPT_REST
       'callback' => array($this, 'sync_config_from_file'),
       'permission_callback' => array($this, 'check_permission'),
     ));
+
+    // Scanner routes
+    register_rest_route('vapt/v1', '/scan/start', array(
+      'methods'  => 'POST',
+      'callback' => array($this, 'start_scan'),
+      'permission_callback' => array($this, 'check_permission'),
+    ));
+
+    register_rest_route('vapt/v1', '/scan/(?P<id>\d+)/report', array(
+      'methods'  => 'GET',
+      'callback' => array($this, 'get_scan_report'),
+      'permission_callback' => array($this, 'check_permission'),
+    ));
+
+    register_rest_route('vapt/v1', '/scans', array(
+      'methods'  => 'GET',
+      'callback' => array($this, 'get_scans'),
+      'permission_callback' => array($this, 'check_permission'),
+    ));
   }
 
   public function check_permission()
@@ -449,6 +468,44 @@ class VAPT_REST
     }
 
     return new WP_REST_Response($json_files, 200);
+  }
+
+  // Scanner methods
+  public function start_scan($request)
+  {
+    $target_url = $request->get_param('target_url');
+    if (!$target_url || !filter_var($target_url, FILTER_VALIDATE_URL)) {
+      return new WP_REST_Response(['error' => 'Invalid target URL'], 400);
+    }
+
+    $scanner = new VAPT_Scanner();
+    $scan_id = $scanner->start_scan($target_url);
+
+    if ($scan_id === false) {
+      return new WP_REST_Response(['error' => 'Failed to start scan'], 500);
+    }
+
+    return new WP_REST_Response(['scan_id' => $scan_id, 'status' => 'started'], 200);
+  }
+
+  public function get_scan_report($request)
+  {
+    $scan_id = $request->get_param('id');
+    $scanner = new VAPT_Scanner();
+    $report = $scanner->generate_report($scan_id);
+
+    if (!$report) {
+      return new WP_REST_Response(['error' => 'Scan not found'], 404);
+    }
+
+    return new WP_REST_Response($report, 200);
+  }
+
+  public function get_scans($request)
+  {
+    global $wpdb;
+    $scans = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}vapt_scans ORDER BY created_at DESC", ARRAY_A);
+    return new WP_REST_Response($scans, 200);
   }
 
   public function update_feature($request)

@@ -132,47 +132,31 @@ Documentation
 ---
 
 ## 📝 Usage Flow
-
 1. **Agent receives request** → "Implement SQL Injection Protection"
 
-2. **Agent reads SKILL.md** → Understand methodology and patterns
+2. **Agent reads SKILL.md** → Understand "Configuration over Implementation"
 
-3. **Agent queries features-database.json** → Get feature details:
+3. **Agent queries features-database.json** → Get feature details and ID (`sql-injection`).
+
+4. **Agent decides Driver** → SQLi is best handled by .htaccess (Htaccess Driver) or Input Sanitization (Hook Driver).
+
+5. **Agent generates JSON Schema** →
+   Instead of writing PHP files, the agent creates a `generated_schema` for the plugin:
    ```json
    {
-     "id": "sql-injection",
-     "name": "SQL Injection Protection",
-     "severity": "critical",
-     "priority": 1,
-     "implementation_methods": [".htaccess", "nginx", "functions.php"],
-     "verification_steps": [...],
-     "evidence_requirements": [...]
+     "controls": [{ "type": "toggle", "key": "block_sqli", "label": "Block SQLi Patterns" }],
+     "enforcement": { "driver": "htaccess", "mappings": { "block_sqli": "RewriteRule ..." } }
    }
    ```
 
-4. **Agent references examples/** → See implementation patterns:
-   - `htaccess-complete.conf` → SQL injection .htaccess rules
-   - `nginx-complete.conf` → SQL injection nginx config
-   - `functions-security.php` → Prepared statement examples
-
-5. **Agent generates artifacts** → Custom implementations:
-   - Artifact 1: `.htaccess` SQL injection protection
-   - Artifact 2: `nginx` SQL injection protection
-   - Artifact 3: `functions.php` prepared statement code
-   - Artifact 4: Evidence collection script
-
-6. **Agent includes testing** → From `testing-tools.sh`:
-   ```bash
-   sqlmap -u 'http://site.com/page?id=1' --batch --level=3
+6. **Agent validates with PROBE_REGISTRY** → Adds a test action to the schema:
+   ```json
+   { "type": "test_action", "test_logic": "universal_probe", "test_config": { "path": "/?id=1' OR '1'='1", "expected_status": 403 } }
    ```
 
-7. **User implements** → Following deployment instructions
+7. **User acts** → Saves the schema in the VAPT Builder Dashboard.
 
-8. **User collects evidence** → Using generated evidence script
-
-9. **User documents** → Using `evidence-template.md`
-
-10. **User tracks progress** → Checking off in `vapt-checklist.md`
+8. **System enforces** → Plugin reads schema and applies rules automatically.
 
 ---
 
