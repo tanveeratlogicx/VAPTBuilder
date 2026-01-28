@@ -1,0 +1,274 @@
+{
+  "id": "htaccess-security-rules",
+  "title": ".htaccess Security Rules",
+  "description": "Tests for presence of security hardening rules in .htaccess or web server configuration.",
+  "severity": "medium",
+  "category": "Configuration",
+  "compliance_references": "",
+  "cwe_reference": "",
+  "remediation_strategy": "Implement security hardening in .htaccess. Block directory listing. Restrict file access. Disable XML-RPC if unused. Add security headers. Regular .htaccess review.",
+  "evidence_requirements": "",
+  "verification_steps": "1. Check if .htaccess exists in WordPress root, 2. Verify directory listing is disabled: `Options -Indexes`, 3. Check for file access restrictions, 4. Verify XML-RPC blocking if not used, 5. Check for security headers, 6. Test for PHP execution in uploads directory, 7. Verify hotlink protection, 8. Check for user agent blocking if applicable",
+  "test_method": "Configuration review",
+  "controls": [
+    {
+      "type": "section",
+      "label": "Configuration",
+      "column": "left"
+    },
+    {
+      "type": "toggle",
+      "label": "Disable Directory Browsing",
+      "key": "disable_directory_browsing",
+      "default": true,
+      "column": "left"
+    },
+    {
+      "type": "toggle",
+      "label": "Block XML-RPC",
+      "key": "block_xmlrpc",
+      "default": true,
+      "column": "left"
+    },
+    {
+      "type": "toggle",
+      "label": "Enable Security Headers",
+      "key": "enable_security_headers",
+      "default": true,
+      "column": "left"
+    },
+    {
+      "type": "toggle",
+      "label": "Block Null Byte Injection",
+      "key": "block_null_byte_injection",
+      "default": true,
+      "column": "left"
+    },
+    {
+      "type": "toggle",
+      "label": "Hide WordPress Version",
+      "key": "hide_wp_version",
+      "default": true,
+      "column": "left"
+    },
+    {
+      "type": "toggle",
+      "label": "Block Debug Exposure",
+      "key": "block_debug_exposure",
+      "default": true,
+      "column": "left"
+    },
+    {
+      "type": "toggle",
+      "label": "Block Author Enumeration",
+      "key": "block_author_enumeration",
+      "default": true,
+      "column": "left"
+    },
+    {
+      "type": "toggle",
+      "label": "Disable XML-RPC Pingback",
+      "key": "disable_xmlrpc_pingback",
+      "default": true,
+      "column": "left"
+    },
+    {
+      "type": "divider",
+      "column": "left"
+    },
+    {
+      "type": "section",
+      "label": "Implementation Notes",
+      "column": "right"
+    },
+    {
+      "type": "textarea",
+      "label": "Operational Notes",
+      "key": "operational_notes",
+      "default": "",
+      "column": "right"
+    },
+    {
+      "type": "section",
+      "label": "Manual Verification",
+      "column": "right"
+    },
+    {
+      "type": "test_checklist",
+      "label": "Verification Checklist",
+      "items": [
+        "Check if .htaccess exists in WordPress root",
+        "Verify directory listing is disabled: Options -Indexes",
+        "Check for file access restrictions",
+        "Verify XML-RPC blocking if not used",
+        "Check for security headers",
+        "Test for PHP execution in uploads directory",
+        "Verify hotlink protection",
+        "Check for user agent blocking if applicable"
+      ],
+      "column": "right"
+    },
+    {
+      "type": "section",
+      "label": "Automated Verification",
+      "column": "right"
+    },
+    {
+      "type": "test_action",
+      "label": "Verify Directory Browsing",
+      "key": "verify_dir_browse",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/wp-content/uploads/",
+        "params": {},
+        "expected_status": 403,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-dir"
+        }
+      },
+      "column": "right"
+    },
+    {
+      "type": "test_action",
+      "label": "Verify XML-RPC Block",
+      "key": "verify_xmlrpc",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/xmlrpc.php",
+        "params": {},
+        "expected_status": 403,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-xmlrpc"
+        }
+      },
+      "column": "right"
+    },
+    {
+      "type": "test_action",
+      "label": "Verify Security Headers",
+      "key": "verify_headers",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/",
+        "params": {},
+        "expected_status": 200,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-headers"
+        }
+      },
+      "column": "right"
+    },
+    {
+      "type": "test_action",
+      "label": "Verify Null Byte Block",
+      "key": "verify_null_byte",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/",
+        "params": {
+          "test": "%00"
+        },
+        "expected_status": 403,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-null-byte"
+        }
+      },
+      "column": "right"
+    },
+    {
+      "type": "test_action",
+      "label": "Verify Version Hide",
+      "key": "verify_version_hide",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/",
+        "params": {},
+        "expected_status": 200,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-version-hide"
+        }
+      },
+      "column": "right"
+    },
+    {
+      "type": "test_action",
+      "label": "Verify Debug Exposure Block",
+      "key": "verify_debug_exposure",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/wp-content/debug.log",
+        "params": {},
+        "expected_status": 403,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-debug-log-block"
+        }
+      },
+      "column": "right"
+    },
+    {
+      "type": "test_action",
+      "label": "Verify Author Enumeration Block",
+      "key": "verify_author_enum",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/",
+        "params": {
+          "author": "1"
+        },
+        "expected_status": 403,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-author-enum"
+        }
+      },
+      "column": "right"
+    },
+    {
+      "type": "test_action",
+      "label": "Verify XML-RPC Pingback Disable",
+      "key": "verify_pingback",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/xmlrpc.php",
+        "params": {},
+        "expected_status": 403,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-pingback"
+        }
+      },
+      "column": "right"
+    },
+    {
+      "type": "evidence_list",
+      "label": "Evidence",
+      "items": [
+        ".htaccess file contains security rules",
+        "Directory listing returns 403 Forbidden",
+        "XML-RPC endpoint blocked with 403",
+        "Security headers present in response",
+        "Null byte injection attempts blocked"
+      ],
+      "column": "right"
+    }
+  ],
+  "enforcement": {
+    "driver": "hook",
+    "mappings": {
+      "disable_directory_browsing": "disable_directory_browsing",
+      "block_xmlrpc": "block_xmlrpc",
+      "enable_security_headers": "enable_security_headers",
+      "block_null_byte_injection": "block_null_byte_injection",
+      "hide_wp_version": "hide_wp_version",
+      "block_debug_exposure": "block_debug_exposure",
+      "block_author_enumeration": "block_author_enumeration",
+      "disable_xmlrpc_pingback": "disable_xmlrpc_pingback"
+    }
+  }
+}

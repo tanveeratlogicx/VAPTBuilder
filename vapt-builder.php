@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version: 2.5.5
+ * Version: 2.5.6
  * Author: Tan Malik
  * Text Domain: vapt-builder
  */
