@@ -3273,7 +3273,7 @@ Test Method: ${feature.test_method || 'None provided'}
                 const s = (f[col] || '').toLowerCase();
                 const map = {
                   'critical': '#d63638', // Red
-                  'high': '#d63638',     // Red
+                  'high': '#d94f00',     // Orange
                   'medium': '#2271b1',   // Blue
                   'low': '#00a32a',      // Green
                   'informational': '#333' // Black
