@@ -663,6 +663,17 @@ class VAPT_REST
     $json_path = VAPT_PATH . 'data/' . $filename;
     file_put_contents($json_path, $content);
 
+    // Auto-unhide if it was hidden
+    $hidden_files = get_option('vapt_hidden_json_files', array());
+    $normalized_hidden = array_map('sanitize_file_name', $hidden_files);
+
+    if (in_array($filename, $normalized_hidden) || in_array($files['file']['name'], $hidden_files)) {
+      $new_hidden = array_filter($hidden_files, function ($f) use ($filename, $files) {
+        return sanitize_file_name($f) !== $filename && $f !== $files['file']['name'];
+      });
+      update_option('vapt_hidden_json_files', array_values($new_hidden));
+    }
+
     return new WP_REST_Response(array('success' => true, 'filename' => $filename), 200);
   }
 
@@ -1206,7 +1217,7 @@ class VAPT_REST
     }
 
     return new WP_REST_Response(array(
-      'active_file' => get_option('vapt_active_feature_file', 'vapt-builder-features.json')
+      'active_file' => get_option('vapt_active_feature_file', 'Feature-List-99.json')
     ), 200);
   }
 }

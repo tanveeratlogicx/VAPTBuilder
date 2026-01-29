@@ -98,7 +98,7 @@ window.vaptScriptLoaded = true;
     return el(Modal, {
       title: __('Confirmation', 'vapt-builder'),
       onRequestClose: onCancel,
-      className: 'vapt-modal vapt-confirm-modal'
+      className: 'vapt-confirm-modal-react'
     }, [
       el('div', { className: 'vapt-modal-body' }, [
         el('div', { style: { display: 'flex', gap: '15px', alignItems: 'flex-start', marginBottom: '20px' } }, [
@@ -1605,11 +1605,19 @@ window.vaptScriptLoaded = true;
     }
 
     const stats = {
+      unfilteredTotal: safeFeatures.length,
       total: processedFeatures.length,
       draft: processedFeatures.filter(f => f.status === 'Draft' || f.status === 'draft' || f.status === 'available').length,
       develop: processedFeatures.filter(f => f.status === 'Develop' || f.status === 'develop' || f.status === 'in_progress').length,
       test: processedFeatures.filter(f => f.status === 'Test' || f.status === 'test').length,
       release: processedFeatures.filter(f => f.status === 'Release' || f.status === 'release' || f.status === 'implemented').length
+    };
+
+    const resetFilters = () => {
+      setSelectedCategories([]);
+      setSelectedSeverities([]);
+      setFilterStatus('all');
+      setSearchQuery('');
     };
 
     // Status Filter Second
@@ -2996,11 +3004,21 @@ Test Method: ${feature.test_method || 'None provided'}
             }
           }, [
             el('span', { style: { fontWeight: '700', textTransform: 'uppercase', fontSize: '10px', color: '#666' } }, __('Summary:', 'vapt-builder')),
-            el('span', { style: { fontWeight: '500' } }, sprintf(__('Total: %d', 'vapt-builder'), stats.total)),
+            el('span', { style: { fontWeight: '600', color: '#2271b1' } },
+              stats.total === stats.unfilteredTotal
+                ? sprintf(__('Total: %d', 'vapt-builder'), stats.total)
+                : sprintf(__('Filtered: %d of %d', 'vapt-builder'), stats.total, stats.unfilteredTotal)
+            ),
             el('span', { style: { opacity: 0.7 } }, sprintf(__('Draft: %d', 'vapt-builder'), stats.draft)),
             el('span', { style: { color: '#d63638', fontWeight: '600' } }, sprintf(__('Develop: %d', 'vapt-builder'), stats.develop)),
             el('span', { style: { color: '#dba617', fontWeight: '600' } }, sprintf(__('Test: %d', 'vapt-builder'), stats.test)),
             el('span', { style: { color: '#46b450', fontWeight: '700' } }, sprintf(__('Release: %d', 'vapt-builder'), stats.release)),
+            (stats.total < stats.unfilteredTotal || searchQuery || filterStatus !== 'all') && el(Button, {
+              isLink: true,
+              isSmall: true,
+              onClick: resetFilters,
+              style: { marginLeft: 'auto', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase' }
+            }, __('Reset All Filters', 'vapt-builder'))
           ])
         ]),
         // Filters Row (Ultra-Slim)
