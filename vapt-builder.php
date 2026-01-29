@@ -13,7 +13,7 @@ if (! defined('ABSPATH')) {
 }
 
 // Plugin Constants (Builder-specific)
-define('VAPT_VERSION', '2.5.5');
+define('VAPT_VERSION', '2.5.7');
 define('VAPT_PATH', plugin_dir_path(__FILE__));
 define('VAPT_URL', plugin_dir_url(__FILE__));
 define('VAPT_SUPERADMIN_EMAIL', 'tanveer@logicx.io'); // Default fallback

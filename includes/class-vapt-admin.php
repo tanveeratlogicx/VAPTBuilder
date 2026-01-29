@@ -112,11 +112,13 @@ class VAPT_Admin
   private function get_vulnerability_data()
   {
     if ($this->vulnerabilities_cache === null) {
-      $file_path = VAPT_PATH . 'data/Feature-List-99.json';
+      $active_file = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : get_option('vapt_active_feature_file', 'Feature-List-99.json');
+      $file_path = VAPT_PATH . 'data/' . sanitize_file_name($active_file);
+
       if (file_exists($file_path)) {
         $data = json_decode(file_get_contents($file_path), true);
-        if ($data && isset($data['features'])) {
-          $this->vulnerabilities_cache = $data['features'];
+        if ($data && (isset($data['features']) || isset($data['wordpress_vapt']))) {
+          $this->vulnerabilities_cache = isset($data['features']) ? $data['features'] : $data['wordpress_vapt'];
         } else {
           $this->vulnerabilities_cache = [];
         }

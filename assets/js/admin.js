@@ -711,6 +711,7 @@ window.vaptScriptLoaded = true;
     const [buildDomain, setBuildDomain] = useState('');
     const [buildVersion, setBuildVersion] = useState('2.5.0');
     const [includeConfig, setIncludeConfig] = useState(true);
+    const [includeData, setIncludeData] = useState(false);
     const [whiteLabel, setWhiteLabel] = useState({
       name: 'VAPT Security',
       description: '',
@@ -769,6 +770,7 @@ window.vaptScriptLoaded = true;
           features: buildFeatures,
           generate_type: type,
           include_config: includeConfig,
+          include_data: includeData,
           white_label: {
             name: whiteLabel.name.trim(),
             description: whiteLabel.description.trim(),
@@ -886,6 +888,13 @@ window.vaptScriptLoaded = true;
                 label: __('Include Config', 'vapt-builder'),
                 checked: includeConfig,
                 onChange: (val) => setIncludeConfig(val),
+                help: null,
+                style: { marginBottom: 0 }
+              }),
+              el(ToggleControl, {
+                label: __('Include Active Data', 'vapt-builder'),
+                checked: includeData,
+                onChange: (val) => setIncludeData(val),
                 help: null,
                 style: { marginBottom: 0 }
               })

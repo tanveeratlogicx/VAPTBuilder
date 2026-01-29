@@ -46,7 +46,12 @@ class VAPT_Build
     wp_mkdir_p($plugin_dir);
 
     // 2. Output Config Content (Generated)
-    $config_content = self::generate_config_content($domain, $version, $features);
+    $active_data_file_name = null;
+    if (isset($data['include_data']) && ($data['include_data'] === true || $data['include_data'] === 'true' || $data['include_data'] === 1)) {
+      $active_data_file_name = get_option('vapt_active_feature_file', 'Feature-List-99.json');
+    }
+
+    $config_content = self::generate_config_content($domain, $version, $features, $active_data_file_name);
 
     // If Config Only -> Save and ZIP just that
     if ($generate_type === 'config_only') {
@@ -56,7 +61,7 @@ class VAPT_Build
     }
 
     // 3. Full Build: Copy Plugin Files Recursively
-    self::copy_plugin_files(VAPT_PATH, $plugin_dir);
+    self::copy_plugin_files(VAPT_PATH, $plugin_dir, $active_data_file_name);
 
     // 4. Inject Config File (If Requested)
     if (!isset($data['include_config']) || $data['include_config'] === true || $data['include_config'] === 'true' || $data['include_config'] === 1) {
@@ -87,7 +92,7 @@ class VAPT_Build
     return $base_storage_url . '/' . $domain . '/' . $version . '/' . $zip_filename;
   }
 
-  public static function generate_config_content($domain, $version, $features)
+  public static function generate_config_content($domain, $version, $features, $active_data_file = null)
   {
     $config = "<?php\n";
     $config .= "/**\n * VAPT Builder Configuration for $domain\n * Build Version: $version\n */\n\n";
@@ -95,9 +100,13 @@ class VAPT_Build
 
     $config .= "// Domain Locking\n";
     $config .= "define( 'VAPT_DOMAIN_LOCKED', '" . esc_sql($domain) . "' );\n";
-    $config .= "define( 'VAPT_BUILD_VERSION', '" . esc_sql($version) . "' );\n\n";
+    $config .= "define( 'VAPT_BUILD_VERSION', '" . esc_sql($version) . "' );\n";
 
-    $config .= "// Active Features\n";
+    if ($active_data_file) {
+      $config .= "define( 'VAPT_ACTIVE_DATA_FILE', '" . esc_sql($active_data_file) . "' );\n";
+    }
+
+    $config .= "\n// Active Features\n";
     foreach ($features as $key) {
       $config .= "define( 'VAPT_FEATURE_" . strtoupper(str_replace('-', '_', $key)) . "', true );\n";
     }
@@ -105,7 +114,7 @@ class VAPT_Build
     return $config;
   }
 
-  private static function copy_plugin_files($source, $dest)
+  private static function copy_plugin_files($source, $dest, $active_data_file = null)
   {
     $iterator = new RecursiveIteratorIterator(
       new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS),
@@ -121,7 +130,15 @@ class VAPT_Build
       foreach ($exclusions as $exclude) {
         if (strpos($subPath, $exclude) === 0) continue 2;
       }
-      if (strpos($subPath, 'data') === 0) continue;
+
+      // Handle Data Directory
+      if (strpos($subPath, 'data') === 0) {
+        if ($active_data_file && strpos($subPath, 'data\\' . $active_data_file) !== false || $active_data_file && strpos($subPath, 'data/' . $active_data_file) !== false) {
+          // Allow this specific file
+        } else {
+          continue;
+        }
+      }
 
 
       if ($item->isDir()) {
