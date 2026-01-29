@@ -2832,10 +2832,9 @@ Test Method: ${feature.test_method || 'None provided'}
       return el('div', { className: 'vapt-lifecycle-radios', style: { display: 'flex', gap: '10px', fontSize: '12px', alignItems: 'center' } }, [
         ...steps.map((step) => {
           const isChecked = step.id === activeStep;
-          const colors = { 'Draft': '#333', 'Develop': '#2271b1', 'Test': '#d63638', 'Release': '#00a32a' };
           return el('label', {
             key: step.id,
-            style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? (colors[step.id] || '#2271b1') : '#72777c', fontWeight: isChecked ? '700' : 'normal' }
+            style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? '#2271b1' : '#72777c', fontWeight: isChecked ? '700' : 'normal' }
           }, [
             el('input', {
               type: 'radio',
@@ -3272,9 +3271,15 @@ Test Method: ${feature.test_method || 'None provided'}
                 content = el('strong', { style: { color: '#1e1e1e', fontSize: '13px' } }, f.label || f.title || f.name);
               } else if (col === 'severity') {
                 const s = (f[col] || '').toLowerCase();
-                const map = { 'critical': '#d63638', 'high': '#e65054', 'medium': '#ea580c', 'low': '#2271b1', 'informational': '#72777c' };
-                const color = map[s] || '#72777c';
-                content = el('span', { style: { color: color, fontWeight: '600' } }, s.charAt(0).toUpperCase() + s.slice(1));
+                const map = {
+                  'critical': '#d63638', // Red
+                  'high': '#d63638',     // Red
+                  'medium': '#2271b1',   // Blue
+                  'low': '#00a32a',      // Green
+                  'informational': '#333' // Black
+                };
+                const color = map[s] || '#333';
+                content = el('span', { style: { color: color, fontWeight: 'bold' } }, s.charAt(0).toUpperCase() + s.slice(1));
               } else if (col === 'implemented_at' && f[col]) {
                 content = new Date(f[col]).toLocaleString();
               } else if (col === 'owasp') {
