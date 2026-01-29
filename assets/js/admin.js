@@ -3263,8 +3263,8 @@ Test Method: ${feature.test_method || 'None provided'}
           el('th', { style: { width: '300px', verticalAlign: 'middle', borderBottom: '2px solid #ddd' } }, __('Lifecycle Status', 'vapt-builder')),
           el('th', { style: { width: '140px', verticalAlign: 'middle', borderBottom: '2px solid #ddd' } }, __('Include', 'vapt-builder')), // Reduced Include Width
         ])),
-        el('tbody', null, processedFeatures.map((f) => el(Fragment, { key: f.key }, [
-          el('tr', { style: { borderBottom: '1px solid #f0f0f0' } }, [ // Ledger row style
+        el('tbody', null, processedFeatures.map((f, index) => el(Fragment, { key: f.key }, [
+          el('tr', { style: { borderBottom: '1px solid #f0f0f0', background: index % 2 === 0 ? '#ffffff' : '#fcfcfc' } }, [ // Ledger row style with zebra striping
             ...activeCols.map(col => {
               let content = f[col] || '-';
               if (col === 'title' || col === 'label' || col === 'name') {
@@ -3289,9 +3289,9 @@ Test Method: ${feature.test_method || 'None provided'}
               } else if (typeof f[col] === 'object' && f[col] !== null) {
                 content = el('pre', { style: { fontSize: '10px', margin: 0, background: '#f0f0f0', padding: '4px', whiteSpace: 'pre-wrap' } }, JSON.stringify(f[col], null, 2));
               }
-              return el('td', { key: col, style: { verticalAlign: 'middle', padding: '8px 10px' } }, content); // Tidy padding
+              return el('td', { key: col, style: { verticalAlign: 'middle', padding: '4px 10px' } }, content); // Tidy padding (reduced to 4px)
             }),
-            el('td', { style: { verticalAlign: 'middle', padding: '8px 10px' } }, [
+            el('td', { style: { verticalAlign: 'middle', padding: '4px 10px' } }, [
               el('div', { style: { display: 'flex', gap: '10px', alignItems: 'center' } }, [ // Flex wrapper for alignment
                 el(LifecycleIndicator, {
                   feature: f,
@@ -3364,7 +3364,7 @@ Tech Stack Guide:
                 })
               ])
             ]),
-            el('td', { className: 'vapt-support-cell', style: { verticalAlign: 'middle', padding: '8px 10px' } }, el('div', { style: { display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'wrap' } }, [
+            el('td', { className: 'vapt-support-cell', style: { verticalAlign: 'middle', padding: '4px 10px' } }, el('div', { style: { display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'wrap' } }, [
               // Pill Group for Include unit
 
 
