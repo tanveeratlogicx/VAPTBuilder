@@ -2832,9 +2832,10 @@ Test Method: ${feature.test_method || 'None provided'}
       return el('div', { className: 'vapt-lifecycle-radios', style: { display: 'flex', gap: '10px', fontSize: '12px', alignItems: 'center' } }, [
         ...steps.map((step) => {
           const isChecked = step.id === activeStep;
+          const colors = { 'Draft': '#333', 'Develop': '#2271b1', 'Test': '#d63638', 'Release': '#00a32a' };
           return el('label', {
             key: step.id,
-            style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? '#2271b1' : 'inherit', fontWeight: isChecked ? '600' : 'normal' }
+            style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? (colors[step.id] || '#2271b1') : '#72777c', fontWeight: isChecked ? '700' : 'normal' }
           }, [
             el('input', {
               type: 'radio',
@@ -3224,7 +3225,7 @@ Test Method: ${feature.test_method || 'None provided'}
             let width = 'auto';
             if (col === 'title' || col === 'name') width = '350px'; // Increased Title Width
             if (col === 'category') width = '120px';
-            if (col === 'severity') width = '80px';
+            if (col === 'severity') width = '60px'; // Reduced Severity Width
             if (col === 'id') width = '100px';
 
             const isSortable = ['title', 'name', 'category', 'severity'].includes(col);
