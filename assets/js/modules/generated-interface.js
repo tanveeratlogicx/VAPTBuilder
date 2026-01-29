@@ -490,7 +490,7 @@
 
         case 'textarea':
         case 'code':
-          if (!value) return null; // Hide if empty to reduce clutter
+          if (!value || (typeof value === 'string' && !value.trim())) return null; // Hide if empty or just whitespace
           return el('div', { key: uniqueKey, style: { marginBottom: '10px' } }, [
             el('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' } }, [
               el('label', { style: { fontSize: '12px', fontWeight: '600', color: '#334155' } }, label),
