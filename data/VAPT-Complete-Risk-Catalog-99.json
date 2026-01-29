@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "schema_version": "3.0.1",
+    "schema_version": "3.1.0",
     "plugin_name": "WordPress VAPT Protection Suite",
     "generated_at": "2026-01-28T18:23:59.202637Z",
     "total_risks": 99,

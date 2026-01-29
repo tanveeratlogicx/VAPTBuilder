@@ -223,6 +223,19 @@ class VAPT_REST
         if (isset($item['severity']) && is_array($item['severity'])) {
           $item['severity'] = isset($item['severity']['level']) ? $item['severity']['level'] : 'medium';
         }
+
+        // 3. Flatten Test Method (Hybrid Support)
+        if (empty($item['test_method']) && isset($item['testing']['test_method'])) {
+          $item['test_method'] = $item['testing']['test_method'];
+        }
+
+        // 4. Flatten Verification Engine (Hybrid Support)
+        if (empty($item['verification_engine']) && isset($item['protection']['automated_protection'])) {
+          // Store entire object or just availability/method? Frontend expects string/key usually, 
+          // but for checking existence/mapping, the object is fine. 
+          // However, for the 'Auto-Detect' to pick 'verification_engine' key, we just need to Ensure KEY exists.
+          $item['verification_engine'] = $item['protection']['automated_protection'];
+        }
         // 3. Flatten Verification Steps
         if (isset($item['testing']) && isset($item['testing']['verification_steps']) && is_array($item['testing']['verification_steps'])) {
           $steps = [];
