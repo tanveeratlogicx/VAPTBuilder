@@ -3294,8 +3294,35 @@ Test Method: ${feature.test_method || 'None provided'}
                 onChange: (newStatus) => {
                   let defaultNote = '';
                   const title = f.label || f.title;
+                  const description = f.description || 'No description provided.';
+                  const owasp = f.owasp || 'N/A';
+                  const category = f.category || 'General';
+                  const severity = f.severity || 'Medium';
+
+                  let devInstruct = '';
+                  let assuranceAgainst = f.assurance_against || [];
+
                   if (newStatus === 'Develop') {
-                    defaultNote = `Initiating implementation for ${title}. Configuring workbench and internal security drivers.`;
+                    // Smart Mapping 1: Rich Change Note
+                    defaultNote = `Initiating implementation for ${title}.
+
+Context: ${description}
+Ref: ${owasp}`;
+
+                    // Smart Mapping 2: Agent Instructions
+                    devInstruct = `[Agent Prompt]: Implement strict validation for ${category} (${severity}).
+
+Compliance: ${owasp}
+
+Tech Stack Guide:
+- Prioritize .htaccess rules (Apache) or wp-config.php (Constants) if possible.
+- Fallback to PHP Hooks (WordPress API) only if dynamic logic is required.`;
+
+                    // Smart Mapping 3: Design Context (Protection Against)
+                    if (assuranceAgainst.length === 0 && f.description) {
+                      assuranceAgainst = [f.description];
+                    }
+
                   } else if (newStatus === 'Test') {
                     const risk = (f.assurance_against && f.assurance_against.length > 0) ? f.assurance_against[0] : __('identified risks', 'vapt-builder');
                     defaultNote = `Development phase complete. Ready to verify protection against: ${risk}.`;
@@ -3309,16 +3336,16 @@ Test Method: ${feature.test_method || 'None provided'}
                     ...f,
                     nextStatus: newStatus,
                     note: defaultNote,
-                    remediation: f.remediation || '',
+                    remediation: f.remediation || f.test_method || '',
                     assurance: f.assurance || [],
-                    assurance_against: f.assurance_against || [],
+                    assurance_against: assuranceAgainst,
                     owasp: f.owasp || '',
                     test_method: f.test_method || '',
                     verification_steps: f.verification_steps || [],
                     tests: f.tests || [],
                     evidence: f.evidence || [],
                     schema_hints: f.schema_hints || {},
-                    devInstruct: ''
+                    devInstruct: devInstruct
                   });
                 }
               }),
@@ -3335,19 +3362,7 @@ Test Method: ${feature.test_method || 'None provided'}
             el('td', { className: 'vapt-support-cell', style: { verticalAlign: 'middle' } }, el('div', { style: { display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' } }, [
               // Pill Group for Include unit
 
-              el('div', {
-                onClick: () => handleSmartToggle(f, 'include_verification_engine'),
-                title: __('Toggle Verification Engine', 'vapt-builder'),
-                style: {
-                  cursor: 'pointer', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.05em',
-                  background: f.include_verification_engine ? '#d63638' : '#f0f0f1',
-                  color: f.include_verification_engine ? '#fff' : '#d63638',
-                  opacity: ['Draft', 'draft', 'available'].includes(f.status) ? 0.3 : 1,
-                  pointerEvents: ['Draft', 'draft', 'available'].includes(f.status) ? 'none' : 'auto',
-                  border: '1px solid', borderColor: f.include_verification_engine ? '#d63638' : '#dcdcde',
-                  whiteSpace: 'nowrap'
-                }
-              }, __('Verification Engine', 'vapt-builder')),
+
 
               !['Draft', 'draft', 'available'].includes(f.status) && el('div', {
                 onClick: () => setDesignFeature(f),
