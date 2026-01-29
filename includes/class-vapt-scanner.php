@@ -53,18 +53,21 @@ class VAPT_Scanner
    */
   private function load_vulnerabilities()
   {
-    $file_path = VAPT_PATH . 'data/Feature-List-99.json';
+    $active_file = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : get_option('vapt_active_feature_file', 'Feature-List-99.json');
+    $file_path = VAPT_PATH . 'data/' . sanitize_file_name($active_file);
+
     if (file_exists($file_path)) {
       $content = file_get_contents($file_path);
       $data = json_decode($content, true);
 
-      if (json_last_error() === JSON_ERROR_NONE && $data && isset($data['features']) && is_array($data['features'])) {
-        $this->vulnerabilities = $data['features'];
+      if (json_last_error() === JSON_ERROR_NONE && $data && (isset($data['features']) || isset($data['wordpress_vapt']))) {
+        $this->vulnerabilities = isset($data['features']) ? $data['features'] : $data['wordpress_vapt'];
       } else {
         error_log('VAPT Scanner: Failed to load vulnerabilities. JSON Error: ' . json_last_error_msg());
       }
     } else {
       error_log('VAPT Scanner: Vulnerability definitions file not found at ' . $file_path);
+      $this->vulnerabilities = [];
     }
   }
 

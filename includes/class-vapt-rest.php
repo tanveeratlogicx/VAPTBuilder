@@ -186,7 +186,7 @@ class VAPT_REST
 
   public function get_features($request)
   {
-    $default_file = get_option('vapt_active_feature_file', 'vapt-builder-features.json');
+    $default_file = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : get_option('vapt_active_feature_file', 'Feature-List-99.json');
     $file = $request->get_param('file') ?: $default_file;
     $json_path = VAPT_PATH . 'data/' . sanitize_file_name($file);
 
@@ -209,6 +209,59 @@ class VAPT_REST
       $schema = isset($raw_data['schema']) ? $raw_data['schema'] : [];
     } elseif (isset($raw_data['features']) && is_array($raw_data['features'])) {
       $features = $raw_data['features'];
+      $schema = isset($raw_data['schema']) ? $raw_data['schema'] : [];
+    } elseif (isset($raw_data['risk_catalog']) && is_array($raw_data['risk_catalog'])) {
+      // 🛡️ ADAPTER: VAPT Risk Catalog Format (v3.0+)
+      $raw_features = $raw_data['risk_catalog'];
+      $features = array();
+      foreach ($raw_features as $item) {
+        // 1. Flatten Description
+        if (isset($item['description']) && is_array($item['description'])) {
+          $item['description'] = isset($item['description']['summary']) ? $item['description']['summary'] : '';
+        }
+        // 2. Flatten Severity
+        if (isset($item['severity']) && is_array($item['severity'])) {
+          $item['severity'] = isset($item['severity']['level']) ? $item['severity']['level'] : 'medium';
+        }
+
+        // 3. Flatten Test Method (Hybrid Support)
+        if (empty($item['test_method']) && isset($item['testing']['test_method'])) {
+          $item['test_method'] = $item['testing']['test_method'];
+        }
+
+        // 4. Flatten Verification Engine (Hybrid Support)
+        if (empty($item['verification_engine']) && isset($item['protection']['automated_protection'])) {
+          // Store entire object or just availability/method? Frontend expects string/key usually, 
+          // but for checking existence/mapping, the object is fine. 
+          // However, for the 'Auto-Detect' to pick 'verification_engine' key, we just need to Ensure KEY exists.
+          $item['verification_engine'] = $item['protection']['automated_protection'];
+        }
+        // 3. Flatten Verification Steps
+        if (isset($item['testing']) && isset($item['testing']['verification_steps']) && is_array($item['testing']['verification_steps'])) {
+          $steps = [];
+          foreach ($item['testing']['verification_steps'] as $step) {
+            if (is_array($step) && isset($step['action'])) {
+              $steps[] = $step['action'];
+            } elseif (is_string($step)) {
+              $steps[] = $step;
+            }
+          }
+          $item['verification_steps'] = $steps;
+        }
+        // 4. Flatten Remediation
+        if (isset($item['protection']) && is_array($item['protection'])) {
+          // Try to find code in automated protection
+          if (isset($item['protection']['automated_protection']['implementation_steps'][0]['code'])) {
+            $item['remediation'] = $item['protection']['automated_protection']['implementation_steps'][0]['code'];
+          }
+        }
+        // 5. Map OWASP
+        if (isset($item['owasp_mapping']) && isset($item['owasp_mapping']['owasp_top_10_2021'])) {
+          $item['owasp'] = $item['owasp_mapping']['owasp_top_10_2021'];
+        }
+
+        $features[] = $item;
+      }
       $schema = isset($raw_data['schema']) ? $raw_data['schema'] : [];
     } else {
       $features = $raw_data;
@@ -447,7 +500,7 @@ class VAPT_REST
     $json_files = [];
 
     $hidden_files = get_option('vapt_hidden_json_files', array());
-    $active_file  = get_option('vapt_active_feature_file', 'vapt-builder-features.json');
+    $active_file  = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : get_option('vapt_active_feature_file', 'Feature-List-99.json');
 
     $hidden_normalized = array_map('sanitize_file_name', $hidden_files);
     $active_normalized = sanitize_file_name($active_file);
@@ -662,6 +715,17 @@ class VAPT_REST
 
     $json_path = VAPT_PATH . 'data/' . $filename;
     file_put_contents($json_path, $content);
+
+    // Auto-unhide if it was hidden
+    $hidden_files = get_option('vapt_hidden_json_files', array());
+    $normalized_hidden = array_map('sanitize_file_name', $hidden_files);
+
+    if (in_array($filename, $normalized_hidden) || in_array($files['file']['name'], $hidden_files)) {
+      $new_hidden = array_filter($hidden_files, function ($f) use ($filename, $files) {
+        return sanitize_file_name($f) !== $filename && $f !== $files['file']['name'];
+      });
+      update_option('vapt_hidden_json_files', array_values($new_hidden));
+    }
 
     return new WP_REST_Response(array('success' => true, 'filename' => $filename), 200);
   }
@@ -904,33 +968,22 @@ class VAPT_REST
   public function generate_build($request)
   {
     $data = $request->get_json_params();
-    $zip_path = VAPT_Build::generate($data);
-
-    if (file_exists($zip_path)) {
-      if (isset($data['generate_type']) && $data['generate_type'] === 'config_only') {
-        $upload_dir = wp_upload_dir();
-        $target_dir = $upload_dir['basedir'] . '/vapt-builds';
-        wp_mkdir_p($target_dir);
-
-        $file_name = basename($zip_path);
-        copy($zip_path, $target_dir . '/' . $file_name);
-        $download_url = $upload_dir['baseurl'] . '/vapt-builds/' . $file_name;
-        return new WP_REST_Response(array('success' => true, 'download_url' => $download_url), 200);
-      }
-
-      $upload_dir = wp_upload_dir();
-      $target_dir = $upload_dir['basedir'] . '/vapt-builds';
-      wp_mkdir_p($target_dir);
-
-      $file_name = basename($zip_path);
-      copy($zip_path, $target_dir . '/' . $file_name);
-
-      $download_url = $upload_dir['baseurl'] . '/vapt-builds/' . $file_name;
-
-      return new WP_REST_Response(array('success' => true, 'download_url' => $download_url), 200);
+    if (!is_array($data)) {
+      $data = [];
     }
 
-    return new WP_REST_Response(array('error' => 'Build failed'), 500);
+    // Merge other parameters
+    $data['include_config'] = $request->get_param('include_config');
+    $data['include_data'] = $request->get_param('include_data');
+
+    // Delegate to Build Class
+    require_once VAPT_PATH . 'includes/class-vapt-build.php';
+    try {
+      $download_url = VAPT_Build::generate($data);
+      return new WP_REST_Response(array('success' => true, 'download_url' => $download_url), 200);
+    } catch (Exception $e) {
+      return new WP_REST_Response(array('success' => false, 'message' => $e->getMessage()), 500);
+    }
   }
 
   public function save_config_to_root($request)
@@ -1217,7 +1270,7 @@ class VAPT_REST
     }
 
     return new WP_REST_Response(array(
-      'active_file' => get_option('vapt_active_feature_file', 'vapt-builder-features.json')
+      'active_file' => get_option('vapt_active_feature_file', 'Feature-List-99.json')
     ), 200);
   }
 }

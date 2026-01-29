@@ -98,7 +98,7 @@ window.vaptScriptLoaded = true;
     return el(Modal, {
       title: __('Confirmation', 'vapt-builder'),
       onRequestClose: onCancel,
-      className: 'vapt-modal vapt-confirm-modal'
+      className: 'vapt-confirm-modal-react'
     }, [
       el('div', { className: 'vapt-modal-body' }, [
         el('div', { style: { display: 'flex', gap: '15px', alignItems: 'flex-start', marginBottom: '20px' } }, [
@@ -435,8 +435,8 @@ window.vaptScriptLoaded = true;
         className: 'vapt-domain-features-modal',
         style: { maxWidth: '1400px', width: '90%' }
       }, [
-        // Status Visibility Filters (Superadmin Only)
-        isSuper && el('div', {
+        // Status Visibility Filters
+        el('div', {
           style: {
             marginBottom: '20px',
             padding: '12px 20px',
@@ -462,7 +462,7 @@ window.vaptScriptLoaded = true;
               height: 'auto',
               boxShadow: (statusFilters || []).length !== 3 ? '0 2px 4px rgba(34, 113, 177, 0.2)' : 'none'
             }
-          }, (statusFilters || []).length === 3 ? __('Clear All Filters', 'vapt-builder') : __('Select All Statuses', 'vapt-builder')),
+          }, (statusFilters || []).length === 3 ? __('Reset All Filters', 'vapt-builder') : __('Select All Statuses', 'vapt-builder')),
           el('div', { style: { display: 'flex', gap: '15px', paddingLeft: '20px', borderLeft: '2px solid #e2e8f0' } }, [
             { label: __('Develop', 'vapt-builder'), value: 'develop' },
             { label: __('Test', 'vapt-builder'), value: 'test' },
@@ -711,6 +711,7 @@ window.vaptScriptLoaded = true;
     const [buildDomain, setBuildDomain] = useState('');
     const [buildVersion, setBuildVersion] = useState('2.5.0');
     const [includeConfig, setIncludeConfig] = useState(true);
+    const [includeData, setIncludeData] = useState(false);
     const [whiteLabel, setWhiteLabel] = useState({
       name: 'VAPT Security',
       description: '',
@@ -769,6 +770,7 @@ window.vaptScriptLoaded = true;
           features: buildFeatures,
           generate_type: type,
           include_config: includeConfig,
+          include_data: includeData,
           white_label: {
             name: whiteLabel.name.trim(),
             description: whiteLabel.description.trim(),
@@ -886,6 +888,13 @@ window.vaptScriptLoaded = true;
                 label: __('Include Config', 'vapt-builder'),
                 checked: includeConfig,
                 onChange: (val) => setIncludeConfig(val),
+                help: null,
+                style: { marginBottom: 0 }
+              }),
+              el(ToggleControl, {
+                label: __('Include Active Data', 'vapt-builder'),
+                checked: includeData,
+                onChange: (val) => setIncludeData(val),
                 help: null,
                 style: { marginBottom: 0 }
               })
@@ -1439,16 +1448,24 @@ window.vaptScriptLoaded = true;
     const [sortBy, setSortBy] = useState(() => localStorage.getItem('vapt_sort_by') || 'name');
     const [sortOrder, setSortOrder] = useState(() => localStorage.getItem('vapt_sort_order') || 'asc');
     const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem('vapt_search_query') || '');
-    const [fieldMapping, setFieldMapping] = useState(() => {
-      const saved = localStorage.getItem('vapt_field_mapping');
-      return saved ? JSON.parse(saved) : { test_method: '', verification_steps: '', verification_engine: '' };
-    });
+    const [fieldMapping, setFieldMapping] = useState({ test_method: '', verification_steps: '', verification_engine: '' });
     const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
 
-    // Persist Field Mapping
+    // Load/Save Field Mapping per File
     useEffect(() => {
-      localStorage.setItem('vapt_field_mapping', JSON.stringify(fieldMapping));
-    }, [fieldMapping]);
+      if (!selectedFile) return;
+      const saved = localStorage.getItem(`vapt_field_mapping_${selectedFile}`);
+      if (saved) {
+        setFieldMapping(JSON.parse(saved));
+      } else {
+        setFieldMapping({ test_method: '', verification_steps: '', verification_engine: '' });
+      }
+    }, [selectedFile]);
+
+    useEffect(() => {
+      if (!selectedFile) return;
+      localStorage.setItem(`vapt_field_mapping_${selectedFile}`, JSON.stringify(fieldMapping));
+    }, [fieldMapping, selectedFile]);
 
     const toggleSort = (key) => {
       if (sortBy === key) {
@@ -1596,11 +1613,19 @@ window.vaptScriptLoaded = true;
     }
 
     const stats = {
+      unfilteredTotal: safeFeatures.length,
       total: processedFeatures.length,
       draft: processedFeatures.filter(f => f.status === 'Draft' || f.status === 'draft' || f.status === 'available').length,
       develop: processedFeatures.filter(f => f.status === 'Develop' || f.status === 'develop' || f.status === 'in_progress').length,
       test: processedFeatures.filter(f => f.status === 'Test' || f.status === 'test').length,
       release: processedFeatures.filter(f => f.status === 'Release' || f.status === 'release' || f.status === 'implemented').length
+    };
+
+    const resetFilters = () => {
+      setSelectedCategories([]);
+      setSelectedSeverities([]);
+      setFilterStatus('all');
+      setSearchQuery('');
     };
 
     // Status Filter Second
@@ -2505,6 +2530,54 @@ Test Method: ${feature.test_method || 'None provided'}
     // Field Mapping Modal
     const FieldMappingModal = ({ isOpen, onClose }) => {
       const [localMapping, setLocalMapping] = useState(fieldMapping);
+      const [autoStatus, setAutoStatus] = useState(null);
+
+      const autoDetect = () => {
+        let newMapping = { ...localMapping };
+        let foundCount = 0;
+
+        // Heuristics (Priority Order)
+        const heuristics = {
+          test_method: ['test_method', 'testing_method', 'protocol', 'method'],
+          verification_steps: ['verification_steps', 'verification', 'testing', 'steps', 'manual_verification'],
+          verification_engine: ['verification_engine', 'automated_protection', 'automation', 'automated_test', 'verification_steps', 'remediation']
+        };
+
+        // 1. Test Method
+        for (const candidate of heuristics.test_method) {
+          if (allKeys.includes(candidate)) {
+            newMapping.test_method = candidate;
+            foundCount++;
+            break;
+          }
+        }
+
+        // 2. Verification Steps
+        for (const candidate of heuristics.verification_steps) {
+          if (allKeys.includes(candidate)) {
+            newMapping.verification_steps = candidate;
+            foundCount++;
+            break;
+          }
+        }
+
+        // 3. Verification Engine
+        for (const candidate of heuristics.verification_engine) {
+          if (allKeys.includes(candidate)) {
+            newMapping.verification_engine = candidate;
+            foundCount++;
+            break;
+          }
+        }
+
+        setLocalMapping(newMapping);
+        if (foundCount > 0) {
+          setAutoStatus({ message: sprintf(__('Auto-detected %d best matches!', 'vapt-builder'), foundCount), type: 'success' });
+        } else {
+          setAutoStatus({ message: __('No matching fields found in active file.', 'vapt-builder'), type: 'warning' });
+        }
+        setTimeout(() => setAutoStatus(null), 3000);
+      };
 
       const save = () => {
         setFieldMapping(localMapping);
@@ -2517,6 +2590,13 @@ Test Method: ${feature.test_method || 'None provided'}
         style: { maxWidth: '500px' }
       }, [
         el('p', { style: { fontSize: '13px', color: '#666' } }, __('Select which JSON fields should be automatically copied when you toggle these features ON. If the database field is empty, it will be populated from the mapped JSON key.', 'vapt-builder')),
+
+        autoStatus && el(Notice, {
+          status: autoStatus.type,
+          isDismissible: false,
+          style: { margin: '15px 0' }
+        }, autoStatus.message),
+
         el('div', { style: { display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '15px' } }, [
           el(SelectControl, {
             label: __('Test Method Source', 'vapt-builder'),
@@ -2540,9 +2620,18 @@ Test Method: ${feature.test_method || 'None provided'}
             onChange: (val) => setLocalMapping({ ...localMapping, verification_engine: val })
           })
         ]),
-        el('div', { style: { marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' } }, [
-          el(Button, { isSecondary: true, onClick: onClose }, __('Cancel', 'vapt-builder')),
-          el(Button, { isPrimary: true, onClick: save }, __('Save Mapping', 'vapt-builder'))
+        el('div', { style: { marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
+          el(Button, {
+            isSecondary: true,
+            icon: 'search',
+            onClick: autoDetect,
+            title: __('Scan active file for standard VAPT fields', 'vapt-builder')
+          }, __('Auto-Detect', 'vapt-builder')),
+
+          el('div', { style: { display: 'flex', gap: '10px' } }, [
+            el(Button, { isSecondary: true, onClick: onClose }, __('Cancel', 'vapt-builder')),
+            el(Button, { isPrimary: true, onClick: save }, __('Save Mapping', 'vapt-builder'))
+          ])
         ])
       ]);
     };
@@ -2987,11 +3076,21 @@ Test Method: ${feature.test_method || 'None provided'}
             }
           }, [
             el('span', { style: { fontWeight: '700', textTransform: 'uppercase', fontSize: '10px', color: '#666' } }, __('Summary:', 'vapt-builder')),
-            el('span', { style: { fontWeight: '500' } }, sprintf(__('Total: %d', 'vapt-builder'), stats.total)),
+            el('span', { style: { fontWeight: '600', color: '#2271b1' } },
+              stats.total === stats.unfilteredTotal
+                ? sprintf(__('Total: %d', 'vapt-builder'), stats.total)
+                : sprintf(__('Filtered: %d of %d', 'vapt-builder'), stats.total, stats.unfilteredTotal)
+            ),
             el('span', { style: { opacity: 0.7 } }, sprintf(__('Draft: %d', 'vapt-builder'), stats.draft)),
             el('span', { style: { color: '#d63638', fontWeight: '600' } }, sprintf(__('Develop: %d', 'vapt-builder'), stats.develop)),
             el('span', { style: { color: '#dba617', fontWeight: '600' } }, sprintf(__('Test: %d', 'vapt-builder'), stats.test)),
             el('span', { style: { color: '#46b450', fontWeight: '700' } }, sprintf(__('Release: %d', 'vapt-builder'), stats.release)),
+            (stats.total < stats.unfilteredTotal || searchQuery || filterStatus !== 'all') && el(Button, {
+              isLink: true,
+              isSmall: true,
+              onClick: resetFilters,
+              style: { marginLeft: 'auto', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase' }
+            }, __('Reset All Filters', 'vapt-builder'))
           ])
         ]),
         // Filters Row (Ultra-Slim)
@@ -2999,13 +3098,38 @@ Test Method: ${feature.test_method || 'None provided'}
           // Search Box
           el('div', { style: { flex: '1 1 180px', background: '#f6f7f7', padding: '4px 10px', borderRadius: '4px', border: '1px solid #dcdcde', display: 'flex', flexDirection: 'column', justifyContent: 'center' } }, [
             el('label', { className: 'components-base-control__label', style: { display: 'block', marginBottom: '2px', fontWeight: '600', textTransform: 'uppercase', fontSize: '9px', color: '#666', letterSpacing: '0.02em' } }, __('Search Features', 'vapt-builder')),
-            el(TextControl, {
-              value: searchQuery,
-              onChange: setSearchQuery,
-              placeholder: __('Search...', 'vapt-builder'),
-              hideLabelFromVision: true,
-              style: { margin: 0, height: '28px', minHeight: '28px', fontSize: '12px' }
-            })
+            el('div', { style: { position: 'relative' } }, [
+              el(TextControl, {
+                value: searchQuery,
+                onChange: setSearchQuery,
+                placeholder: __('Search...', 'vapt-builder'),
+                hideLabelFromVision: true,
+                style: { margin: 0, height: '28px', minHeight: '28px', fontSize: '12px', paddingRight: '24px' }
+              }),
+              searchQuery && el(Button, {
+                icon: 'no-alt', // Unfilled circle-style 'X'
+                label: __('Clear Search', 'vapt-builder'),
+                onClick: () => setSearchQuery(''),
+                style: {
+                  position: 'absolute',
+                  right: '6px', // Slightly shifted for better balance
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  minWidth: '20px',
+                  width: '20px',
+                  height: '20px',
+                  padding: 0,
+                  color: '#717171', // Darker Grey
+                  background: 'transparent',
+                  boxShadow: 'none',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: 0.8
+                }
+              })
+            ])
           ]),
 
           // Category Unit

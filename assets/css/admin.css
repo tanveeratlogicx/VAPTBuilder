@@ -119,7 +119,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    display: none;
+    /* display: none;  Removed to allow React to control visibility */
 }
 
 .vapt-modal-content {

@@ -17,10 +17,14 @@ When you load the Settings page, the server sees your IP (139.x).
 But when the Browser sends the Cron Test, the server sees its own IP (23.x).
 
 
-I have just tested it and here's what I have found
-1. The changes are not being applied - When I refresh without Clicking on the `Save Changes` button, the toggles revert to their old values.
-2. Clicking on any of the Toggle should display a message regarding the Action it took - and the same Action should immediately be Verifiable on the `Statistics` Tab using Ajax.
+I changed the data file to `T:\~\Local925 Sites\hermasnet\app\public\wp-content\plugins\VAPTBuilder\data\VAPT-Complete-Risk-Catalog-99.json`, and it had failed to load any features because this had a different Data Structure.
+Can we change it in a way [BUT Progressively] that Plugin works equally good with both of these Structure's - All other files use a common Structure but `T:\~\Local925 Sites\hermasnet\app\public\wp-content\plugins\VAPTBuilder\data\VAPT-Complete-Risk-Catalog-99.json' uses a different JSON Structure.
+I need you to create a plan and then roll it out in steps carefully not to break the Plugins.
 
-The Actions Toggle are supposed to take are 
-1. "Disable WP‑Cron" toggle should Add/Remove an entry to/from the wp-config.php file ie., Enabling/Disabling the Protection.
-2. "Enable Cron Rate Limiting" toggle should Add/Remove an entry to/from the .htaccess file ie., Enabling/Disabling the Protection.
+# Map Include Fields via JSON Source [Modal]
+Staying on the Feature's List tab, help me automate the Process of Identifying the correct Mapping and Assigning to the Form Fields - Based on the Active JSON Data file, dynamically.
+1. Test Method Source
+2. Verification Steps Source
+3. Verification Engine Source
+
+The Superadmin may override the suggested mappings if required.

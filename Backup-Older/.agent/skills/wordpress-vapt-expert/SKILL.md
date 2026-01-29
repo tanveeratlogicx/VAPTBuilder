@@ -1,0 +1,863 @@
+---
+name: wordpress-vapt-expert
+description: WordPress Vulnerability Assessment and Penetration Testing (VAPT) expert. Use when implementing security protections, generating evidence for VAPT features, or hardening WordPress websites against OWASP Top 10 vulnerabilities. Handles SQL injection, XSS, authentication issues, access control, and 87+ security features with both .htaccess and nginx configurations.
+---
+
+# WordPress VAPT Expert Skill
+
+This skill helps implement comprehensive security protections for WordPress websites and generate concrete evidence for vulnerability assessments. It covers 87 security features across OWASP Top 10 2021, CWE Top 25, and PCI DSS standards.
+
+## When to use this skill
+
+- **Implementing VAPT protections**: When you need to secure a WordPress site against specific vulnerabilities
+- **Generating security evidence**: When you need proof that protections are working (logs, test results, configuration files)
+- **Security hardening**: When performing comprehensive WordPress security audits
+- **Compliance requirements**: When meeting OWASP, CWE, or PCI DSS standards
+- **Multiple VAPT features**: When handling several security features simultaneously
+
+**Keywords that trigger this skill**: WordPress security, VAPT, vulnerability assessment, penetration testing, SQL injection, XSS, authentication, access control, security headers, OWASP, hardening, evidence generation, .htaccess security, nginx security
+
+## Automated Implementation with VAPTBuilder Plugin
+
+For production WordPress environments, the **VAPTBuilder plugin** provides automated implementation, enforcement, and verification of all 87 VAPT features. This is the recommended approach for efficiency and reliability.
+
+### Why Use VAPTBuilder?
+- **Automated Enforcement**: Features are enforced via PHP hooks or .htaccess rules without manual coding.
+- **Dynamic UI Generation**: The plugin generates interactive dashboards with controls, tests, and verification probes.
+- **Centralized Management**: Manage domains, features, and evidence in a single admin interface.
+- **Real-Time Verification**: Built-in probes (e.g., universal_probe, spam_requests) test protections automatically.
+- **Evidence Generation**: Automatic header-based verification (e.g., `X-VAPT-Enforced`) and reporting.
+
+### Quick Setup
+1. Install the VAPTBuilder plugin in your WordPress site.
+2. Access the admin dashboard at `/wp-admin/admin.php?page=vapt-builder` (client) or `/wp-admin/admin.php?page=vapt-domain-admin` (superadmin).
+3. Enable desired features from the 87 available in `resources/features-database.json`.
+4. Use built-in verification tests to confirm protections are active.
+5. Generate reports with enforcement headers and probe results.
+
+**Note**: The `features-database.json` file is the authoritative source for feature definitions. The plugin uses `generated_schema` JSON to drive enforcement.
+
+## 🚀 Core Philosophy: Configuration Over Implementation
+
+**Do NOT write custom PHP code or .htaccess rules manually unless absolutely necessary.**
+
+The VAPTBuilder plugin provides robust **Drivers** that handle the heavy lifting. Your job is to **configure** these drivers via JSON schemas.
+
+### The Driver System
+1.  **VAPT_Hook_Driver**: Enforces security via WordPress hooks (API, Headers, Auth).
+    *   *Usage*: Map a control key to a driver method (e.g., `block_xmlrpc`, `limit_login_attempts`).
+2.  **VAPT_Htaccess_Driver**: Manages .htaccess rules safely.
+    *   *Usage*: Map a control key to a raw rule string or preset.
+
+### The Goal
+Instead of writing a 50-line PHP script to block XML-RPC, you generate a **15-line JSON Schema** that tells the plugin:
+"Render a toggle. If ON, tell the Hook Driver to run `block_xmlrpc`."
+
+## Feature Categories Covered
+
+**📊 Quick Reference:** See `/resources/features-database.json` for the complete database of all 87 features with detailed implementation methods, testing procedures, and evidence requirements.
+
+1. **Injection Attacks** (Critical Priority)
+   - SQL Injection Protection
+   - XSS Protection (Reflected, Stored, DOM-based)
+   - Command Injection
+   - XXE Protection
+   - SSRF Protection
+   - LFI/RFI Protection
+   - Template Injection
+   - Email Header Injection
+
+2. **Authentication & Session Management** (Critical/High Priority)
+   - Broken Authentication Protection
+   - Weak Password Policy Enforcement
+   - Brute Force Protection
+   - Session Management Security
+   - Session Fixation Protection
+   - Session Timeout
+   - Password Reset Vulnerabilities
+   - Account Takeover Prevention
+
+3. **Access Control** (Critical/High Priority)
+   - Broken Access Control
+   - IDOR Protection
+   - Privilege Escalation Prevention
+   - Admin Interface Protection
+   - CSRF Protection
+   - Admin Functionality Exposure
+
+4. **Configuration Security** (High/Medium Priority)
+   - Sensitive Data Exposure Prevention
+   - Security Headers (CSP, HSTS, X-Frame-Options, etc.)
+   - wp-config.php Protection
+   - File Permissions
+   - .htaccess Security Rules
+   - Debug Mode Configuration
+   - File Editor Disabling
+
+5. **API Security** (Medium Priority)
+   - XML-RPC Security
+   - REST API Endpoint Security
+   - Rate Limiting
+   - CORS Configuration
+
+6. **Information Disclosure** (Medium/Low Priority)
+   - Version Disclosure Prevention
+   - User Enumeration Blocking
+   - Directory Listing Prevention
+   - Backup File Exposure
+   - Log File Protection
+   - Database Error Disclosure
+
+7. **Cryptography** (High Priority)
+   - SSL/TLS Configuration
+   - Data Encryption at Rest
+   - Data Encryption in Transit
+   - Weak Cryptographic Algorithms
+   - Insecure Random Number Generation
+
+8. **Input Validation** (High Priority)
+   - Input Validation & Sanitization
+   - File Upload Security
+   - Directory Traversal Protection
+   - Mass Assignment Prevention
+   - Validation Bypass Prevention
+
+9. **Availability & DoS** (Medium/High Priority)
+   - Rate Limiting
+   - DoS Protection
+   - Cron Protection
+   - Resource Limits
+
+10. **Third-Party & Dependencies** (High Priority)
+    - Known Vulnerabilities Monitoring
+    - Insecure Third-Party Integrations
+    - Component Version Management
+
+## How to Implement Features (The "Builder" Way)
+
+### Step 1: Identify the Driver Strategy
+Consult `resources/features-database.json` to understand the feature. Then decide on the driver:
+
+| Feature Type | Preferred Driver | Examples |
+| :--- | :--- | :--- |
+| **Logic/Auth/API** | **Hook Driver** | Rate Limiting, User Checks, Header Injection, XML-RPC Blocking |
+| **Server/File Access** | **Htaccess Driver** | Directory Listing, File Blocking, Hotlink Protection |
+| **Manual/Ops** | **Manual/None** | File Permissions, Weak Passwords (policy only) |
+
+### Step 2: Construct the JSON Schema
+You must generate a valid `generated_schema` JSON object. This schema defines the UI controls AND the backend enforcement logic.
+
+#### Schema Structure
+```json
+{
+  "controls": [
+    // UI Controls (Toggles, Inputs, Tests)
+    { "type": "toggle", "label": "Enable Protection", "key": "enable_protection" },
+    { "type": "test_action", "label": "Verify", "key": "verify_it", "test_logic": "universal_probe", "test_config": { ... } }
+  ],
+  "enforcement": {
+    "driver": "hook", // or "htaccess"
+    "mappings": {
+      "enable_protection": "driver_method_name" // or "Actual .htaccess Rule"
+    }
+  }
+}
+```
+
+### Step 3: Implement & Verify
+1.  **Generate**: Create the schema based on the feature requirements.
+2.  **Apply**: Update the `vapt_feature_meta` table (or ask the user to save it).
+3.  **Verify**: Use the generated "Verify" button in the UI to confirm it works.
+
+## Driver Reference
+
+### 🔌 VAPT_Hook_Driver Methods
+Use these method names in your `enforcement.mappings` when `driver` is `hook`.
+
+*   `block_xmlrpc` - Blocks access to `xmlrpc.php`.
+*   `add_security_headers` - Adds strict security headers (X-Frame, X-XSS, etc.).
+*   `disable_directory_browsing` - (Legacy hook) Prefer htaccess for this.
+*   `limit_login_attempts` - Enforces rate limiting on login/API. Requires `limit` or `rpm` in data.
+*   `hide_wp_version` - Removes generator tags.
+*   `block_user_enumeration` - Blocks `/?author=1` scans.
+*   `disable_file_editors` - Disables Theme/Plugin editors.
+
+### 📝 VAPT_Htaccess_Driver Rules
+When `driver` is `htaccess`, the value in `mappings` is the **actual Apache directive**.
+
+*   **Security Restrictions**: The driver validates rules.
+    *   *Allowed*: `Options`, `Deny`, `Allow`, `RewriteRule`, `Header`.
+    *   *Blocked*: `php_value`, `php_flag`, suspicious `cmd` execution.
+    *   *Wrappers*: The driver automatically wraps rules in markers. Do NOT add `# BEGIN VAPT`.
+
+## Verification Reference (PROBE_REGISTRY)
+
+The frontend `generated-interface.js` has a built-in `PROBE_REGISTRY`. You **MUST** use these for the `test_logic` field.
+
+### `universal_probe` (Recommended)
+Flexible HTTP tester.
+*   `test_config`:
+    *   `method`: "GET" (default), "POST", "HEAD"
+    *   `path`: Relative path (e.g., `/wp-content/debug.log`)
+    *   `expected_status`: 403, 404, 200 (Integer)
+    *   `expected_headers`: `{ "X-VAPT-Enforced": "feature-key" }`
+    *   `expected_text`: "Forbidden string"
+
+### Special Probes
+*   `spam_requests`: Sends burst traffic. Requires `rpm` or `limit` in feature data.
+*   `check_headers`: Checks for general security headers.
+*   `block_xmlrpc`: Specific ping to XML-RPC.
+*   `hide_wp_version`: Scans source code for version tags.
+
+### Example: Universal Probe Configuration
+```json
+{
+  "type": "test_action",
+  "label": "Test Debug Log Block",
+  "key": "verify_debug_log",
+  "test_logic": "universal_probe",
+  "test_config": {
+    "path": "/wp-content/debug.log",
+    "expected_status": 403,
+    "expected_headers": { "X-VAPTC-Enforced": "php-debug-exposure" }
+  }
+}
+```
+
+## Implementation Patterns
+
+### Pattern 1: .htaccess Implementation
+
+```apache
+# ============================================
+# WordPress VAPT Protection: [FEATURE_NAME]
+# Category: [CATEGORY]
+# Severity: [SEVERITY]
+# Deployment Path: .htaccess in WordPress root
+# ============================================
+
+# [Brief description of protection]
+
+# Protection rules
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Specific rules here
+</IfModule>
+
+# Alternative approach (if applicable)
+<FilesMatch "pattern">
+    # Access control
+</FilesMatch>
+
+# Evidence generation: Check logs at /var/log/apache2/error.log
+```
+
+### Pattern 2: nginx Configuration
+
+```nginx
+# ============================================
+# WordPress VAPT Protection: [FEATURE_NAME]
+# Category: [CATEGORY]
+# Severity: [SEVERITY]
+# Deployment Path: /etc/nginx/sites-available/your-site.conf
+# ============================================
+
+# [Brief description of protection]
+
+# Protection rules
+location ~ pattern {
+    # Specific rules here
+}
+
+# Alternative approach (if applicable)
+location = /specific-file {
+    # Access control
+}
+
+# Evidence generation: Check logs at /var/log/nginx/error.log
+```
+
+### Pattern 3: wp-config.php Constants
+
+```php
+<?php
+/**
+ * ============================================
+ * WordPress VAPT Protection: [FEATURE_NAME]
+ * Category: [CATEGORY]
+ * Severity: [SEVERITY]
+ * Deployment Path: wp-config.php (before "That's all, stop editing!")
+ * ============================================
+ * 
+ * [Brief description of protection]
+ * 
+ * BACKUP INSTRUCTIONS:
+ * 1. Create backup: cp wp-config.php wp-config.php.backup
+ * 2. Add the code below BEFORE the line: require_once ABSPATH . 'wp-settings.php';
+ * 3. Test the site after implementation
+ * 4. If issues occur, restore: cp wp-config.php.backup wp-config.php
+ */
+
+// Protection constants
+define('CONSTANT_NAME', value);
+
+// Additional configuration
+// [Explanation of each setting]
+```
+
+### Pattern 4: functions.php Implementation
+
+```php
+<?php
+/**
+ * ============================================
+ * WordPress VAPT Protection: [FEATURE_NAME]
+ * Category: [CATEGORY]
+ * Severity: [SEVERITY]
+ * Deployment Path: wp-content/themes/your-theme/functions.php
+ * ============================================
+ * 
+ * [Brief description of protection]
+ * 
+ * BACKUP INSTRUCTIONS:
+ * 1. Create backup: cp functions.php functions.php.backup
+ * 2. Add this code at the END of functions.php
+ * 3. Test the site thoroughly
+ * 4. If issues occur, restore: cp functions.php.backup functions.php
+ */
+
+// Protection function
+add_action('hook_name', 'vapt_protection_function_name');
+function vapt_protection_function_name() {
+    // Protection logic
+    // Include all necessary validation, sanitization, etc.
+}
+
+// Additional hooks/filters as needed
+```
+
+### Pattern 5: Evidence Generation Script
+
+```php
+<?php
+/**
+ * ============================================
+ * Evidence Generator: [FEATURE_NAME]
+ * Purpose: Generate concrete evidence of protection
+ * Deployment Path: /vapt-evidence/[feature-id]-evidence.php
+ * ============================================
+ * 
+ * USAGE:
+ * 1. Upload this file to /vapt-evidence/ directory (create if needed)
+ * 2. Access via: https://your-site.com/vapt-evidence/[feature-id]-evidence.php
+ * 3. Review the output and save for documentation
+ * 4. DELETE this file after evidence collection
+ * 
+ * SECURITY WARNING:
+ * This file should ONLY be used temporarily for evidence collection.
+ * DELETE immediately after use to prevent information disclosure.
+ */
+
+// Authentication check (basic - improve for production)
+$auth_key = 'YOUR_RANDOM_KEY_HERE'; // Change this!
+if (!isset($_GET['key']) || $_GET['key'] !== $auth_key) {
+    die('Unauthorized access');
+}
+
+echo "<h1>VAPT Evidence: [FEATURE_NAME]</h1>";
+echo "<h2>Feature ID: [FEATURE_ID]</h2>";
+echo "<h3>Generated: " . date('Y-m-d H:i:s') . "</h3>";
+
+// Evidence collection logic
+echo "<h3>1. Configuration Status</h3>";
+// Check if protections are active
+
+echo "<h3>2. Test Results</h3>";
+// Run automated tests
+
+echo "<h3>3. Log Analysis</h3>";
+// Check relevant logs
+
+echo "<h3>4. Recommendations</h3>";
+// Provide actionable recommendations
+
+echo "<hr><p style='color:red;'><strong>SECURITY REMINDER: DELETE THIS FILE AFTER USE!</strong></p>";
+```
+
+## Server Configuration Guidelines
+
+### Apache (.htaccess) Best Practices
+
+1. **Always backup** before modifying .htaccess
+2. **Test after each change** - syntax errors can break the site
+3. **Order matters** - RewriteRule directives are processed sequentially
+4. **Use IfModule** - Ensures compatibility if modules aren't loaded
+5. **Comment extensively** - Future administrators need context
+
+**Common .htaccess modules:**
+- `mod_rewrite` - URL rewriting and redirects
+- `mod_headers` - HTTP header manipulation
+- `mod_deflate` - Compression
+- `mod_expires` - Cache control
+- `mod_security` - Web application firewall
+
+### nginx Best Practices
+
+1. **Always backup** before modifying nginx configuration
+2. **Test configuration** - `nginx -t` before reloading
+3. **Reload, don't restart** - `nginx -s reload` for zero downtime
+4. **Location block order** - More specific locations first
+5. **Separate files** - Use includes for organization
+
+**Common nginx directives:**
+- `location` - URL matching and handling
+- `add_header` - HTTP header manipulation
+- `deny` / `allow` - Access control
+- `limit_req` - Rate limiting
+- `return` - Redirects and responses
+
+### Choosing Between Apache and nginx
+
+**Use .htaccess when:**
+- WordPress is on shared hosting (Apache)
+- No access to main server config
+- Need per-directory configuration
+- Quick prototyping and testing
+
+**Use nginx when:**
+- Full server control available
+- Performance is critical
+- Hosting modern WordPress stack
+- Managing multiple sites
+
+**Provide both when:**
+- Implementation method varies by server
+- Maximum compatibility needed
+- Documentation for different environments
+
+## Evidence Generation Guidelines
+
+### Types of Evidence Required
+
+1. **Configuration Evidence**
+   - Screenshots of wp-config.php settings
+   - .htaccess / nginx config snippets
+   - WordPress admin panel settings
+   - File permissions output
+
+2. **Testing Evidence**
+   - Successful block of attack attempts (403 errors)
+   - Tool scan results (WPScan, SQLMap, etc.)
+   - Manual test results with payloads
+   - Before/after comparisons
+
+3. **Log Evidence**
+   - Apache/nginx access logs showing blocked attempts
+   - WordPress debug logs (if enabled for testing)
+   - Security plugin logs
+   - Error logs showing proper handling
+
+4. **Verification Evidence**
+   - HTTP header analysis (curl -I output)
+   - Security header testing results (securityheaders.com)
+   - SSL test results (SSL Labs)
+   - Third-party scanner results
+
+### Evidence Collection Scripts
+
+Create PHP scripts that:
+- Run automated tests
+- Parse log files for relevant entries
+- Check configuration settings
+- Generate formatted reports
+- Include timestamps and system info
+
+**Important:** All evidence scripts must:
+- Include authentication mechanism
+- Warn about deletion after use
+- Not expose sensitive data unnecessarily
+- Be thoroughly commented
+- Include usage instructions
+
+## Testing Methodology
+
+### Automated Verification via VAPTBuilder Plugin
+
+When using the VAPTBuilder plugin, leverage its built-in verification system:
+
+- **Probe Registry**: Use probes like `universal_probe`, `spam_requests`, `check_headers`, `block_xmlrpc` for automated testing.
+- **Header Verification**: Check for `X-VAPT-Enforced` headers to confirm plugin enforcement.
+- **Generated Interface**: UI controls automatically include test actions with real-time results.
+- **Evidence Collection**: Plugin generates reports with header analysis and probe outcomes.
+
+For manual verification when not using the plugin, follow the steps below.
+
+### Verification Steps for Each Feature
+
+1. **Pre-Implementation Baseline**
+   - Document current state
+   - Run vulnerability scans
+   - Record existing protections
+
+2. **Implementation**
+   - Apply protection code
+   - Verify syntax/configuration
+   - Clear caches (WordPress, server, CDN)
+
+3. **Functional Testing**
+   - Verify site still works normally
+   - Test affected functionality
+   - Check for broken features
+
+4. **Security Testing**
+   - Attempt attack payloads
+   - Verify blocks are working
+   - Check for bypass techniques
+   - Use automated tools
+
+5. **Evidence Collection**
+   - Run evidence generation scripts
+   - Capture screenshots
+   - Export logs
+   - Document results
+
+6. **Documentation**
+   - Record what was implemented
+   - Note any customizations
+   - Document test results
+   - Create rollback plan
+
+### Common Testing Tools
+
+Reference the scripts in `/scripts/testing-tools.sh` for:
+- **WPScan** - WordPress vulnerability scanner
+- **SQLMap** - SQL injection testing
+- **OWASP ZAP** - Web application scanner
+- **Burp Suite** - Manual testing platform
+- **Nikto** - Web server scanner
+- **curl** - HTTP header testing
+- **SecurityHeaders.com** - Header analysis
+- **SSL Labs** - SSL/TLS testing
+
+## Priority Implementation Guide
+
+### Critical Priority (Implement First)
+
+1. SQL Injection Protection
+2. Sensitive Data Exposure Prevention
+3. Broken Authentication Protection
+4. Insecure Deserialization Protection
+5. Disable File Editing
+6. Admin Interface Protection
+7. RFI Protection
+8. Command Injection Protection
+9. Authentication Bypass Prevention
+10. Admin Functionality Exposure Prevention
+
+### High Priority (Implement Second)
+
+1. XSS Protection
+2. Broken Access Control
+3. IDOR Protection
+4. Session Management Security
+5. Known Vulnerabilities Monitoring
+6. Weak Password Policy Enforcement
+7. XXE Protection
+8. SSRF Protection
+9. File Upload Security
+10. Directory Traversal Protection
+
+### Medium Priority (Implement Third)
+
+1. Security Headers
+2. CSRF Protection
+3. Logging & Monitoring
+4. Rate Limiting
+5. Disable XML-RPC
+6. Disable REST API (if not needed)
+7. Content Security Policy
+8. File Permissions
+9. Database Security Configuration
+
+### Low Priority (Implement Last)
+
+1. User Enumeration Prevention
+2. Cron Protection
+3. WordPress Version Disclosure
+4. Directory Listing Prevention
+5. Concurrent Session Control
+
+## Common Patterns and Solutions
+
+### Pattern: Blocking Malicious Patterns
+
+**.htaccess approach:**
+```apache
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{QUERY_STRING} [malicious_pattern] [NC,OR]
+    RewriteCond %{REQUEST_URI} [malicious_pattern] [NC]
+    RewriteRule .* - [F,L]
+</IfModule>
+```
+
+**nginx approach:**
+```nginx
+location ~ [malicious_pattern] {
+    return 403;
+}
+```
+
+### Pattern: Adding Security Headers
+
+**.htaccess approach:**
+```apache
+<IfModule mod_headers.c>
+    Header set X-Header-Name "value"
+</IfModule>
+```
+
+**nginx approach:**
+```nginx
+add_header X-Header-Name "value" always;
+```
+
+**functions.php approach:**
+```php
+add_action('send_headers', 'vapt_security_headers');
+function vapt_security_headers() {
+    header('X-Header-Name: value');
+}
+```
+
+### Pattern: Protecting Sensitive Files
+
+**.htaccess approach:**
+```apache
+<FilesMatch "^(wp-config\.php|readme\.html|license\.txt)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+```
+
+**nginx approach:**
+```nginx
+location ~ ^/(wp-config\.php|readme\.html|license\.txt) {
+    deny all;
+}
+```
+
+### Pattern: Input Validation & Sanitization
+
+**functions.php approach:**
+```php
+add_filter('pre_user_query', 'vapt_sanitize_user_input');
+function vapt_sanitize_user_input($query) {
+    // Validation logic
+    // Use WordPress sanitization functions
+    // sanitize_text_field(), esc_sql(), etc.
+}
+```
+
+## Artifact Organization
+
+When creating artifacts for a VAPT feature, organize as follows:
+
+```
+Artifact 1: Protection Implementation (.htaccess)
+- Complete .htaccess rules
+- Comments explaining each section
+- Deployment path and instructions
+
+Artifact 2: Protection Implementation (nginx)
+- Complete nginx configuration
+- Comments explaining each section
+- Deployment path and instructions
+
+Artifact 3: Protection Implementation (WordPress)
+- wp-config.php additions (if needed)
+- functions.php additions (if needed)
+- Complete, self-contained code
+
+Artifact 4: Evidence Generation Script
+- PHP script for automated testing
+- Evidence collection logic
+- Report generation
+- Security warnings
+
+Artifact 5: Testing & Verification Guide
+- Manual testing steps
+- Expected results
+- Tool commands
+- Evidence checklist
+```
+
+## Critical Reminders
+
+1. **Never create actual WordPress plugin files** - Only provide code snippets for existing files
+2. **Always provide both Apache and nginx** configurations when applicable
+3. **Make artifacts self-contained** - No external dependencies
+4. **Include deployment paths** in every artifact header
+5. **Provide backup instructions** before any file modification
+6. **Generate concrete evidence** - Not just "this should work"
+7. **Test before deploying** - Syntax errors can break sites
+8. **Delete evidence scripts** after use - Security risk if left
+9. **Comment extensively** - Future administrators need context
+10. **Follow WordPress coding standards** when writing PHP
+
+## Example Workflow
+
+**User Request:** "Implement SQL Injection Protection and XSS Protection"
+
+**Agent Response:**
+
+1. **Identify features** from the JSON database
+   - sql-injection (Critical, Priority 1)
+   - xss-protection (High, Priority 2)
+
+2. **Determine implementation methods**
+   - SQL Injection: .htaccess + nginx + functions.php
+   - XSS Protection: .htaccess + nginx + functions.php + CSP headers
+
+3. **Create artifacts** (5 total):
+   - Artifact 1: Combined .htaccess rules for both features
+   - Artifact 2: Combined nginx configuration for both features
+   - Artifact 3: functions.php additions for both features
+   - Artifact 4: Evidence generation script for SQL Injection
+   - Artifact 5: Evidence generation script for XSS Protection
+
+4. **Provide deployment guide**:
+   - Order of implementation
+   - Testing procedures
+   - Evidence collection steps
+   - Rollback procedures
+
+## Scripts and Resources
+
+This skill includes the following resources in the skill folder:
+
+### Scripts (`/scripts/`)
+- `testing-tools.sh` - Reference commands for common VAPT testing tools (WPScan, SQLMap, OWASP ZAP, Burp Suite, Nikto, curl, nmap, etc.)
+- `evidence-collector.php` - Template for creating feature-specific evidence collection scripts with automated testing and reporting
+
+### Examples (`/examples/`)
+- `htaccess-complete.conf` - Complete Apache .htaccess security configuration with 30+ protection rules
+- `nginx-complete.conf` - Complete nginx security configuration with 35+ security directives
+- `functions-security.php` - Complete WordPress functions.php security additions with 20+ protection functions
+
+### Resources (`/resources/`)
+- `features-database.json` - **Complete database of all 87 VAPT features** with implementation methods, testing procedures, and evidence requirements
+- `vapt-checklist.md` - Comprehensive implementation checklist organized by priority
+- `evidence-template.md` - Professional evidence documentation template for compliance reporting
+
+### Plugin Files for Reference (in VAPTBuilder plugin)
+- `includes/enforcers/class-vapt-hook-driver.php` - PHP-based enforcement driver for hook-based features
+- `assets/js/modules/generated-interface.js` - UI generation and PROBE_REGISTRY for automated testing
+- `vapt-builder.php` - Main plugin file with database setup and feature enforcement
+
+### How to Use These Resources
+
+**When implementing a VAPT feature:**
+1. **Check `features-database.json`** first to understand the feature's category, severity, implementation methods, and evidence requirements
+2. **Reference example files** in `/examples/` for implementation patterns
+3. **Use `testing-tools.sh`** for the correct testing commands
+4. **Generate evidence** using the template from `evidence-collector.php`
+5. **Document** using `evidence-template.md`
+6. **Track progress** with `vapt-checklist.md`
+
+**Important:** The agent should read these files as needed to provide accurate implementations, but should not include entire file contents in responses unless specifically requested. Instead, extract relevant sections and customize for the specific feature being implemented.
+
+## Interface & Schema Generation
+
+When generating the `generated_schema` JSON for the VAPT Workbench, you **MUST** adhere to the following strict layout and control guidelines to ensure consistency with the dashboard UI.
+
+### 1. Dashboard Layout Structure (Two-Column + Full Width)
+
+The Workbench processes the JSON schema into a specific layout. Your meaningful controls must be categorized correctly to appear in the right place:
+
+*   **Left Column (Functional Implementation)**:
+    *   **Content**: All configuration inputs (`toggle`, `input`, `select`, etc.).
+    *   **Purpose**: Controls that change *how* the feature works.
+*   **Right Column (Automated Verification)**:
+    *   **Content**: Controls with `type: "test_action"`.
+    *   **Purpose**: "Run Verify" buttons and automated checks.
+*   **Bottom Row (Full Width - Below Grid)**:
+    *   **Content**: Controls with `key: "operational_notes"` (or label "Operational Notes").
+    *   **Purpose**: Contextual guidance, warnings, or implementation details. Should use `type: "textarea"` with `rows: 3` and `read_only: (optional)`.
+
+### 2. Manual Verification Modal
+
+The "Functional Verification" button (on the dashboard) opens a modal dedicated **ONLY** to manual protocols. Do **NOT** put automated tests here.
+
+*   **Content**:
+    *   `test_method`: The manual protocol text (from Feature Meta).
+    *   `verification_steps`: The evidence checklist (from Feature Meta).
+    *   `type: "risk_indicators"`: Threat model summary.
+    *   `type: "assurance_badges"`: Visual confirmation status.
+
+### 3. Verification Logic Guidelines
+
+*   **Automated Tests**:
+    *   Use `test_logic: "universal_probe"` whenever possible.
+    *   **MUST** include `expected_headers` validation (e.g., `X-VAPT-Enforced: php-feature-key`) to prove the VAPT plugin is the one enforcing the rule (vs. another plugin).
+    *   **Probe Logic**: Ensure the probe actually triggers the protection (e.g., accesses a blocked file, sends a banned header) and checks for the expected block response (403/404).
+
+### 4. Schema Example
+
+```json
+{
+  "controls": [
+    { "type": "section", "label": "Functional Implementation" },
+    { "type": "toggle", "label": "Enable Feature", "key": "status", "default": true },
+    { "type": "input", "label": "Threshold", "key": "limit", "default": "5" },
+
+    { "type": "test_action", "label": "Verify Blocking", "key": "verify_block", "test_logic": "universal_probe", "test_config": { ... } },
+
+    { "type": "textarea", "label": "Operational Notes", "key": "operational_notes", "default": "Notes here...", "help": "Contextual guide." },
+
+    { "type": "risk_indicators", "label": "Risks", "items": [...] },
+    { "type": "assurance_badges", "label": "Assurance", "items": [...] }
+  ],
+  "enforcement": { ... }
+}
+```
+
+## Response Format
+
+When responding to a VAPT feature request:
+
+1. **Feature Summary** (Brief)
+   - Feature name and ID
+   - Category and severity
+   - Implementation methods chosen
+
+2. **Artifacts** (Main content)
+   - Each artifact as separate code block
+   - Clear headers with deployment paths
+   - Self-contained and complete
+
+3. **Deployment Instructions** (Clear steps)
+   - Order of implementation
+   - File locations
+   - Testing procedures
+
+4. **Evidence Requirements** (Specific)
+   - What evidence to collect
+   - How to collect it
+   - What to look for
+
+5. **Verification Steps** (Actionable)
+   - Manual tests to perform
+   - Expected results
+   - Tool commands to run
+
+## Conclusion
+
+This skill enables comprehensive WordPress VAPT implementation with:
+- 87 security features from OWASP Top 10 2021
+- Both .htaccess and nginx configurations
+- Evidence generation for compliance
+- Self-contained, production-ready artifacts
+- Clear deployment and testing procedures
+
+Always prioritize Critical and High severity features first, and ensure every implementation includes concrete evidence generation capabilities.
