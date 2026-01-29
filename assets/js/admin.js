@@ -435,8 +435,8 @@ window.vaptScriptLoaded = true;
         className: 'vapt-domain-features-modal',
         style: { maxWidth: '1400px', width: '90%' }
       }, [
-        // Status Visibility Filters (Superadmin Only)
-        isSuper && el('div', {
+        // Status Visibility Filters
+        el('div', {
           style: {
             marginBottom: '20px',
             padding: '12px 20px',
@@ -462,7 +462,7 @@ window.vaptScriptLoaded = true;
               height: 'auto',
               boxShadow: (statusFilters || []).length !== 3 ? '0 2px 4px rgba(34, 113, 177, 0.2)' : 'none'
             }
-          }, (statusFilters || []).length === 3 ? __('Clear All Filters', 'vapt-builder') : __('Select All Statuses', 'vapt-builder')),
+          }, (statusFilters || []).length === 3 ? __('Reset All Filters', 'vapt-builder') : __('Select All Statuses', 'vapt-builder')),
           el('div', { style: { display: 'flex', gap: '15px', paddingLeft: '20px', borderLeft: '2px solid #e2e8f0' } }, [
             { label: __('Develop', 'vapt-builder'), value: 'develop' },
             { label: __('Test', 'vapt-builder'), value: 'test' },

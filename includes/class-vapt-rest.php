@@ -210,6 +210,46 @@ class VAPT_REST
     } elseif (isset($raw_data['features']) && is_array($raw_data['features'])) {
       $features = $raw_data['features'];
       $schema = isset($raw_data['schema']) ? $raw_data['schema'] : [];
+    } elseif (isset($raw_data['risk_catalog']) && is_array($raw_data['risk_catalog'])) {
+      // 🛡️ ADAPTER: VAPT Risk Catalog Format (v3.0+)
+      $raw_features = $raw_data['risk_catalog'];
+      $features = array();
+      foreach ($raw_features as $item) {
+        // 1. Flatten Description
+        if (isset($item['description']) && is_array($item['description'])) {
+          $item['description'] = isset($item['description']['summary']) ? $item['description']['summary'] : '';
+        }
+        // 2. Flatten Severity
+        if (isset($item['severity']) && is_array($item['severity'])) {
+          $item['severity'] = isset($item['severity']['level']) ? $item['severity']['level'] : 'medium';
+        }
+        // 3. Flatten Verification Steps
+        if (isset($item['testing']) && isset($item['testing']['verification_steps']) && is_array($item['testing']['verification_steps'])) {
+          $steps = [];
+          foreach ($item['testing']['verification_steps'] as $step) {
+            if (is_array($step) && isset($step['action'])) {
+              $steps[] = $step['action'];
+            } elseif (is_string($step)) {
+              $steps[] = $step;
+            }
+          }
+          $item['verification_steps'] = $steps;
+        }
+        // 4. Flatten Remediation
+        if (isset($item['protection']) && is_array($item['protection'])) {
+          // Try to find code in automated protection
+          if (isset($item['protection']['automated_protection']['implementation_steps'][0]['code'])) {
+            $item['remediation'] = $item['protection']['automated_protection']['implementation_steps'][0]['code'];
+          }
+        }
+        // 5. Map OWASP
+        if (isset($item['owasp_mapping']) && isset($item['owasp_mapping']['owasp_top_10_2021'])) {
+          $item['owasp'] = $item['owasp_mapping']['owasp_top_10_2021'];
+        }
+
+        $features[] = $item;
+      }
+      $schema = isset($raw_data['schema']) ? $raw_data['schema'] : [];
     } else {
       $features = $raw_data;
     }

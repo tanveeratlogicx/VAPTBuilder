@@ -21391,8 +21391,8 @@
         "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
       },
       "description": {
-        "summary": "Root readme.html exposes exact WordPress version to attackers.",
-        "detailed": "Root readme.html exposes exact WordPress version to attackers. New",
+        "summary": "Root readme.html exposes exact WordPress version to attackers. New",
+        "detailed": "Root readme.html exposes exact WordPress version to attackers.",
         "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
         "affected_components": [
           "WordPress Core",
