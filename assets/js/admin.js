@@ -3113,7 +3113,7 @@ Test Method: ${feature.test_method || 'None provided'}
                 style: {
                   position: 'absolute',
                   right: '6px', // Slightly shifted for better balance
-                  top: '50%',
+                  top: '40%', // Adjusted to visually center (moved up slightly)
                   transform: 'translateY(-50%)',
                   minWidth: '20px',
                   width: '20px',
