@@ -2834,7 +2834,7 @@ Test Method: ${feature.test_method || 'None provided'}
           const isChecked = step.id === activeStep;
           return el('label', {
             key: step.id,
-            style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? '#2271b1' : '#72777c', fontWeight: isChecked ? '700' : 'normal' }
+            style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? '#2271b1' : 'inherit', fontWeight: isChecked ? '600' : 'normal' }
           }, [
             el('input', {
               type: 'radio',
@@ -3222,9 +3222,9 @@ Test Method: ${feature.test_method || 'None provided'}
           ...activeCols.map(col => {
             const label = col.charAt(0).toUpperCase() + col.slice(1).replace(/_/g, ' ');
             let width = 'auto';
-            if (col === 'title' || col === 'name') width = '350px'; // Increased Title Width
+            if (col === 'title' || col === 'name') width = '200px';
             if (col === 'category') width = '120px';
-            if (col === 'severity') width = '60px'; // Reduced Severity Width
+            if (col === 'severity') width = '80px';
             if (col === 'id') width = '100px';
 
             const isSortable = ['title', 'name', 'category', 'severity'].includes(col);
@@ -3240,9 +3240,7 @@ Test Method: ${feature.test_method || 'None provided'}
                 background: isActive ? '#f0f6fb' : 'inherit',
                 position: 'relative',
                 paddingRight: isSortable ? '10px' : '10px',
-                paddingLeft: isSortable ? '30px' : '10px',
-                verticalAlign: 'middle',
-                borderBottom: '2px solid #ddd' // Ledger header style
+                paddingLeft: isSortable ? '30px' : '10px'
               },
               className: isSortable ? 'vapt-sortable-header' : ''
             }, [
@@ -3260,67 +3258,59 @@ Test Method: ${feature.test_method || 'None provided'}
               label
             ]);
           }),
-          el('th', { style: { width: '300px', verticalAlign: 'middle', borderBottom: '2px solid #ddd' } }, __('Lifecycle Status', 'vapt-builder')),
-          el('th', { style: { width: '140px', verticalAlign: 'middle', borderBottom: '2px solid #ddd' } }, __('Include', 'vapt-builder')), // Reduced Include Width
+          el('th', { style: { width: '300px' } }, __('Lifecycle Status', 'vapt-builder')),
+          el('th', { style: { width: '240px' } }, __('Include', 'vapt-builder')),
         ])),
-        el('tbody', null, processedFeatures.map((f, index) => el(Fragment, { key: f.key }, [
-          el('tr', { style: { borderBottom: '1px solid #f0f0f0', background: index % 2 === 0 ? '#ffffff' : '#fcfcfc' } }, [ // Ledger row style with zebra striping
+        el('tbody', null, processedFeatures.map((f) => el(Fragment, { key: f.key }, [
+          el('tr', null, [
             ...activeCols.map(col => {
               let content = f[col] || '-';
               if (col === 'title' || col === 'label' || col === 'name') {
-                content = el('strong', { style: { color: '#1e1e1e', fontSize: '13px' } }, f.label || f.title || f.name);
+                content = el('strong', null, f.label || f.title || f.name);
               } else if (col === 'severity') {
                 const s = (f[col] || '').toLowerCase();
-                const map = {
-                  'critical': '#d63638', // Red
-                  'high': '#d94f00',     // Orange
-                  'medium': '#2271b1',   // Blue
-                  'low': '#00a32a',      // Green
-                  'informational': '#333' // Black
-                };
-                const color = map[s] || '#333';
-                content = el('span', { style: { color: color, fontWeight: 'bold' } }, s.charAt(0).toUpperCase() + s.slice(1));
+                const map = { 'critical': 'Critical', 'high': 'High', 'medium': 'Medium', 'low': 'Low', 'informational': 'Informational' };
+                content = map[s] || (s.charAt(0).toUpperCase() + s.slice(1).toLowerCase());
               } else if (col === 'implemented_at' && f[col]) {
                 content = new Date(f[col]).toLocaleString();
               } else if (col === 'owasp') {
-                content = el('span', { className: 'vapt-pill-compact', style: { background: '#f0f6fb', color: '#2271b1', fontSize: '10px' } }, f[col]);
+                content = el('span', { className: 'vapt-pill-compact', style: { background: '#f0f6fb', color: '#2271b1' } }, f[col]);
               } else if ((col === 'verification_steps' || col === 'verification') && Array.isArray(f[col])) {
-                content = el('ul', { style: { margin: 0, padding: 0, listStyle: 'decimal inside', fontSize: '10px' } },
+                content = el('ul', { style: { margin: 0, padding: 0, listStyle: 'decimal inside', fontSize: '11px' } },
                   f[col].map((step, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, step))
                 );
               } else if (Array.isArray(f[col])) {
-                content = el('div', { style: { fontSize: '10px', display: 'flex', flexWrap: 'wrap', gap: '4px' } }, f[col].map((item, idx) => el('span', { key: idx, className: 'vapt-pill-compact' },
+                content = el('div', { style: { fontSize: '11px', display: 'flex', flexWrap: 'wrap', gap: '4px' } }, f[col].map((item, idx) => el('span', { key: idx, className: 'vapt-pill-compact' },
                   typeof item === 'object' ? JSON.stringify(item) : String(item)
                 )));
               } else if (typeof f[col] === 'object' && f[col] !== null) {
                 content = el('pre', { style: { fontSize: '10px', margin: 0, background: '#f0f0f0', padding: '4px', whiteSpace: 'pre-wrap' } }, JSON.stringify(f[col], null, 2));
               }
-              return el('td', { key: col, style: { verticalAlign: 'middle', padding: '4px 10px' } }, content); // Tidy padding (reduced to 4px)
+              return el('td', { key: col }, content);
             }),
-            el('td', { style: { verticalAlign: 'middle', padding: '4px 10px' } }, [
-              el('div', { style: { display: 'flex', gap: '10px', alignItems: 'center' } }, [ // Flex wrapper for alignment
-                el(LifecycleIndicator, {
-                  feature: f,
-                  onChange: (newStatus) => {
-                    let defaultNote = '';
-                    const title = f.label || f.title;
-                    const description = f.description || 'No description provided.';
-                    const owasp = f.owasp || 'N/A';
-                    const category = f.category || 'General';
-                    const severity = f.severity || 'Medium';
+            el('td', { style: { display: 'flex', gap: '10px', alignItems: 'center' } }, [
+              el(LifecycleIndicator, {
+                feature: f,
+                onChange: (newStatus) => {
+                  let defaultNote = '';
+                  const title = f.label || f.title;
+                  const description = f.description || 'No description provided.';
+                  const owasp = f.owasp || 'N/A';
+                  const category = f.category || 'General';
+                  const severity = f.severity || 'Medium';
 
-                    let devInstruct = '';
-                    let assuranceAgainst = f.assurance_against || [];
+                  let devInstruct = '';
+                  let assuranceAgainst = f.assurance_against || [];
 
-                    if (newStatus === 'Develop') {
-                      // Smart Mapping 1: Rich Change Note
-                      defaultNote = `Initiating implementation for ${title}.
+                  if (newStatus === 'Develop') {
+                    // Smart Mapping 1: Rich Change Note
+                    defaultNote = `Initiating implementation for ${title}.
 
 Context: ${description}
 Ref: ${owasp}`;
 
-                      // Smart Mapping 2: Agent Instructions
-                      devInstruct = `[Agent Prompt]: Implement strict validation for ${category} (${severity}).
+                    // Smart Mapping 2: Agent Instructions
+                    devInstruct = `[Agent Prompt]: Implement strict validation for ${category} (${severity}).
 
 Compliance: ${owasp}
 
@@ -3328,50 +3318,50 @@ Tech Stack Guide:
 - Prioritize .htaccess rules (Apache) or wp-config.php (Constants) if possible.
 - Fallback to PHP Hooks (WordPress API) only if dynamic logic is required.`;
 
-                      // Smart Mapping 3: Design Context (Protection Against)
-                      if (assuranceAgainst.length === 0 && f.description) {
-                        assuranceAgainst = [f.description];
-                      }
-
-                    } else if (newStatus === 'Test') {
-                      const risk = (f.assurance_against && f.assurance_against.length > 0) ? f.assurance_against[0] : __('identified risks', 'vapt-builder');
-                      defaultNote = `Development phase complete. Ready to verify protection against: ${risk}.`;
-                    } else if (newStatus === 'Release') {
-                      defaultNote = `Verification protocol passed for ${title}. Ready for baseline deployment.`;
-                    } else {
-                      defaultNote = `Reverting ${title} to Draft for further planning.`;
+                    // Smart Mapping 3: Design Context (Protection Against)
+                    if (assuranceAgainst.length === 0 && f.description) {
+                      assuranceAgainst = [f.description];
                     }
 
-                    setTransitioning({
-                      ...f,
-                      nextStatus: newStatus,
-                      note: defaultNote,
-                      remediation: f.remediation || f.test_method || '',
-                      assurance: f.assurance || [],
-                      assurance_against: assuranceAgainst,
-                      owasp: f.owasp || '',
-                      test_method: f.test_method || '',
-                      verification_steps: f.verification_steps || [],
-                      tests: f.tests || [],
-                      evidence: f.evidence || [],
-                      schema_hints: f.schema_hints || {},
-                      devInstruct: devInstruct
-                    });
+                  } else if (newStatus === 'Test') {
+                    const risk = (f.assurance_against && f.assurance_against.length > 0) ? f.assurance_against[0] : __('identified risks', 'vapt-builder');
+                    defaultNote = `Development phase complete. Ready to verify protection against: ${risk}.`;
+                  } else if (newStatus === 'Release') {
+                    defaultNote = `Verification protocol passed for ${title}. Ready for baseline deployment.`;
+                  } else {
+                    defaultNote = `Reverting ${title} to Draft for further planning.`;
                   }
-                }),
-                el(Button, {
-                  icon: 'backup',
-                  isSmall: true,
-                  isTertiary: true,
-                  disabled: !f.has_history,
-                  title: f.has_history ? __('View History', 'vapt-builder') : __('No History', 'vapt-builder'),
-                  onClick: () => f.has_history && setHistoryFeature(f),
-                  style: { marginLeft: 'auto', opacity: f.has_history ? 1 : 0.3 } // Push history to right
-                })
-              ])
+
+                  setTransitioning({
+                    ...f,
+                    nextStatus: newStatus,
+                    note: defaultNote,
+                    remediation: f.remediation || f.test_method || '',
+                    assurance: f.assurance || [],
+                    assurance_against: assuranceAgainst,
+                    owasp: f.owasp || '',
+                    test_method: f.test_method || '',
+                    verification_steps: f.verification_steps || [],
+                    tests: f.tests || [],
+                    evidence: f.evidence || [],
+                    schema_hints: f.schema_hints || {},
+                    devInstruct: devInstruct
+                  });
+                }
+              }),
+              el(Button, {
+                icon: 'backup',
+                isSmall: true,
+                isTertiary: true,
+                disabled: !f.has_history,
+                onClick: () => f.has_history && setHistoryFeature(f),
+                label: f.has_history ? __('View History', 'vapt-builder') : __('No History', 'vapt-builder'),
+                style: { marginLeft: '10px', opacity: f.has_history ? 1 : 0.4 }
+              })
             ]),
-            el('td', { className: 'vapt-support-cell', style: { verticalAlign: 'middle', padding: '4px 10px' } }, el('div', { style: { display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'wrap' } }, [
+            el('td', { className: 'vapt-support-cell', style: { verticalAlign: 'middle' } }, el('div', { style: { display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' } }, [
               // Pill Group for Include unit
+
 
 
               !['Draft', 'draft', 'available'].includes(f.status) && el('div', {
