@@ -1,0 +1,191 @@
+{
+  "controls": [
+    {
+      "type": "section",
+      "label": "Configuration (Left Column)"
+    },
+    {
+      "type": "toggle",
+      "label": "Disable WordPress Cron (Use Server Cron)",
+      "key": "disable_wp_cron",
+      "default": false
+    },
+    {
+      "type": "toggle",
+      "label": "Enable Cron Authentication",
+      "key": "cron_auth",
+      "default": true
+    },
+    {
+      "type": "input",
+      "label": "Cron Execution Rate Limit (requests per minute)",
+      "key": "cron_rate_limit",
+      "default": "10"
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "label": "Verification (Right Column)"
+    },
+    {
+      "type": "textarea",
+      "label": "Operational Notes",
+      "key": "operational_notes",
+      "default": "Contextual help and operational guidance for wp-cron.php security."
+    },
+    {
+      "type": "test_checklist",
+      "label": "Manual Verification",
+      "items": [
+        "Test wp-cron.php for DoS vulnerabilities",
+        "Check for unauthorized cron task execution",
+        "Verify cron job authentication",
+        "Test with malformed cron requests",
+        "Check cron execution frequency limits",
+        "Verify server cron vs WordPress cron",
+        "Test for information disclosure via cron"
+      ]
+    },
+    {
+      "type": "test_action",
+      "label": "Test DoS Vulnerabilities",
+      "key": "test_dos",
+      "test_logic": "spam_requests",
+      "test_config": {
+        "method": "GET",
+        "path": "/wp-cron.php",
+        "rpm": 20,
+        "expected_status": 429,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-rate-limit"
+        }
+      }
+    },
+    {
+      "type": "test_action",
+      "label": "Check Unauthorized Execution",
+      "key": "test_unauth",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "POST",
+        "path": "/wp-cron.php",
+        "expected_status": 403,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-author-enum"
+        }
+      }
+    },
+    {
+      "type": "test_action",
+      "label": "Verify Cron Authentication",
+      "key": "test_auth",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/wp-cron.php",
+        "params": {
+          "auth": "invalid"
+        },
+        "expected_status": 401,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-author-enum"
+        }
+      }
+    },
+    {
+      "type": "test_action",
+      "label": "Test Malformed Requests",
+      "key": "test_malformed",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/wp-cron.php",
+        "params": {
+          "cron": "<script>alert('xss')</script>"
+        },
+        "expected_status": 400,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-null-byte"
+        }
+      }
+    },
+    {
+      "type": "test_action",
+      "label": "Check Frequency Limits",
+      "key": "test_frequency",
+      "test_logic": "spam_requests",
+      "test_config": {
+        "method": "GET",
+        "path": "/wp-cron.php",
+        "rpm": 15,
+        "expected_status": 429,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-rate-limit"
+        }
+      }
+    },
+    {
+      "type": "test_action",
+      "label": "Verify Server vs WordPress Cron",
+      "key": "test_server_cron",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/wp-cron.php",
+        "expected_status": 200,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-version-hide"
+        }
+      }
+    },
+    {
+      "type": "test_action",
+      "label": "Test Information Disclosure",
+      "key": "test_info_disclosure",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/wp-cron.php",
+        "expected_status": 403,
+        "expected_headers": {
+          "X-VAPT-Enforced": "php-debug-exposure"
+        }
+      }
+    },
+    {
+      "type": "test_action",
+      "label": "Reset Rate Limits",
+      "key": "reset_limits",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/",
+        "params": {
+          "vapt_action": "reset_rate_limits"
+        },
+        "expected_status": 200
+      }
+    },
+    {
+      "type": "evidence_list",
+      "label": "Evidence",
+      "items": [
+        "wp-cron.php blocks unauthorized access with 403 status",
+        "Rate limiting enforced with 429 status on excessive requests",
+        "Malicious input sanitized and blocked",
+        "Cron execution limited to configured rate",
+        "Server cron verified, WordPress cron disabled if applicable"
+      ]
+    }
+  ],
+  "enforcement": {
+    "driver": "hook",
+    "mappings": {
+      "disable_wp_cron": "disable_xmlrpc",
+      "cron_auth": "block_author_enumeration",
+      "cron_rate_limit": "limit_login_attempts"
+    }
+  }
+}

@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version: 3.1.7
+ * Version: 3.1.0
  * Author: Tan Malik
  * Text Domain: vapt-builder
  */
@@ -13,7 +13,7 @@ if (! defined('ABSPATH')) {
 }
 
 // Plugin Constants (Builder-specific)
-define('VAPT_VERSION', '3.1.7');
+define('VAPT_VERSION', '3.1.0');
 define('VAPT_PATH', plugin_dir_path(__FILE__));
 define('VAPT_URL', plugin_dir_url(__FILE__));
 define('VAPT_SUPERADMIN_EMAIL', 'tanveer@logicx.io'); // Default fallback

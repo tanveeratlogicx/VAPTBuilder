@@ -490,7 +490,6 @@
 
         case 'textarea':
         case 'code':
-          if (!value || (typeof value === 'string' && !value.trim())) return null; // Hide if empty or just whitespace
           return el('div', { key: uniqueKey, style: { marginBottom: '10px' } }, [
             el('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' } }, [
               el('label', { style: { fontSize: '12px', fontWeight: '600', color: '#334155' } }, label),
@@ -516,21 +515,15 @@
           return el('div', { key: uniqueKey, style: { padding: '10px 0' } }, [
             label && el('strong', { style: { display: 'block', fontSize: '11px', color: '#991b1b', marginBottom: '5px', textTransform: 'uppercase' } }, label),
             el('ul', { style: { margin: 0, paddingLeft: '18px', color: '#b91c1c', fontSize: '12px', listStyleType: 'disc' } },
-              (control.risks || control.items || []).map((r, i) => {
-                const itemLabel = typeof r === 'object' ? (r.label || r.description || JSON.stringify(r)) : r;
-                return el('li', { key: i, style: { marginBottom: '4px' } }, itemLabel);
-              }))
+              (control.risks || control.items || []).map((r, i) => el('li', { key: i, style: { marginBottom: '4px' } }, r)))
           ]);
 
         case 'assurance_badges':
           return el('div', { key: uniqueKey, style: { display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '10px 0', marginTop: '10px', borderTop: '1px solid #fed7aa' } },
-            (control.badges || control.items || []).map((b, i) => {
-              const bLabel = typeof b === 'object' ? (b.label || JSON.stringify(b)) : b;
-              return el('span', { key: i, style: { display: 'flex', alignItems: 'center', background: '#ffffff', color: '#166534', padding: '4px 10px', borderRadius: '15px', fontSize: '12px', border: '1px solid #bbf7d0', fontWeight: '600', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' } }, [
-                el('span', { style: { marginRight: '6px', fontSize: '14px' } }, '🛡️'),
-                bLabel
-              ]);
-            })
+            (control.badges || control.items || []).map((b, i) => el('span', { key: i, style: { display: 'flex', alignItems: 'center', background: '#ffffff', color: '#166534', padding: '4px 10px', borderRadius: '15px', fontSize: '12px', border: '1px solid #bbf7d0', fontWeight: '600', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' } }, [
+              el('span', { style: { marginRight: '6px', fontSize: '14px' } }, '🛡️'),
+              b
+            ]))
           );
 
         case 'test_checklist':
@@ -538,10 +531,7 @@
           return el('div', { key: uniqueKey, style: { marginBottom: '10px' } }, [
             label && el('strong', { style: { display: 'block', fontSize: '12px', color: '#334155', marginBottom: '6px' } }, label),
             el('ol', { style: { margin: 0, paddingLeft: '20px', color: '#475569', fontSize: '12px' } },
-              (control.items || control.tests || control.checklist || control.evidence || []).map((item, i) => {
-                const listLabel = typeof item === 'object' ? (item.label || item.description || JSON.stringify(item)) : item;
-                return el('li', { key: i, style: { marginBottom: '4px' } }, listLabel);
-              }))
+              (control.items || control.tests || control.checklist || control.evidence || []).map((item, i) => el('li', { key: i, style: { marginBottom: '4px' } }, item)))
           ]);
 
         case 'info':

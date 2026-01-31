@@ -1,0 +1,194 @@
+[
+  {
+    "id": 1,
+    "name": "wp-cron.php Enabled Leads to DoS Attack",
+    "description": "WordPress cron system enabled via wp-cron.php allows resource exhaustion through repeated cron spam requests, leading to server overload.",
+    "category": "Configuration",
+    "severity": "High",
+    "owasp": "A04:2021 - Insecure Design",
+    "test_method": "Direct endpoint access",
+    "verification_steps": [
+      "1. Access /wp-cron.php directly",
+      "2. Monitor server load during repeated requests",
+      "3. Check cron event logs for spam triggers",
+      "4. Verify resource exhaustion under load"
+    ],
+    "remediation": "Disable wp-cron.php via wp-config.php (define('DISABLE_WP_CRON', true)); Use server cron jobs instead."
+  },
+  {
+    "id": 2,
+    "name": "Xmlrpc enabled Leads to Ping back attack",
+    "description": "XML-RPC enabled allows distributed pingback amplification attacks, enabling DDoS via pingback.ping method.",
+    "category": "Information Disclosure",
+    "severity": "High",
+    "owasp": "A05:2021 - Security Misconfiguration",
+    "test_method": "XML-RPC pingback test",
+    "verification_steps": [
+      "1. POST to /xmlrpc.php with pingback.ping method",
+      "2. Verify amplification response size",
+      "3. Test with external target URL",
+      "4. Check server logs for XML-RPC access"
+    ],
+    "remediation": "Disable XML-RPC via .htaccess or plugins like Disable XML-RPC. Block /xmlrpc.php entirely."
+  },
+  {
+    "id": 3,
+    "name": "Username Enumeration via WordPress REST API",
+    "description": "WP REST API /wp/v2/users endpoint exposes usernames without authentication.",
+    "category": "Authentication",
+    "severity": "Medium",
+    "owasp": "A01:2021 - Broken Access Control",
+    "test_method": "REST API enumeration",
+    "verification_steps": [
+      "1. GET /wp/v2/users",
+      "2. Check response for username slugs",
+      "3. Iterate ?page=2 for pagination",
+      "4. Verify no auth required"
+    ],
+    "remediation": "Add .htaccess rule: RewriteRule ^wp-json/wp/v2/users - [F]. Use authentication plugins."
+  },
+  {
+    "id": 4,
+    "name": "Email Flooding via Password Reset",
+    "description": "wp-login.php?checkemail=1 endpoint abuse allows unlimited password reset emails.",
+    "category": "Authentication",
+    "severity": "Medium",
+    "owasp": "A07:2021 - Identification and Authentication Failures",
+    "test_method": "Password reset spam",
+    "verification_steps": [
+      "1. POST to /wp-login.php?action=lostpassword",
+      "2. Check email delivery repeatedly",
+      "3. Monitor mail logs for flood",
+      "4. Test rate without limits"
+    ],
+    "remediation": "Implement rate limiting via plugins (Limit Login Attempts). Add CAPTCHA to reset form."
+  },
+  {
+    "id": 5,
+    "name": "Exposed WordPress Admin Username via Author Query",
+    "description": "/?author=1 reveals admin usernames through IDOR in author archives.",
+    "category": "Information Disclosure",
+    "severity": "Medium",
+    "owasp": "A01:2021 - Broken Access Control",
+    "test_method": "Author ID enumeration",
+    "verification_steps": [
+      "1. Access /?author=1",
+      "2. Extract author name from meta/h1",
+      "3. Iterate author=2,3,...",
+      "4. Check post archives"
+    ],
+    "remediation": "Add .htaccess: RewriteCond %{QUERY_STRING} ^author=.* [NC] RewriteRule .* - [R=403]. Rename admin user."
+  },
+  {
+    "id": 6,
+    "name": "Endpoint Disclosure (auto-generated WP REST routes)",
+    "description": "WordPress auto-generates REST API routes exposing internal endpoints without permission checks.",
+    "category": "API Security",
+    "severity": "Low",
+    "owasp": "A05:2021 - Security Misconfiguration",
+    "test_method": "REST API discovery",
+    "verification_steps": [
+      "1. GET /wp-json/ to list namespaces",
+      "2. Access undocumented routes",
+      "3. Check for sensitive data exposure",
+      "4. Test unauthenticated access"
+    ],
+    "remediation": "Disable public REST endpoints or use authentication middleware."
+  },
+  {
+    "id": 7,
+    "name": "Lack of Rate Limiting on WordPress Login",
+    "description": "wp-login.php lacks brute-force protection, enabling unlimited login attempts.",
+    "category": "Authentication",
+    "severity": "High",
+    "owasp": "A07:2021 - Identification and Authentication Failures",
+    "test_method": "Brute-force simulation",
+    "verification_steps": [
+      "1. Attempt multiple failed logins",
+      "2. Monitor for lockout/throttling",
+      "3. Check server logs",
+      "4. Test from multiple IPs"
+    ],
+    "remediation": "Install Limit Login Attempts Reloaded. Add fail2ban rules for wp-login.php."
+  },
+  {
+    "id": 8,
+    "name": "Username Enumeration via wp-login.php",
+    "description": "Different error messages on wp-login.php reveal valid vs invalid usernames.",
+    "category": "Authentication",
+    "severity": "Medium",
+    "owasp": "A07:2021 - Identification and Authentication Failures",
+    "test_method": "Login error analysis",
+    "verification_steps": [
+      "1. POST invalid username",
+      "2. POST known username with bad pass",
+      "3. Compare error messages",
+      "4. Test ?author= confirmation"
+    ],
+    "remediation": "Use uniform error: 'Invalid credentials'. Plugins: Rename wp-login.php."
+  },
+  {
+    "id": 9,
+    "name": "Lack of Rate Limiting on Contact and Registration Forms",
+    "description": "Contact/registration forms allow spam/DoS without submission limits.",
+    "category": "Configuration",
+    "severity": "Medium",
+    "owasp": "A04:2021 - Insecure Design",
+    "test_method": "Form spam test",
+    "verification_steps": [
+      "1. Submit forms rapidly",
+      "2. Check for throttling",
+      "3. Monitor email/database load",
+      "4. Test with bots"
+    ],
+    "remediation": "Add reCAPTCHA v3. Rate limit via server config or plugins like WPForms Smart Tags."
+  },
+  {
+    "id": 10,
+    "name": "Server Banner Grabbing",
+    "description": "Server headers expose Apache/Nginx versions for targeted exploits.",
+    "category": "Information Disclosure",
+    "severity": "Low",
+    "owasp": "A05:2021 - Security Misconfiguration",
+    "test_method": "Header inspection",
+    "verification_steps": [
+      "1. curl -I domain.com",
+      "2. Check Server: header",
+      "3. Verify no version info hidden",
+      "4. Test all vhosts"
+    ],
+    "remediation": "Apache: ServerTokens Prod. Nginx: server_tokens off;.htaccess: Header unset Server."
+  },
+  {
+    "id": 11,
+    "name": "Information Disclosure via readme.html",
+    "description": "Root readme.html exposes exact WordPress version to attackers.",
+    "category": "Information Disclosure",
+    "severity": "Medium",
+    "owasp": "A05:2021 - Security Misconfiguration",
+    "test_method": "Static file access",
+    "verification_steps": [
+      "1. GET /readme.html",
+      "2. Extract version from content",
+      "3. Check generator meta tags",
+      "4. Verify public access"
+    ],
+    "remediation": ".htaccess: <Files readme.html> Order allow,deny Deny from all </Files>. Delete file."
+  },
+  {
+    "id": 12,
+    "name": "HSTS Not Implemented",
+    "description": "Missing HSTS header enables HTTPS downgrade and MITM attacks.",
+    "category": "Configuration",
+    "severity": "Medium",
+    "owasp": "A05:2021 - Security Misconfiguration",
+    "test_method": "Header scan",
+    "verification_steps": [
+      "1. curl -I https://domain.com",
+      "2. Check Strict-Transport-Security header",
+      "3. Test ssllabs.com/ssltest",
+      "4. Verify preload eligibility"
+    ],
+    "remediation": "Add to .htaccess: Header always set Strict-Transport-Security 'max-age=31536000; includeSubDomains'. Use security plugins."
+  }
+]
