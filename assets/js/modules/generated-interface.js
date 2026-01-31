@@ -445,6 +445,10 @@
       const { type, label, key, help, options, rows, action } = control;
       const value = currentData[key] !== undefined ? currentData[key] : (control.default || '');
       const uniqueKey = key || `ctrl-${index}`;
+      const isEnforced = feature.is_enforced === true || feature.is_enforced === 1 || feature.is_enforced === '1';
+      const conditionalTypes = ['info', 'html', 'warning', 'alert'];
+
+      if (conditionalTypes.includes(type) && isEnforced) return null;
 
       switch (type) {
         case 'test_action':
@@ -540,7 +544,40 @@
 
         case 'warning':
         case 'alert':
-          return el('div', { key: uniqueKey, style: { padding: '10px', background: '#fff7ed', borderLeft: '3px solid #f97316', fontSize: '12px', color: '#7c2d12', marginBottom: '10px' }, dangerouslySetInnerHTML: { __html: label || control.content } });
+          const alertType = (label || 'info').toLowerCase();
+          const alertMap = {
+            success: { icon: 'yes', color: '#166534', bg: '#f0fdf4', border: '#bbf7d0' },
+            warning: { icon: 'warning', color: '#9a3412', bg: '#fff7ed', border: '#fed7aa' },
+            error: { icon: 'no', color: '#991b1b', bg: '#fef2f2', border: '#fecaca' },
+            info: { icon: 'info', color: '#0c4a6e', bg: '#f0f9ff', border: '#bae6fd' },
+            tip: { icon: 'lightbulb', color: '#3f6212', bg: '#f7fee7', border: '#d9f99d' },
+            alert: { icon: 'warning', color: '#9a3412', bg: '#fff7ed', border: '#fed7aa' }
+          };
+          const style = alertMap[alertType] || alertMap.info;
+          return el('div', {
+            key: uniqueKey,
+            style: {
+              display: 'flex',
+              gap: '10px',
+              padding: '12px',
+              background: style.bg,
+              borderLeft: `4px solid ${style.color}`,
+              borderTop: `1px solid ${style.border}`,
+              borderRight: `1px solid ${style.border}`,
+              borderBottom: `1px solid ${style.border}`,
+              borderRadius: '4px',
+              fontSize: '13px',
+              color: style.color,
+              marginBottom: '15px',
+              alignItems: 'center'
+            }
+          }, [
+            el(Icon, { icon: style.icon, size: 20, style: { flexShrink: 0 } }),
+            el('div', {
+              style: { lineHeight: '1.5' },
+              dangerouslySetInnerHTML: { __html: control.message || control.content || label }
+            })
+          ]);
 
         case 'remediation_steps':
         case 'evidence_uploader':

@@ -3222,7 +3222,7 @@ Test Method: ${feature.test_method || 'None provided'}
           ...activeCols.map(col => {
             const label = col.charAt(0).toUpperCase() + col.slice(1).replace(/_/g, ' ');
             let width = 'auto';
-            if (col === 'title' || col === 'name') width = '200px';
+            if (col === 'title' || col === 'name') width = '300px';
             if (col === 'category') width = '120px';
             if (col === 'severity') width = '80px';
             if (col === 'id') width = '100px';
@@ -3259,7 +3259,7 @@ Test Method: ${feature.test_method || 'None provided'}
             ]);
           }),
           el('th', { style: { width: '300px' } }, __('Lifecycle Status', 'vapt-builder')),
-          el('th', { style: { width: '240px' } }, __('Include', 'vapt-builder')),
+          el('th', { style: { width: '144px' } }, __('Include', 'vapt-builder')),
         ])),
         el('tbody', null, processedFeatures.map((f) => el(Fragment, { key: f.key }, [
           el('tr', null, [
@@ -3334,21 +3334,6 @@ Test Method: ${feature.test_method || 'None provided'}
             ]),
             el('td', { className: 'vapt-support-cell', style: { verticalAlign: 'middle' } }, el('div', { style: { display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' } }, [
               // Pill Group for Include unit
-
-              el('div', {
-                onClick: () => handleSmartToggle(f, 'include_verification_engine'),
-                title: __('Toggle Verification Engine', 'vapt-builder'),
-                style: {
-                  cursor: 'pointer', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.05em',
-                  background: f.include_verification_engine ? '#d63638' : '#f0f0f1',
-                  color: f.include_verification_engine ? '#fff' : '#d63638',
-                  opacity: ['Draft', 'draft', 'available'].includes(f.status) ? 0.3 : 1,
-                  pointerEvents: ['Draft', 'draft', 'available'].includes(f.status) ? 'none' : 'auto',
-                  border: '1px solid', borderColor: f.include_verification_engine ? '#d63638' : '#dcdcde',
-                  whiteSpace: 'nowrap'
-                }
-              }, __('Verification Engine', 'vapt-builder')),
-
               !['Draft', 'draft', 'available'].includes(f.status) && el('div', {
                 onClick: () => setDesignFeature(f),
                 title: __('Open Design Hub', 'vapt-builder'),

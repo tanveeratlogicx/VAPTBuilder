@@ -149,11 +149,9 @@
         el(CardHeader, { style: { borderBottom: '1px solid #f3f4f6', padding: '12px 24px' } }, [
           el('div', { style: { display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: '20px', width: '100%' } }, [
             el('div', null, [
-              el('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
+              el('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } }, [
                 el('h3', { style: { margin: 0, fontSize: '16px', fontWeight: 700, color: '#111827' } }, f.label),
-                f.description && el(Tooltip, { text: f.description },
-                  el(Icon, { icon: 'info-outline', size: 16, style: { color: '#94a3b8', cursor: 'help' } })
-                )
+                f.description && el('p', { style: { margin: 0, fontSize: '12px', color: '#64748b', lineHeight: '1.4' } }, f.description)
               ])
             ]),
             el('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' } }, [
