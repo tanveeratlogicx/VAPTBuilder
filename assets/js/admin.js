@@ -1354,7 +1354,10 @@ window.vaptScriptLoaded = true;
     ]);
   };
 
-  const FeatureList = ({ features, schema, updateFeature, loading, dataFiles, selectedFile, onSelectFile, onUpload, allFiles, hiddenFiles, onUpdateHiddenFiles, manageSourcesStatus, isManageModalOpen, setIsManageModalOpen, designPromptConfig, setDesignPromptConfig, isPromptConfigModalOpen, setIsPromptConfigModalOpen }) => {
+  const FeatureList = ({
+    features, schema, updateFeature, loading, dataFiles, selectedFile, onSelectFile, onUpload, allFiles, hiddenFiles, onUpdateHiddenFiles, manageSourcesStatus, isManageModalOpen, setIsManageModalOpen, designPromptConfig, setDesignPromptConfig,
+    historyFeature, setHistoryFeature, designFeature, setDesignFeature, transitioning, setTransitioning, isPromptConfigModalOpen, setIsPromptConfigModalOpen, isMappingModalOpen, setIsMappingModalOpen
+  }) => {
     const [columnOrder, setColumnOrder] = useState(() => {
       const saved = localStorage.getItem(`vapt_col_order_${selectedFile}`);
       return saved ? JSON.parse(saved) : ['title', 'category', 'severity', 'description'];
@@ -1486,41 +1489,10 @@ window.vaptScriptLoaded = true;
       localStorage.setItem('vapt_search_query', searchQuery);
     }, [filterStatus, selectedCategories, selectedSeverities, sortBy, sortOrder, searchQuery]);
 
-    const [historyFeature, setHistoryFeature] = useState(null);
-    const [designFeature, setDesignFeature] = useState(null);
-    const [transitioning, setTransitioning] = useState(null); // { key, nextStatus, note }
     const [saveStatus, setSaveStatus] = useState(null); // Feedback for media/clipboard uploads
 
-    const confirmTransition = (formValues) => {
-      if (!transitioning) return;
-      const { key, nextStatus } = transitioning;
-      const { note, devInstruct, wireframeUrl } = formValues;
+    // confirmTransition moved to VAPTAdmin to avoid modal flicker when state updates
 
-      const safeFeatures = Array.isArray(features) ? features : [];
-      const feature = safeFeatures.find(f => f.key === key);
-      let updates = { status: nextStatus, history_note: note };
-
-      // Save Wireframe if provided
-      if (wireframeUrl) {
-        updates.wireframe_url = wireframeUrl;
-      }
-
-      // Auto-Generate Interface when moving to 'Develop' (Phase 6 transition)
-      if (nextStatus === 'Develop' && Generator && feature && feature.remediation) {
-        try {
-          const schema = Generator.generate(feature.remediation, devInstruct);
-          if (schema) {
-            updates.generated_schema = schema;
-            console.log('VAPT Builder: Auto-generated schema for ' + key, schema);
-          }
-        } catch (e) {
-          console.error('VAPT Builder: Generation error', e);
-        }
-      }
-
-      updateFeature(key, updates);
-      setTransitioning(null);
-    };
 
     // Smart Toggle Handling
     const handleSmartToggle = (feature, toggleKey) => {
@@ -2046,7 +2018,8 @@ INSTRUCTIONS & CRITICAL RULES:
 11. **Truthful Reporting**: To differentiate between VAPT enforcement and external plugins/server rules, your test MUST fail if the 'X-VAPT-Enforced' header is missing, even if the HTTP status (e.g., 403) is correct.
 12. **Interface Layout (MANDATORY)**: You MUST follow a two-column grid structure. Primary functional controls (toggles, inputs) go on the left. Status indicators, alerts, and feedback blocks go on the right. Functional Verification (Manual and Automated) should be clearly separated and prominent.
 13. **Verification & Evidence (MANDATORY)**: You MUST include specific sections for: Operational Notes (textarea with key 'operational_notes', placed in the Right Column), Manual Verification (checklist), Automated Verification (test_action).
-14. **Reference JSON Structure**:
+14. **Header Advice (MANDATORY)**: If the feature involves security headers, you MUST provide explicit, actionable advice on the exact header names and recommended values in the 'Operational Notes'. Include warnings if a configuration (e.g., strict CSP) could potentially break site functionality.
+15. **Reference JSON Structure**:
    {
      "controls": [
        { "type": "section", "label": "Configuration" },
@@ -3339,456 +3312,481 @@ Test Method: ${feature.test_method || 'None provided'}
                 title: __('Open Design Hub', 'vapt-builder'),
                 style: {
                   cursor: 'pointer', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.05em',
-                  background: '#f0f0f1',
-                  color: '#2271b1',
-                  border: '1px solid #2271b1'
                 }
-              }, __('Workbench Design Hub', 'vapt-Copilot'))
-            ]))
-          ])
+              }, __('Workbench Design Hub', 'vapt-builder'))
+            ])))
+        ])
         ])))
-      ]),
+      ]);
+};
 
-      // History Modal (Sibling in PanelBody Array)
-      historyFeature && el(HistoryModal, {
-        feature: historyFeature,
-        updateFeature: updateFeature,
-        onClose: () => setHistoryFeature(null)
-      }),
+const VAPTAdmin = () => {
+  const [features, setFeatures] = useState([]);
+  const [schema, setSchema] = useState({ item_fields: [] });
+  const [domains, setDomains] = useState([]);
+  const [dataFiles, setDataFiles] = useState([]);
+  const [selectedFile, setSelectedFile] = useState('features-with-test-methods.json');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isDomainModalOpen, setDomainModalOpen] = useState(false);
+  const [selectedDomain, setSelectedDomain] = useState(null);
+  const [saveStatus, setSaveStatus] = useState(null); // { message: '', type: 'info'|'success'|'error' }
+  const [designPromptConfig, setDesignPromptConfig] = useState(null);
+  const [isPromptConfigModalOpen, setIsPromptConfigModalOpen] = useState(false);
+  const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
+  const [transitioning, setTransitioning] = useState(null);
 
-      transitioning && el(TransitionNoteModal, {
-        transitioning: transitioning,
-        onConfirm: confirmTransition,
-        onCancel: () => setTransitioning(null)
-      }),
+  // Status Auto-clear helper
+  useEffect(() => {
+    if (saveStatus && saveStatus.type === 'success') {
+      const timer = setTimeout(() => setSaveStatus(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveStatus]);
 
-      designFeature && el(DesignModal, {
-        feature: designFeature,
-        onClose: () => !isPromptConfigModalOpen && setDesignFeature(null)
-      }),
+  const fetchData = (file = selectedFile) => {
+    console.log('VAPT Builder: Fetching data for file:', file);
+    setLoading(true);
 
-      isPromptConfigModalOpen && el(PromptConfigModal, {
-        isOpen: isPromptConfigModalOpen,
-        onClose: () => setIsPromptConfigModalOpen(false),
-        feature: designFeature // Pass current feature for testing
-      }),
+    setLoading(true);
+    setSchema({ item_fields: [] }); // Clear previous schema while loading
 
-      isMappingModalOpen && el(FieldMappingModal, {
-        isOpen: isMappingModalOpen,
-        onClose: () => setIsMappingModalOpen(false)
-      }),
-
-    ]);
-  };
-
-  const VAPTAdmin = () => {
-    const [features, setFeatures] = useState([]);
-    const [schema, setSchema] = useState({ item_fields: [] });
-    const [domains, setDomains] = useState([]);
-    const [dataFiles, setDataFiles] = useState([]);
-    const [selectedFile, setSelectedFile] = useState('features-with-test-methods.json');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [isDomainModalOpen, setDomainModalOpen] = useState(false);
-    const [selectedDomain, setSelectedDomain] = useState(null);
-    const [saveStatus, setSaveStatus] = useState(null); // { message: '', type: 'info'|'success'|'error' }
-    const [designPromptConfig, setDesignPromptConfig] = useState(null);
-    const [isPromptConfigModalOpen, setIsPromptConfigModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState(() => {
-      const validTabs = ['features', 'license', 'domains', 'build'];
-      const saved = localStorage.getItem('vapt_admin_active_tab');
-      return validTabs.includes(saved) ? saved : 'features';
-    });
-
-    // New: Global UI States for Modals
-    const [alertState, setAlertState] = useState(null);
-    const [confirmState, setConfirmState] = useState(null);
-    const [selectedDomains, setSelectedDomains] = useState([]);
-
-    // Status Auto-clear helper
-    useEffect(() => {
-      if (saveStatus && saveStatus.type === 'success') {
-        const timer = setTimeout(() => setSaveStatus(null), 2000);
-        return () => clearTimeout(timer);
-      }
-    }, [saveStatus]);
-
-    const fetchData = (file = selectedFile) => {
-      console.log('VAPT Builder: Fetching data for file:', file);
-      setLoading(true);
-
-      setLoading(true);
-      setSchema({ item_fields: [] }); // Clear previous schema while loading
-
-      // Use individual catches to prevent one failure from blocking all
-      const fetchFeatures = apiFetch({ path: `vapt/v1/features?file=${file}` })
-        .then(res => {
-          if (res.error) throw new Error(res.error);
-          setFeatures(res.features || []);
-          setSchema(res.schema || { item_fields: [] });
-          setDesignPromptConfig(res.design_prompt || null); // Load prompt config
-          return res;
-        })
-        .catch(err => { console.error('VAPT Builder: Features fetch error:', err); return []; });
-      const fetchDomains = apiFetch({ path: 'vapt/v1/domains' })
-        .catch(err => { console.error('VAPT Builder: Domains fetch error:', err); return []; });
-      const fetchDataFiles = apiFetch({ path: 'vapt/v1/data-files' })
-        .catch(err => { console.error('VAPT Builder: Data files fetch error:', err); return []; });
-
-      return Promise.all([fetchFeatures, fetchDomains, fetchDataFiles])
-        .then(([res, domainData, files]) => {
-          const cleanedFiles = (files || []).map(f => ({ ...f, label: (f.label || f.filename).replace(/_/g, ' ') }));
-          setFeatures(res.features || []);
-          setSchema(res.schema || { item_fields: [] });
-          setDomains(domainData || []);
-          setDataFiles(cleanedFiles);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error('VAPT Builder: Dashboard data fetch error:', err);
-          setError(sprintf(__('Critical error loading dashboard data: %s', 'vapt-builder'), err.message || 'Unknown error'));
-          setLoading(false);
-        });
-    };
-
-    useEffect(() => {
-      // First fetch the active file from backend setup
-      apiFetch({ path: 'vapt/v1/active-file' }).then(res => {
-        if (res.active_file) {
-          setSelectedFile(res.active_file);
-          fetchData(res.active_file);
-        } else {
-          fetchData();
-        }
-      }).catch(() => fetchData());
-    }, []);
-
-    const onSelectFile = (file) => {
-      setConfirmState({
-        message: __('Changing the feature source will override the current list. Previously implemented features with matching keys will retain their status. Proceed?', 'vapt-builder'),
-        onConfirm: () => {
-          setConfirmState(null);
-          setSelectedFile(file);
-          fetchData(file);
-          // Persist to backend
-          apiFetch({
-            path: 'vapt/v1/active-file',
-            method: 'POST',
-            data: { file }
-          }).catch(err => console.error('Failed to sync active file:', err));
-        }
-      });
-    };
-
-    const updateFeature = (key, data) => {
-      // Optimistic Update
-      setFeatures(prev => prev.map(f => f.key === key ? { ...f, ...data } : f));
-      setSaveStatus({ message: __('Saving...', 'vapt-builder'), type: 'info' });
-
-      return apiFetch({
-        path: 'vapt/v1/features/update',
-        method: 'POST',
-        data: { key, ...data }
-      }).then(() => {
-        setSaveStatus({ message: __('Saved', 'vapt-builder'), type: 'success' });
-      }).catch(err => {
-        console.error('Update failed:', err);
-        const errMsg = err.message || (err.data && err.data.message) || err.error || __('Error saving!', 'vapt-builder');
-        setSaveStatus({ message: errMsg, type: 'error' });
-      });
-    };
-
-    const addDomain = (domain, isWildcard = false, isEnabled = true, id = null) => {
-      // Optimistic Update for better UX
-      if (id) {
-        setDomains(prev => prev.map(d => d.id === id ? { ...d, domain, is_wildcard: isWildcard, is_enabled: isEnabled } : d));
-      }
-
-      // Explicitly pass values as booleans to avoid truthiness confusion on backend
-      return apiFetch({
-        path: 'vapt/v1/domains/update',
-        method: 'POST',
-        data: {
-          id: id,
-          domain,
-          is_wildcard: Boolean(isWildcard),
-          is_enabled: Boolean(isEnabled)
-        }
-      }).then((res) => {
-        if (res.domain) {
-          setDomains(prev => {
-            const exists = prev.find(d => d.id === res.domain.id);
-            if (exists) {
-              return prev.map(d => d.id === res.domain.id ? res.domain : d);
-            } else {
-              return [...prev, res.domain];
-            }
-          });
-        }
-        setSaveStatus({ message: __('Domain updated successfully', 'vapt-builder'), type: 'success' });
-        fetchData();
+    // Use individual catches to prevent one failure from blocking all
+    const fetchFeatures = apiFetch({ path: `vapt/v1/features?file=${file}` })
+      .then(res => {
+        if (res.error) throw new Error(res.error);
+        setFeatures(res.features || []);
+        setSchema(res.schema || { item_fields: [] });
+        setDesignPromptConfig(res.design_prompt || null); // Load prompt config
         return res;
-      }).catch(err => {
-        setSaveStatus({ message: __('Failed to update domain', 'vapt-builder'), type: 'error' });
-        fetchData(); // Rollback to server state
-        throw err;
-      });
-    };
+      })
+      .catch(err => { console.error('VAPT Builder: Features fetch error:', err); return []; });
+    const fetchDomains = apiFetch({ path: 'vapt/v1/domains' })
+      .catch(err => { console.error('VAPT Builder: Domains fetch error:', err); return []; });
+    const fetchDataFiles = apiFetch({ path: 'vapt/v1/data-files' })
+      .catch(err => { console.error('VAPT Builder: Data files fetch error:', err); return []; });
 
-    const deleteDomain = (domainId) => {
-      apiFetch({
-        path: `vapt/v1/domains/delete?id=${domainId}`,
-        method: 'DELETE'
-      }).then(() => fetchData());
-    };
-
-    const batchDeleteDomains = (ids) => {
-      // Optimistic Delete
-      setDomains(prev => prev.filter(d => !ids.includes(d.id)));
-
-      return apiFetch({
-        path: 'vapt/v1/domains/batch-delete',
-        method: 'POST',
-        data: { ids }
-      }).then(() => {
-        setSaveStatus({ message: sprintf(__('%d domains deleted', 'vapt-builder'), ids.length), type: 'success' });
-        setSelectedDomains([]);
-        fetchData();
-      }).catch(err => {
-        setSaveStatus({ message: __('Batch delete failed', 'vapt-builder'), type: 'error' });
-        fetchData(); // Rollback
-      });
-    };
-
-    const updateDomainFeatures = (domainId, updatedFeatures) => {
-      // Optimistic Update
-      setDomains(prev => prev.map(d => d.id === domainId ? { ...d, features: updatedFeatures } : d));
-      setSaveStatus({ message: __('Saving...', 'vapt-builder'), type: 'info' });
-
-      apiFetch({
-        path: 'vapt/v1/domains/features',
-        method: 'POST',
-        data: { domain_id: domainId, features: updatedFeatures }
-      }).then(() => {
-        setSaveStatus({ message: __('Saved', 'vapt-builder'), type: 'success' });
-      }).catch(err => {
-        console.error('Domain features update failed:', err);
-        setSaveStatus({ message: __('Error saving!', 'vapt-builder'), type: 'error' });
-      });
-    };
-
-    const uploadJSON = (file) => {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      setLoading(true);
-      apiFetch({
-        path: 'vapt/v1/upload-json',
-        method: 'POST',
-        body: formData,
-      }).then((res) => {
-        console.log('VAPT Builder: JSON uploaded', res);
-        // Fetch fresh data (including file list) THEN update selection
-        fetchData().then(() => { // Call fetchData without arguments to refresh all data, including dataFiles
-          setSelectedFile(res.filename);
-        });
-      }).catch(err => {
-        console.error('VAPT Builder: Upload error:', err);
-        setAlertState({ message: __('Error uploading JSON', 'vapt-builder') });
+    return Promise.all([fetchFeatures, fetchDomains, fetchDataFiles])
+      .then(([res, domainData, files]) => {
+        const cleanedFiles = (files || []).map(f => ({ ...f, label: (f.label || f.filename).replace(/_/g, ' ') }));
+        setFeatures(res.features || []);
+        setSchema(res.schema || { item_fields: [] });
+        setDomains(domainData || []);
+        setDataFiles(cleanedFiles);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('VAPT Builder: Dashboard data fetch error:', err);
+        setError(sprintf(__('Critical error loading dashboard data: %s', 'vapt-builder'), err.message || 'Unknown error'));
         setLoading(false);
       });
-    };
-
-    const [allFiles, setAllFiles] = useState([]);
-    const [hiddenFiles, setHiddenFiles] = useState([]);
-    const [isManageModalOpen, setIsManageModalOpen] = useState(false);
-
-    const fetchAllFiles = () => {
-      apiFetch({ path: 'vapt/v1/data-files/all' }).then(res => {
-        // Clean display filenames (underscores to spaces)
-        const cleaned = res.map(f => ({ ...f, display_name: f.filename.replace(/_/g, ' ') }));
-        setAllFiles(cleaned);
-        setHiddenFiles(res.filter(f => f.isHidden).map(f => f.filename));
-      });
-    };
-
-    useEffect(() => {
-      if (isManageModalOpen) {
-        fetchAllFiles();
-      }
-    }, [isManageModalOpen]);
-
-    const [manageSourcesStatus, setManageSourcesStatus] = useState(null);
-
-    const updateHiddenFiles = (newHidden) => {
-      setHiddenFiles(newHidden);
-      setManageSourcesStatus('saving');
-      apiFetch({
-        path: 'vapt/v1/update-hidden-files',
-        method: 'POST',
-        data: { hidden_files: newHidden }
-      }).then(() => {
-        fetchData(); // Refresh dropdown list
-        setManageSourcesStatus('saved');
-        setTimeout(() => setManageSourcesStatus(null), 2000);
-      }).catch(() => setManageSourcesStatus('error'));
-    };
-
-
-
-
-
-    const tabs = [
-      {
-        name: 'features',
-        title: __('Feature List', 'vapt-builder'),
-        className: 'vapt-tab-features',
-      },
-      {
-        name: 'license',
-        title: __('License Management', 'vapt-builder'),
-        className: 'vapt-tab-license',
-      },
-      {
-        name: 'domains',
-        title: __('Domain Features', 'vapt-builder'),
-        className: 'vapt-tab-domains',
-      },
-      {
-        name: 'build',
-        title: __('Build Generator', 'vapt-builder'),
-        className: 'vapt-tab-build',
-      },
-    ];
-
-    if (error) {
-      return el('div', { className: 'vapt-admin-wrap' }, [
-        el('h1', null, __('VAPT Builder Dashboard', 'vapt-builder')),
-        el(Notice, { status: 'error', isDismissible: false }, error),
-        el(Button, { isSecondary: true, onClick: () => fetchData() }, __('Retry', 'vapt-builder'))
-      ]);
-    }
-
-    return el('div', { className: 'vapt-admin-wrap' }, [
-      el('h1', null, [
-        __('VAPT Builder Dashboard', 'vapt-builder'),
-        el('span', { style: { fontSize: '0.5em', marginLeft: '10px', color: '#666', fontWeight: 'normal' } }, `v${settings.pluginVersion}`)
-      ]),
-      saveStatus && el('div', {
-        style: {
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          background: saveStatus.type === 'error' ? '#d63638' : '#2271b1',
-          color: '#fff',
-          padding: '10px 20px',
-          borderRadius: '4px',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-          zIndex: 100,
-          fontWeight: '600',
-          transition: 'opacity 0.3s ease-in-out'
-        }
-      }, saveStatus.message),
-
-      el(TabPanel, {
-        className: 'vapt-main-tabs',
-        activeClass: 'is-active',
-        initialTabName: activeTab,
-        onSelect: (tabName) => {
-          const name = typeof tabName === 'string' ? tabName : tabName.name;
-          setActiveTab(name);
-          localStorage.setItem('vapt_admin_active_tab', name);
-        },
-        tabs: tabs
-      }, (tab) => {
-        switch (tab.name) {
-          case 'features': return el(FeatureList, {
-            key: selectedFile, // Force remount on file change to fix persistence
-            features,
-            schema,
-            updateFeature,
-            loading,
-            dataFiles,
-            selectedFile,
-            allFiles,
-            hiddenFiles,
-            onUpdateHiddenFiles: updateHiddenFiles,
-            manageSourcesStatus: manageSourcesStatus,
-            onSelectFile: onSelectFile,
-            onUpload: uploadJSON,
-            isManageModalOpen,
-            setIsManageModalOpen,
-            designPromptConfig,
-            setDesignPromptConfig,
-            isPromptConfigModalOpen,
-            setIsPromptConfigModalOpen
-          });
-          case 'license': return el(LicenseManager, { domains, fetchData, isSuper, loading });
-          case 'domains': return el(DomainFeatures, { domains, features, isDomainModalOpen, selectedDomain, setDomainModalOpen, setSelectedDomain, updateDomainFeatures, addDomain, deleteDomain, batchDeleteDomains, setConfirmState, selectedDomains, setSelectedDomains });
-          case 'build': return el(BuildGenerator, { domains, features, setAlertState });
-          default: return null;
-        }
-      }),
-
-      // Global Modals
-      alertState && el(VAPT_AlertModal, {
-        isOpen: true,
-        message: alertState.message,
-        type: alertState.type,
-        onClose: () => setAlertState(null)
-      }),
-      confirmState && el(VAPT_ConfirmModal, {
-        isOpen: true,
-        message: confirmState.message,
-        isDestructive: confirmState.isDestructive,
-        onConfirm: confirmState.onConfirm,
-        onCancel: () => setConfirmState(null)
-      })
-    ]);
   };
 
-  const init = () => {
-    const container = document.getElementById('vapt-admin-root');
-    if (!container) {
-      console.warn('VAPT Builder: Root container #vapt-admin-root not found.');
-      return;
-    }
-
-    console.log('VAPT Builder: Starting React mount...');
-
-    if (typeof wp === 'undefined' || !wp.element) {
-      console.error('VAPT Builder: WordPress React environment (wp.element) missing!');
-      container.innerHTML = '<div class="notice notice-error"><p>Error: WordPress React components failed to load. Please check plugin dependencies.</p></div>';
-      return;
-    }
-
-    try {
-      const root = wp.element.createRoot ? wp.element.createRoot(container) : null;
-      if (root) {
-        root.render(el(ErrorBoundary, null, el(VAPTAdmin)));
+  useEffect(() => {
+    // First fetch the active file from backend setup
+    apiFetch({ path: 'vapt/v1/active-file' }).then(res => {
+      if (res.active_file) {
+        setSelectedFile(res.active_file);
+        fetchData(res.active_file);
       } else {
-        wp.element.render(el(ErrorBoundary, null, el(VAPTAdmin)), container);
+        fetchData();
       }
-      console.log('VAPT Builder: React app mounted successfully.');
+    }).catch(() => fetchData());
+  }, []);
 
-      // Remove the loading notice if present
-      const loadingNotice = container.querySelector('.notice-info');
-      if (loadingNotice) loadingNotice.remove();
-
-    } catch (err) {
-      console.error('VAPT Builder: Mounting exception:', err);
-      container.innerHTML = `<div class="notice notice-error"><p>Critical UI Mounting Error: ${err.message}</p></div>`;
-    }
+  const onSelectFile = (file) => {
+    setConfirmState({
+      message: __('Changing the feature source will override the current list. Previously implemented features with matching keys will retain their status. Proceed?', 'vapt-builder'),
+      onConfirm: () => {
+        setConfirmState(null);
+        setSelectedFile(file);
+        fetchData(file);
+        // Persist to backend
+        apiFetch({
+          path: 'vapt/v1/active-file',
+          method: 'POST',
+          data: { file }
+        }).catch(err => console.error('Failed to sync active file:', err));
+      }
+    });
   };
 
-  // Expose init globally for diagnostics
-  window.vaptInit = init;
+  const updateFeature = (key, data) => {
+    // Optimistic Update
+    setFeatures(prev => prev.map(f => f.key === key ? { ...f, ...data } : f));
+    setSaveStatus({ message: __('Saving...', 'vapt-builder'), type: 'info' });
 
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    console.log('VAPT Builder: Document ready, running init');
-    init();
-  } else {
-    console.log('VAPT Builder: Waiting for DOMContentLoaded');
-    document.addEventListener('DOMContentLoaded', init);
+    return apiFetch({
+      path: 'vapt/v1/features/update',
+      method: 'POST',
+      data: { key, ...data }
+    }).then(() => {
+      setSaveStatus({ message: __('Saved', 'vapt-builder'), type: 'success' });
+    }).catch(err => {
+      console.error('Update failed:', err);
+      const errMsg = err.message || (err.data && err.data.message) || err.error || __('Error saving!', 'vapt-builder');
+      setSaveStatus({ message: errMsg, type: 'error' });
+    });
+  };
+
+  const confirmTransition = (formValues) => {
+    if (!transitioning) return;
+    const { key, nextStatus } = transitioning;
+    const { note, devInstruct, wireframeUrl } = formValues;
+
+    const safeFeatures = Array.isArray(features) ? features : [];
+    const feature = safeFeatures.find(f => f.key === key);
+    let updates = { status: nextStatus, history_note: note };
+
+    // Save Wireframe if provided
+    if (wireframeUrl) {
+      updates.wireframe_url = wireframeUrl;
+    }
+
+    // Auto-Generate Interface when moving to 'Develop' (Phase 6 transition)
+    if (nextStatus === 'Develop' && typeof Generator !== 'undefined' && Generator && feature && feature.remediation) {
+      try {
+        const schema = Generator.generate(feature.remediation, devInstruct);
+        if (schema) {
+          updates.generated_schema = schema;
+          console.log('VAPT Builder: Auto-generated schema for ' + key, schema);
+        }
+      } catch (e) {
+        console.error('VAPT Builder: Generation error', e);
+      }
+    }
+
+    updateFeature(key, updates);
+    setTransitioning(null);
+  };
+
+  const addDomain = (domain, isWildcard = false, isEnabled = true, id = null) => {
+    // Optimistic Update for better UX
+    if (id) {
+      setDomains(prev => prev.map(d => d.id === id ? { ...d, domain, is_wildcard: isWildcard, is_enabled: isEnabled } : d));
+    }
+
+    // Explicitly pass values as booleans to avoid truthiness confusion on backend
+    return apiFetch({
+      path: 'vapt/v1/domains/update',
+      method: 'POST',
+      data: {
+        id: id,
+        domain,
+        is_wildcard: Boolean(isWildcard),
+        is_enabled: Boolean(isEnabled)
+      }
+    }).then((res) => {
+      if (res.domain) {
+        setDomains(prev => {
+          const exists = prev.find(d => d.id === res.domain.id);
+          if (exists) {
+            return prev.map(d => d.id === res.domain.id ? res.domain : d);
+          } else {
+            return [...prev, res.domain];
+          }
+        });
+      }
+      setSaveStatus({ message: __('Domain updated successfully', 'vapt-builder'), type: 'success' });
+      fetchData();
+      return res;
+    }).catch(err => {
+      setSaveStatus({ message: __('Failed to update domain', 'vapt-builder'), type: 'error' });
+      fetchData(); // Rollback to server state
+      throw err;
+    });
+  };
+
+  const deleteDomain = (domainId) => {
+    apiFetch({
+      path: `vapt/v1/domains/delete?id=${domainId}`,
+      method: 'DELETE'
+    }).then(() => fetchData());
+  };
+
+  const batchDeleteDomains = (ids) => {
+    // Optimistic Delete
+    setDomains(prev => prev.filter(d => !ids.includes(d.id)));
+
+    return apiFetch({
+      path: 'vapt/v1/domains/batch-delete',
+      method: 'POST',
+      data: { ids }
+    }).then(() => {
+      setSaveStatus({ message: sprintf(__('%d domains deleted', 'vapt-builder'), ids.length), type: 'success' });
+      setSelectedDomains([]);
+      fetchData();
+    }).catch(err => {
+      setSaveStatus({ message: __('Batch delete failed', 'vapt-builder'), type: 'error' });
+      fetchData(); // Rollback
+    });
+  };
+
+  const updateDomainFeatures = (domainId, updatedFeatures) => {
+    // Optimistic Update
+    setDomains(prev => prev.map(d => d.id === domainId ? { ...d, features: updatedFeatures } : d));
+    setSaveStatus({ message: __('Saving...', 'vapt-builder'), type: 'info' });
+
+    apiFetch({
+      path: 'vapt/v1/domains/features',
+      method: 'POST',
+      data: { domain_id: domainId, features: updatedFeatures }
+    }).then(() => {
+      setSaveStatus({ message: __('Saved', 'vapt-builder'), type: 'success' });
+    }).catch(err => {
+      console.error('Domain features update failed:', err);
+      setSaveStatus({ message: __('Error saving!', 'vapt-builder'), type: 'error' });
+    });
+  };
+
+  const uploadJSON = (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setLoading(true);
+    apiFetch({
+      path: 'vapt/v1/upload-json',
+      method: 'POST',
+      body: formData,
+    }).then((res) => {
+      console.log('VAPT Builder: JSON uploaded', res);
+      // Fetch fresh data (including file list) THEN update selection
+      fetchData().then(() => { // Call fetchData without arguments to refresh all data, including dataFiles
+        setSelectedFile(res.filename);
+      });
+    }).catch(err => {
+      console.error('VAPT Builder: Upload error:', err);
+      setAlertState({ message: __('Error uploading JSON', 'vapt-builder') });
+      setLoading(false);
+    });
+  };
+
+  const [allFiles, setAllFiles] = useState([]);
+  const [hiddenFiles, setHiddenFiles] = useState([]);
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+
+  const fetchAllFiles = () => {
+    apiFetch({ path: 'vapt/v1/data-files/all' }).then(res => {
+      // Clean display filenames (underscores to spaces)
+      const cleaned = res.map(f => ({ ...f, display_name: f.filename.replace(/_/g, ' ') }));
+      setAllFiles(cleaned);
+      setHiddenFiles(res.filter(f => f.isHidden).map(f => f.filename));
+    });
+  };
+
+  useEffect(() => {
+    if (isManageModalOpen) {
+      fetchAllFiles();
+    }
+  }, [isManageModalOpen]);
+
+  const [manageSourcesStatus, setManageSourcesStatus] = useState(null);
+
+  const updateHiddenFiles = (newHidden) => {
+    setHiddenFiles(newHidden);
+    setManageSourcesStatus('saving');
+    apiFetch({
+      path: 'vapt/v1/update-hidden-files',
+      method: 'POST',
+      data: { hidden_files: newHidden }
+    }).then(() => {
+      fetchData(); // Refresh dropdown list
+      setManageSourcesStatus('saved');
+      setTimeout(() => setManageSourcesStatus(null), 2000);
+    }).catch(() => setManageSourcesStatus('error'));
+  };
+
+
+
+
+
+  const tabs = [
+    {
+      name: 'features',
+      title: __('Feature List', 'vapt-builder'),
+      className: 'vapt-tab-features',
+    },
+    {
+      name: 'license',
+      title: __('License Management', 'vapt-builder'),
+      className: 'vapt-tab-license',
+    },
+    {
+      name: 'domains',
+      title: __('Domain Features', 'vapt-builder'),
+      className: 'vapt-tab-domains',
+    },
+    {
+      name: 'build',
+      title: __('Build Generator', 'vapt-builder'),
+      className: 'vapt-tab-build',
+    },
+  ];
+
+  if (error) {
+    return el('div', { className: 'vapt-admin-wrap' }, [
+      el('h1', null, __('VAPT Builder Dashboard', 'vapt-builder')),
+      el(Notice, { status: 'error', isDismissible: false }, error),
+      el(Button, { isSecondary: true, onClick: () => fetchData() }, __('Retry', 'vapt-builder'))
+    ]);
   }
-})();
+
+  return el('div', { className: 'vapt-admin-wrap' }, [
+    el('h1', null, [
+      __('VAPT Builder Dashboard', 'vapt-builder'),
+      el('span', { style: { fontSize: '0.5em', marginLeft: '10px', color: '#666', fontWeight: 'normal' } }, `v${settings.pluginVersion}`)
+    ]),
+    saveStatus && el('div', {
+      style: {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        background: saveStatus.type === 'error' ? '#d63638' : '#2271b1',
+        color: '#fff',
+        padding: '10px 20px',
+        borderRadius: '4px',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+        zIndex: 100,
+        fontWeight: '600',
+        transition: 'opacity 0.3s ease-in-out'
+      }
+    }, saveStatus.message),
+
+    el(TabPanel, {
+      className: 'vapt-main-tabs',
+      activeClass: 'is-active',
+      initialTabName: activeTab,
+      onSelect: (tabName) => {
+        const name = typeof tabName === 'string' ? tabName : tabName.name;
+        setActiveTab(name);
+        localStorage.setItem('vapt_admin_active_tab', name);
+      },
+      tabs: tabs
+    }, (tab) => {
+      switch (tab.name) {
+        case 'features': return el(FeatureList, {
+          key: selectedFile, // Force remount on file change to fix persistence
+          features,
+          schema,
+          updateFeature,
+          loading,
+          dataFiles,
+          selectedFile,
+          allFiles,
+          hiddenFiles,
+          onUpdateHiddenFiles: updateHiddenFiles,
+          manageSourcesStatus: manageSourcesStatus,
+          onSelectFile: onSelectFile,
+          onUpload: uploadJSON,
+          isManageModalOpen,
+          setIsManageModalOpen,
+          designPromptConfig,
+          setDesignPromptConfig,
+          isPromptConfigModalOpen,
+          setIsPromptConfigModalOpen,
+          isMappingModalOpen,
+          setIsMappingModalOpen,
+          historyFeature,
+          setHistoryFeature,
+          designFeature,
+          setDesignFeature,
+          transitioning,
+          setTransitioning
+        });
+        case 'license': return el(LicenseManager, { domains, fetchData, isSuper, loading });
+        case 'domains': return el(DomainFeatures, { domains, features, isDomainModalOpen, selectedDomain, setDomainModalOpen, setSelectedDomain, updateDomainFeatures, addDomain, deleteDomain, batchDeleteDomains, setConfirmState, selectedDomains, setSelectedDomains });
+        case 'build': return el(BuildGenerator, { domains, features, setAlertState });
+        default: return null;
+      }
+    }),
+
+    // Global Modals
+    historyFeature && el(HistoryModal, {
+      feature: historyFeature,
+      updateFeature: updateFeature,
+      onClose: () => setHistoryFeature(null)
+    }),
+
+    transitioning && el(TransitionNoteModal, {
+      transitioning: transitioning,
+      onConfirm: confirmTransition,
+      onCancel: () => setTransitioning(null)
+    }),
+
+    designFeature && el(DesignModal, {
+      feature: designFeature,
+      onClose: () => !isPromptConfigModalOpen && setDesignFeature(null)
+    }),
+
+    isPromptConfigModalOpen && el(PromptConfigModal, {
+      isOpen: isPromptConfigModalOpen,
+      onClose: () => setIsPromptConfigModalOpen(false),
+      feature: designFeature
+    }),
+
+    isMappingModalOpen && el(FieldMappingModal, {
+      isOpen: isMappingModalOpen,
+      onClose: () => setIsMappingModalOpen(false)
+    }),
+
+    alertState && el(VAPT_AlertModal, {
+      isOpen: true,
+      message: alertState.message,
+      type: alertState.type,
+      onClose: () => setAlertState(null)
+    }),
+    confirmState && el(VAPT_ConfirmModal, {
+      isOpen: true,
+      message: confirmState.message,
+      isDestructive: confirmState.isDestructive,
+      onConfirm: confirmState.onConfirm,
+      onCancel: () => setConfirmState(null)
+    })
+  ]);
+};
+
+const init = () => {
+  const container = document.getElementById('vapt-admin-root');
+  if (!container) {
+    console.warn('VAPT Builder: Root container #vapt-admin-root not found.');
+    return;
+  }
+
+  console.log('VAPT Builder: Starting React mount...');
+
+  if (typeof wp === 'undefined' || !wp.element) {
+    console.error('VAPT Builder: WordPress React environment (wp.element) missing!');
+    container.innerHTML = '<div class="notice notice-error"><p>Error: WordPress React components failed to load. Please check plugin dependencies.</p></div>';
+    return;
+  }
+
+  try {
+    const root = wp.element.createRoot ? wp.element.createRoot(container) : null;
+    if (root) {
+      root.render(el(ErrorBoundary, null, el(VAPTAdmin)));
+    } else {
+      wp.element.render(el(ErrorBoundary, null, el(VAPTAdmin)), container);
+    }
+    console.log('VAPT Builder: React app mounted successfully.');
+
+    // Remove the loading notice if present
+    const loadingNotice = container.querySelector('.notice-info');
+    if (loadingNotice) loadingNotice.remove();
+
+  } catch (err) {
+    console.error('VAPT Builder: Mounting exception:', err);
+    container.innerHTML = `<div class="notice notice-error"><p>Critical UI Mounting Error: ${err.message}</p></div>`;
+  }
+};
+
+// Expose init globally for diagnostics
+window.vaptInit = init;
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  console.log('VAPT Builder: Document ready, running init');
+  init();
+} else {
+  console.log('VAPT Builder: Waiting for DOMContentLoaded');
+  document.addEventListener('DOMContentLoaded', init);
+}
+}) ();

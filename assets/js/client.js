@@ -29,12 +29,22 @@
       return saved ? saved : 'Develop';
     });
     const [activeCategory, setActiveCategory] = useState('all');
+    const [activeFeatureKey, setActiveFeatureKey] = useState(() => {
+      const saved = localStorage.getItem('vapt_workbench_active_feature');
+      return saved ? saved : null;
+    });
     const [saveStatus, setSaveStatus] = useState(null);
     const [verifFeature, setVerifFeature] = useState(null);
 
     useEffect(() => {
       localStorage.setItem('vapt_workbench_active_status', activeStatus);
     }, [activeStatus]);
+
+    useEffect(() => {
+      if (activeFeatureKey) {
+        localStorage.setItem('vapt_workbench_active_feature', activeFeatureKey);
+      }
+    }, [activeFeatureKey]);
 
     // Auto-dismiss Success Toasts
     useEffect(() => {
@@ -112,21 +122,28 @@
 
     const displayFeatures = useMemo(() => {
       if (!activeCategory) return [];
-      if (activeCategory === 'all') return statusFeatures;
-      return statusFeatures.filter(f => (f.category || 'Uncategorized') === activeCategory);
-    }, [statusFeatures, activeCategory]);
+      let list = [];
+      if (activeCategory === 'all') list = statusFeatures;
+      else list = statusFeatures.filter(f => (f.category || 'Uncategorized') === activeCategory);
 
-    const scrollToFeature = (featureKey, category) => {
-      if (activeCategory !== 'all' && activeCategory !== category) {
-        setActiveCategory(category);
-        setTimeout(() => {
-          const el = document.getElementById(`feature-${featureKey}`);
-          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 150);
+      // If activeFeatureKey is not in the list, pick the first one
+      if (list.length > 0) {
+        const currentInList = list.find(f => f.key === activeFeatureKey);
+        if (!currentInList) {
+          setActiveFeatureKey(list[0].key);
+        }
       } else {
-        const el = document.getElementById(`feature-${featureKey}`);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setActiveFeatureKey(null);
       }
+
+      return list;
+    }, [statusFeatures, activeCategory, activeFeatureKey]);
+
+    const selectFeature = (featureKey, category) => {
+      if (activeCategory !== category) {
+        setActiveCategory(category);
+      }
+      setActiveFeatureKey(featureKey);
     };
 
     // Helper to render a single feature card
@@ -284,9 +301,9 @@
       ]),
 
       // Main Content Area
-      el('div', { style: { display: 'flex', flexGrow: 1, overflow: 'visible' } }, [
-        // Sidebar
-        el('aside', { className: 'vapt-workbench-sidebar', style: { width: '280px', borderRight: '1px solid #e5e7eb', background: '#fff', overflowY: 'auto', overflowX: 'visible', padding: '20px 0' } }, [
+      el('div', { style: { display: 'flex', flexGrow: 1, overflow: 'hidden' } }, [
+        // Pane 1: Categories Sidebar (Left)
+        el('aside', { className: 'vapt-workbench-sidebar', style: { width: '240px', borderRight: '1px solid #e5e7eb', background: '#fff', overflowY: 'auto', padding: '20px 0', flexShrink: 0 } }, [
           el('div', { style: { padding: '0 20px 10px', fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase' } }, __('Feature Categories')),
           categories.length > 0 && el(Fragment, null, [
             el('button', {
@@ -303,31 +320,11 @@
               el('span', null, __('All Categories', 'vapt-builder')),
               el('span', { style: { fontSize: '11px', background: activeCategory === 'all' ? '#dbeafe' : '#f3f4f6', padding: '2px 6px', borderRadius: '4px' } }, statusFeatures.length)
             ]),
-            activeCategory === 'all' && el('div', {
-              style: {
-                display: 'flex', flexDirection: 'column', gap: '2px',
-                padding: '5px 0', background: '#fcfcfd', borderBottom: '1px solid #e5e7eb'
-              }
-            }, statusFeatures.map(f => el('a', {
-              key: f.key,
-              onClick: (e) => { e.preventDefault(); scrollToFeature(f.key, 'all'); },
-              className: 'vapt-workbench-link',
-              href: `#feature-${f.key}`,
-              style: {
-                fontSize: '13px', color: '#64748b', cursor: 'pointer', whiteSpace: 'nowrap',
-                overflow: 'hidden', textOverflow: 'ellipsis', padding: '8px 20px',
-                transition: 'all 0.2s ease', position: 'relative', zIndex: 10,
-                display: 'block', textDecoration: 'none'
-              },
-              title: f.label
-            }, f.label)))
-          ]),
-          categories.length === 0 && el('p', { style: { padding: '20px', color: '#9ca3af', fontSize: '13px' } }, __('No active categories', 'vapt-builder')),
-          categories.map(cat => {
-            const catFeatures = statusFeatures.filter(f => (f.category || 'Uncategorized') === cat);
-            const isActive = activeCategory === cat;
-            return el(Fragment, { key: cat }, [
-              el('button', {
+            categories.map(cat => {
+              const catFeatures = statusFeatures.filter(f => (f.category || 'Uncategorized') === cat);
+              const isActive = activeCategory === cat;
+              return el('button', {
+                key: cat,
                 onClick: () => setActiveCategory(cat),
                 className: 'vapt-sidebar-link' + (isActive ? ' is-active' : ''),
                 style: {
@@ -335,50 +332,60 @@
                   color: isActive ? '#1d4ed8' : '#4b5563',
                   padding: '12px 20px', textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between',
                   borderRight: isActive ? '3px solid #1d4ed8' : 'none', fontWeight: isActive ? 600 : 500,
-                  fontSize: '14px', position: 'relative'
+                  fontSize: '14px'
                 }
               }, [
                 el('span', null, cat),
                 el('span', { style: { fontSize: '11px', background: isActive ? '#dbeafe' : '#f3f4f6', padding: '2px 6px', borderRadius: '4px' } }, catFeatures.length)
-              ]),
-              isActive && el('div', {
-                style: {
-                  display: 'flex', flexDirection: 'column', gap: '2px',
-                  padding: '5px 0', background: '#fcfcfd', borderBottom: '1px solid #e5e7eb'
-                }
-              }, catFeatures.map(f => el('a', {
-                key: f.key,
-                onClick: (e) => { e.preventDefault(); scrollToFeature(f.key, cat); },
-                className: 'vapt-workbench-link',
-                href: `#feature-${f.key}`,
-                style: {
-                  fontSize: '13px', color: '#64748b', cursor: 'pointer', whiteSpace: 'nowrap',
-                  overflow: 'hidden', textOverflow: 'ellipsis', padding: '8px 20px',
-                  transition: 'all 0.2s ease', position: 'relative', zIndex: 10,
-                  display: 'block', textDecoration: 'none'
-                },
-                title: f.label
-              }, f.label)))
-            ]);
-          })
+              ]);
+            })
+          ]),
+          categories.length === 0 && el('p', { style: { padding: '20px', color: '#9ca3af', fontSize: '13px' } }, __('No active categories', 'vapt-builder'))
         ]),
 
-        // Workspace
-        el('main', { style: { flexGrow: 1, padding: '30px', overflowY: 'auto' } }, [
-          displayFeatures.length === 0 ? el('div', { style: { textAlign: 'center', padding: '100px', color: '#9ca3af' } }, __('Select a category to view implementation controls.', 'vapt-builder')) :
-            el('div', { style: { maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' } },
-              activeCategory === 'all'
-                ? categories.map(cat => {
-                  const catFeats = statusFeatures.filter(f => (f.category || 'Uncategorized') === cat);
-                  return el('section', { key: cat, style: { marginBottom: '20px' } }, [
-                    el('h4', { style: { borderBottom: '2px solid #e5e7eb', paddingBottom: '10px', marginBottom: '25px', color: '#374151', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.05em' } }, cat),
-                    el('div', { style: { display: 'flex', flexDirection: 'column', gap: '20px' } },
-                      catFeats.map(f => renderFeatureCard(f, setVerifFeature))
-                    )
-                  ]);
-                })
-                : displayFeatures.map(f => renderFeatureCard(f, setVerifFeature))
-            )
+        // Pane 2: Feature List (Middle)
+        el('div', { className: 'vapt-workbench-list', style: { width: '320px', borderRight: '1px solid #e5e7eb', background: '#fcfcfd', overflowY: 'auto', flexShrink: 0 } }, [
+          el('div', { style: { padding: '20px', fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', borderBottom: '1px solid #f3f4f6' } },
+            activeCategory === 'all' ? __('All Features', 'vapt-builder') : sprintf(__('%s Features', 'vapt-builder'), activeCategory)
+          ),
+          displayFeatures.length === 0 ? el('p', { style: { padding: '20px', color: '#9ca3af', fontSize: '13px' } }, __('No features available', 'vapt-builder')) :
+            displayFeatures.map(f => {
+              const isActive = activeFeatureKey === f.key;
+              return el('button', {
+                key: f.key,
+                onClick: () => setActiveFeatureKey(f.key),
+                className: 'vapt-feature-item' + (isActive ? ' is-active' : ''),
+                style: {
+                  width: '100%', border: 'none', borderBottom: '1px solid #f3f4f6',
+                  background: isActive ? '#eff6ff' : 'transparent',
+                  color: isActive ? '#1d4ed8' : '#4b5563',
+                  padding: '12px 20px', textAlign: 'left', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  borderRight: isActive ? '3px solid #1d4ed8' : 'none',
+                  fontWeight: isActive ? 600 : 500,
+                  fontSize: '14px',
+                  transition: 'all 0.15s ease'
+                }
+              }, [
+                el('span', null, f.label)
+              ]);
+            })
+        ]),
+
+        // Pane 3: Feature Interface (Right)
+        el('main', { style: { flexGrow: 1, padding: '30px', overflowY: 'auto', background: '#f9fafb' } }, [
+          !activeFeatureKey ? el('div', { style: { textAlign: 'center', padding: '100px', color: '#9ca3af' } }, __('Select a feature from the list to view implementation controls.', 'vapt-builder')) :
+            el('div', { style: { maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' } }, [
+              // Breadcrumb
+              features.find(f => f.key === activeFeatureKey) && el('nav', { style: { marginBottom: '0', fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '8px', background: '#fff', padding: '12px 20px', borderRadius: '8px', border: '1px solid #e5e7eb' } }, [
+                el('span', { style: { cursor: 'pointer' }, onClick: () => setActiveCategory('all') }, __('Configuration', 'vapt-builder')),
+                el('span', null, '›'),
+                el('span', null, features.find(f => f.key === activeFeatureKey).category || __('Uncategorized', 'vapt-builder')),
+                el('span', null, '›'),
+                el('span', { style: { color: '#111827', fontWeight: 600 } }, features.find(f => f.key === activeFeatureKey).label)
+              ]),
+              renderFeatureCard(features.find(f => f.key === activeFeatureKey), setVerifFeature)
+            ])
         ])
       ]),
 
