@@ -2863,7 +2863,8 @@ Feature ID: ${feature.id || 'N/A'}
               } else if (col === 'severity') {
                 const s = (f[col] || '').toLowerCase();
                 const map = { 'critical': 'Critical', 'high': 'High', 'medium': 'Medium', 'low': 'Low', 'informational': 'Informational' };
-                content = map[s] || (s.charAt(0).toUpperCase() + s.slice(1).toLowerCase());
+                const label = map[s] || (s.charAt(0).toUpperCase() + s.slice(1).toLowerCase());
+                content = el('span', { className: `vapt-severity-text severity-${s}` }, label);
               } else if (col === 'implemented_at' && f[col]) {
                 content = new Date(f[col]).toLocaleString();
               } else if (col === 'owasp') {
@@ -2886,6 +2887,16 @@ Feature ID: ${feature.id || 'N/A'}
                 el(LifecycleIndicator, {
                   feature: f,
                   onChange: (newStatus) => {
+                    // Validation: Prevent Draft -> Test or Draft -> Release
+                    const currentStatus = f.status;
+                    if (currentStatus === 'Draft' && (newStatus === 'Test' || newStatus === 'Release')) {
+                      setAlertState({
+                        message: sprintf(__('Cannot transition directly from "Draft" to "%s". Please move to "Develop" first.', 'vapt-builder'), newStatus),
+                        type: 'error'
+                      });
+                      return;
+                    }
+
                     let defaultNote = '';
                     const title = f.label || f.title;
                     if (newStatus === 'Develop') {
@@ -2934,8 +2945,16 @@ Feature ID: ${feature.id || 'N/A'}
                   const schema = typeof f.generated_schema === 'string' ? JSON.parse(f.generated_schema || '{}') : (f.generated_schema || {});
                   const isCustom = schema.controls && schema.controls.length > 0 && !schema._instructions;
 
+                  // Determine status class
+                  let stageClass = '';
+                  if (f.status === 'Test' || f.status === 'test') {
+                    stageClass = 'stage-test';
+                  } else if (f.status === 'Release' || f.status === 'release') {
+                    stageClass = 'stage-release';
+                  }
+
                   return el(Button, {
-                    className: `vapt-premium-btn ${isCustom ? 'is-custom' : ''}`,
+                    className: `vapt-premium-btn ${isCustom ? 'is-custom' : ''} ${stageClass}`,
                     onClick: () => setDesignFeature(f),
                     title: isCustom ? __('Open Workbench Design Bench (Custom)', 'vapt-builder') : __('Open Workbench Design Bench (Default)', 'vapt-builder')
                   }, __('Workbench Design Hub', 'vapt-builder'));

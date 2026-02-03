@@ -67,48 +67,46 @@
 }
 
 .vapt-severity-critical {
-    border-left: 4px solid #dc3232;
+    border-left: 4px solid #800000;
 }
 
 .vapt-severity-high {
-    border-left: 4px solid #ff6b35;
+    border-left: 4px solid #ff0000;
 }
 
 .vapt-severity-medium {
-    border-left: 4px solid #ffb900;
+    border-left: 4px solid #ffa500;
 }
 
 .vapt-severity-low {
-    border-left: 4px solid #46b450;
+    border-left: 4px solid #ffff00;
 }
 
-.vapt-severity-badge {
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: bold;
+.vapt-severity-text {
+    font-weight: 700;
     text-transform: uppercase;
-    display: inline-block;
+    font-size: 11px;
 }
 
-.vapt-severity-critical {
-    background-color: #dc3232;
-    color: white;
+.vapt-severity-text.severity-critical {
+    color: #800000 !important;
 }
 
-.vapt-severity-high {
-    background-color: #ff6b35;
-    color: white;
+.vapt-severity-text.severity-high {
+    color: #ff0000 !important;
 }
 
-.vapt-severity-medium {
-    background-color: #ffb900;
-    color: black;
+.vapt-severity-text.severity-medium {
+    color: #ffa500 !important;
 }
 
-.vapt-severity-low {
-    background-color: #46b450;
-    color: white;
+.vapt-severity-text.severity-low {
+    color: #cc9900 !important;
+    /* Darker yellow for readability on white */
+}
+
+.vapt-severity-text.severity-informational {
+    color: #6c757d !important;
 }
 
 .vapt-modal {
@@ -213,31 +211,36 @@
 }
 
 .severity {
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 12px;
-    font-weight: bold;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
+    background: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
 }
 
-.severity.critical {
-    background: #dc3545;
-    color: #fff;
+.severity.critical,
+.severity-critical {
+    color: #800000 !important;
+    background: none !important;
 }
 
-.severity.high {
-    background: #fd7e14;
-    color: #fff;
+.severity.high,
+.severity-high {
+    color: #ff0000 !important;
+    background: none !important;
 }
 
-.severity.medium {
-    background: #ffc107;
-    color: #000;
+.severity.medium,
+.severity-medium {
+    color: #ffa500 !important;
+    background: none !important;
 }
 
-.severity.low {
-    background: #28a745;
-    color: #fff;
+.severity.low,
+.severity-low {
+    color: #cc9900 !important;
+    background: none !important;
 }
 
 .toggle-switch {
@@ -808,19 +811,19 @@
 }
 
 .vapt-summary-card.critical {
-    border-top: 4px solid #d63638;
+    border-top: 4px solid #800000;
 }
 
 .vapt-summary-card.high {
-    border-top: 4px solid #ffba00;
+    border-top: 4px solid #ff0000;
 }
 
 .vapt-summary-card.medium {
-    border-top: 4px solid #f56e28;
+    border-top: 4px solid #ffa500;
 }
 
 .vapt-summary-card.low {
-    border-top: 4px solid #2271b1;
+    border-top: 4px solid #ffff00;
 }
 
 
@@ -919,6 +922,24 @@
 
 .vapt-premium-btn:active {
     transform: translateY(0);
+}
+
+.vapt-premium-btn.stage-test {
+    background: linear-gradient(135deg, #dba617 0%, #b88a12 100%) !important;
+    box-shadow: 0 4px 8px rgba(219, 166, 23, 0.25) !important;
+}
+
+.vapt-premium-btn.stage-test:hover {
+    background: linear-gradient(135deg, #ecc14e 0%, #dba617 100%) !important;
+}
+
+.vapt-premium-btn.stage-release {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    box-shadow: 0 4px 8px rgba(249, 115, 22, 0.25) !important;
+}
+
+.vapt-premium-btn.stage-release:hover {
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%) !important;
 }
 
 .vapt-premium-btn .dashicons {
