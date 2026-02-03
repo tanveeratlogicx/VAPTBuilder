@@ -65,9 +65,11 @@ class VAPT_Htaccess_Driver
         // It does NOT appear to do variable substitution (e.g. {{value}}) yet, 
         // effectively treating the data as a "Toggle".
 
-        $validation = self::validate_htaccess_directive($directive);
+        $processed_directive = self::prepare_directive($directive);
+        $validation = self::validate_htaccess_directive($processed_directive);
+
         if ($validation['valid']) {
-          $rules[] = $directive;
+          $rules[] = $processed_directive;
         } else {
           error_log(sprintf(
             'VAPT: Invalid .htaccess directive rejected for feature %s (key: %s). Reason: %s',
@@ -77,6 +79,19 @@ class VAPT_Htaccess_Driver
           ));
         }
       }
+    }
+
+    // 2. Wrap collected rules in a marker header for verification
+    if (!empty($rules)) {
+      $feature_key = isset($schema['feature_key']) ? $schema['feature_key'] : 'unknown';
+      $enforcer_headers = array();
+      $enforcer_headers[] = "<IfModule mod_headers.c>";
+      $enforcer_headers[] = "  Header set X-VAPT-Enforced \"htaccess\"";
+      $enforcer_headers[] = "  Header append X-VAPT-Feature \"$feature_key\"";
+      $enforcer_headers[] = "</IfModule>";
+
+      // Prepend headers so they appear at the top of the feature block
+      $rules = array_merge($enforcer_headers, $rules);
     }
 
     return $rules;
@@ -185,6 +200,33 @@ class VAPT_Htaccess_Driver
     //Ideally, we should trigger a full rebuild from Enforcer instead.
     $rules = self::generate_rules($data, $schema);
     self::write_batch($rules, isset($schema['enforcement']['target']) ? $schema['enforcement']['target'] : 'root');
+  }
+
+  /**
+   * Automatically wraps directives in <IfModule> if they are not already wrapped.
+   * This is a safety measure to prevent server crashes if an Apache module is missing.
+   */
+  private static function prepare_directive($directive)
+  {
+    $directive = trim($directive);
+    if (empty($directive)) return $directive;
+
+    // If already wrapped in IfModule, skip
+    if (stripos($directive, '<IfModule') === 0) {
+      return $directive;
+    }
+
+    // Wrap mod_headers directives
+    if (stripos($directive, 'Header ') === 0) {
+      return "<IfModule mod_headers.c>\n  $directive\n</IfModule>";
+    }
+
+    // Wrap mod_rewrite directives
+    if (stripos($directive, 'RewriteEngine') === 0 || stripos($directive, 'RewriteRule') === 0 || stripos($directive, 'RewriteCond') === 0) {
+      return "<IfModule mod_rewrite.c>\n  $directive\n</IfModule>";
+    }
+
+    return $directive;
   }
 
   private static function validate_htaccess_directive($directive)

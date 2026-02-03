@@ -34,11 +34,14 @@
       console.log("[VAPT] Full Response Headers:", headers);
 
       const vaptEnforced = resp.headers.get('x-vapt-enforced');
-      const enforcedFeature = resp.headers.get('x-vapt-feature');
+      const enforcedFeature = resp.headers.get('x-vapt-feature'); // Can be comma-separated
 
-      if (vaptEnforced === 'php-headers') {
-        if (featureKey && enforcedFeature && enforcedFeature !== featureKey) {
-          return { success: false, message: `Inconclusive: Headers are present, but enforced by another feature ('${enforcedFeature}'), not this one. Please disable the conflicting feature to test this one accurately.`, raw: headers };
+      if (vaptEnforced === 'php-headers' || vaptEnforced === 'htaccess') {
+        if (featureKey && enforcedFeature) {
+          const features = enforcedFeature.split(',').map(f => f.trim());
+          if (!features.includes(featureKey)) {
+            return { success: false, message: `Inconclusive: Headers are present, but this specific feature ('${featureKey}') is not listed in enforcement. Found: ${enforcedFeature}.`, raw: headers };
+          }
         }
         return { success: true, message: `Plugin is actively enforcing headers (${vaptEnforced}).`, raw: headers };
       }
@@ -331,7 +334,13 @@
             isSecure = true;
             message = `PASS: Request was blocked (HTTP ${code}). Note: VAPT enforcement header is missing, indicating a Server-Level block (e.g., .htaccess or Firewall) instead of PHP.`;
           } else {
-            message = `Missing Protection Headers (HTTP ${code}). Verification failed.`;
+            // New logic: Check if it's actually missing or just mismatching
+            const vaptEnforced = resp.headers.get('x-vapt-enforced');
+            if (vaptEnforced) {
+              message = `Header Mismatch (HTTP ${code}). VAPT is active (${vaptEnforced}) but headers do not match expected values.`;
+            } else {
+              message = `Missing Protection Headers (HTTP ${code}). Verification failed.`;
+            }
           }
         } else if (statusMatches === false && expectedStatus) {
           message = `Mismatch: Got HTTP ${code}, expected ${expectedStatus}.`;

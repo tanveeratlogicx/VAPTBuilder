@@ -12,7 +12,9 @@ if (! defined('ABSPATH')) {
 class VAPT_Hook_Driver
 {
   private static $feature_configs = [];
+  private static $enforced_keys = [];
   private static $rate_limit_hook_registered = false;
+  private static $marker_hook_registered = false;
 
   /**
    * Apply enforcement rules at runtime
@@ -22,6 +24,11 @@ class VAPT_Hook_Driver
     $log_file = VAPT_PATH . 'vapt-debug.txt';
     $log = "VAPT Enforcement Run at " . current_time('mysql') . "\n";
     $log .= "Feature: $key\n";
+
+    if ($key && !in_array($key, self::$enforced_keys)) {
+      self::$enforced_keys[] = $key;
+      self::register_enforcement_marker();
+    }
 
     if (empty($schema['enforcement']['mappings'])) {
       file_put_contents($log_file, $log . "Skipped: Missing mappings.\n", FILE_APPEND);
@@ -83,6 +90,39 @@ class VAPT_Hook_Driver
           self::block_sensitive_files($key);
           break;
       }
+    }
+  }
+
+  /**
+   * Universal enforcement marker via PHP headers
+   */
+  private static function register_enforcement_marker()
+  {
+    if (self::$marker_hook_registered) return;
+    self::$marker_hook_registered = true;
+
+    add_filter('wp_headers', function ($headers) {
+      if (defined('DOING_AJAX') && DOING_AJAX) return $headers;
+
+      $headers['X-VAPT-Enforced'] = 'php-headers';
+      $existing = isset($headers['X-VAPT-Feature']) ? $headers['X-VAPT-Feature'] : '';
+      $keys = !empty($existing) ? explode(',', $existing) : [];
+
+      foreach (self::$enforced_keys as $key) {
+        if (!in_array($key, $keys)) {
+          $keys[] = $key;
+        }
+      }
+
+      $headers['X-VAPT-Feature'] = implode(',', $keys);
+      $headers['Access-Control-Expose-Headers'] = 'X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, X-VAPT-Enforced, X-VAPT-Feature';
+      return $headers;
+    }, 999);
+
+    if (!headers_sent() && (!defined('DOING_AJAX') || !DOING_AJAX)) {
+      header('X-VAPT-Enforced: php-headers');
+      header('X-VAPT-Feature: ' . implode(',', self::$enforced_keys));
+      header('Access-Control-Expose-Headers: X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, X-VAPT-Enforced, X-VAPT-Feature');
     }
   }
 

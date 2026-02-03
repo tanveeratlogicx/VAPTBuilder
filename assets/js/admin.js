@@ -243,7 +243,6 @@ window.vaptScriptLoaded = true;
     const [saveStatus, setSaveStatus] = useState(null);
 
     // Toggles for Feature Display (v3.3.1)
-    const [includeGuidance, setIncludeGuidance] = useState((feature.include_verification_guidance === undefined || feature.include_verification_guidance === null) ? true : feature.include_verification_guidance == 1);
     const [includeProtocol, setIncludeProtocol] = useState((feature.include_manual_protocol === undefined || feature.include_manual_protocol === null) ? true : feature.include_manual_protocol == 1);
     const [includeNotes, setIncludeNotes] = useState((feature.include_operational_notes === undefined || feature.include_operational_notes === null) ? true : feature.include_operational_notes == 1);
 
@@ -317,7 +316,7 @@ window.vaptScriptLoaded = true;
         updateFeature(feature.key || feature.id, {
           generated_schema: JSON.stringify(parsed),
           include_verification_engine: hasTestActions ? 1 : 0,
-          include_verification_guidance: includeGuidance ? 1 : 0,
+          include_verification_guidance: 1,
           include_manual_protocol: includeProtocol ? 1 : 0,
           include_operational_notes: includeNotes ? 1 : 0,
           implementation_data: JSON.stringify(localImplData)
@@ -522,18 +521,8 @@ INSTRUCTIONS & CRITICAL RULES:
    - **MANDATORY**: Use 'htaccess' for any feature targeting physical files (e.g. readme.html, license.txt, xmlrpc.php, .env). PHP hooks CANNOT block these effectively on Apache.
    - Use 'hook' for dynamic logic, API interceptions, or header injections.
    - For 'htaccess', ALWAYS include 'target': 'root' in the enforcement block.
-\`\`\`json
-{
-  "controls": [...],
-  "enforcement": { 
-     "driver": "htaccess", 
-     "target": "root",
-     "mappings": { "feat_enabled": "<FilesMatch \\"readme\\\\.html\\">\\nRequire all denied\\n</FilesMatch>" }
-  }
-}
-\`\`\`
 6. **Visibility Overrides**:
-   - ${includeGuidance ? "INCLUDE 'test_checklist' and 'evidence_list' for verification." : "EXCLUDE 'test_checklist' and 'evidence_list'."}
+   - INCLUDE 'test_checklist' and 'evidence_list' for verification.
    - ${includeNotes ? "INCLUDE a 'textarea' with key 'operational_notes' for implementation notes." : "EXCLUDE operational notes textarea."}
 7. **No Orphan Headers**: Do NOT include 'header' or 'section' controls if they are not followed by functional controls.
 8. **Automated Verification (CRITICAL)**:
@@ -604,7 +593,6 @@ Feature ID: ${feature.id || 'N/A'}
 
       el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', height: 'calc(100vh - 160px)', maxHeight: '800px', overflow: 'hidden' } }, [
         el('div', { style: { display: 'flex', flexDirection: 'column', height: '100%', paddingRight: '10px' } }, [
-          el('p', { style: { margin: '0 0 10px 0', fontSize: '13px', color: '#666' } }, __('Paste the JSON schema generated via Antigravity (the AI Proxy) below.', 'vapt-builder')),
 
           el('div', { style: { display: 'flex', gap: '10px', marginBottom: '15px' } }, [
             el(Button, { style: { flex: 1, justifyContent: 'center' }, isSecondary: true, onClick: copyContext, icon: 'clipboard' }, __('Copy Design Prompt', 'vapt-builder')),
@@ -627,12 +615,6 @@ Feature ID: ${feature.id || 'N/A'}
           ]),
 
           el('div', { style: { marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '5px' } }, [
-            el(ToggleControl, {
-              label: __('Include Verification & Evidence in Interface', 'vapt-builder'),
-              checked: includeGuidance,
-              onChange: setIncludeGuidance,
-              help: __('Include detailed verification section.', 'vapt-builder')
-            }),
             el(ToggleControl, {
               label: __('Include Manual Verification Protocol', 'vapt-builder'),
               checked: includeProtocol,

@@ -51,6 +51,10 @@ For any feature that *can* be implemented at the server level (e.g., blocking fi
 *   **Access Control**: `<FilesMatch ...> Deny from all </FilesMatch>`
 *   **Blocking Parameters**: `RewriteCond %{QUERY_STRING} ...`
 
+> [!IMPORTANT]
+> **Safety Wrapping**: ALWAYS wrap sensitive Apache directives (like `Header`, `RewriteRule`, `RewriteEngine`) in `<IfModule>` blocks. This prevents the server from crashing if the required module is not enabled.
+> Example: `<IfModule mod_headers.c>\nHeader set X-XSS-Protection "1; mode=block"\n</IfModule>`
+
 ### 2. Application Logic (WordPress Hooks)
 
 Use the `VAPT_Hook_Driver` only when PHP logic is required (e.g., user authentication, specific WP filters).
