@@ -17,7 +17,7 @@
 /readme.html
 /wp-*.php
 /xmlrpc.php
-VAPTBuilder\vapt-debug.txt
+/vapt-debug.txt
 
 # Configuration
 wp-config.php

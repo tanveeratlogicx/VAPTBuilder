@@ -1,0 +1,38 @@
+{
+  "drivers": {
+    "htaccess": {
+      "directives": ["RewriteEngine", "RewriteRule", "RewriteCond", "Header", "FilesMatch", "Deny", "Allow", "Options"],
+      "markers": ["# BEGIN VAPT [feature]", "# END VAPT [feature]"],
+      "forbidden": ["php_value", "php_flag", "SetHandler", "AddHandler"]
+    },
+    "hook": {
+      "registry_file": "includes/enforcers/class-vapt-hook-driver.php",
+      "methods": [
+        "block_xmlrpc",
+        "add_security_headers",
+        "hide_wp_version",
+        "block_user_enumeration",
+        "disable_file_editors",
+        "block_debug_exposure",
+        "limit_login_attempts"
+      ]
+    }
+  },
+  "probes": {
+    "universal_probe": {
+      "schema": {
+        "method": "string (GET|POST|HEAD)",
+        "path": "string (relative path)",
+        "expected_status": "integer (e.g. 403)",
+        "expected_headers": "object (key:value pairs)",
+        "expected_text": "string (body content match)"
+      }
+    },
+    "spam_requests": {
+      "schema": {
+        "count": "integer",
+        "rpm": "integer"
+      }
+    }
+  }
+}

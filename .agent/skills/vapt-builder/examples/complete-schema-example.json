@@ -1,0 +1,46 @@
+{
+  "controls": [
+    {
+      "type": "toggle",
+      "label": "Block Sensitive Files",
+      "key": "block_sensitive_files",
+      "help": "Prevents public access to wp-config.php, readme.html, and log files."
+    },
+    {
+      "type": "test_action",
+      "label": "Verify: wp-config.php Blocked",
+      "key": "verify_wpconfig_block",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/wp-config.php",
+        "expected_status": 403
+      }
+    },
+    {
+      "type": "test_action",
+      "label": "Verify: debug.log Blocked",
+      "key": "verify_debuglog_block",
+      "test_logic": "universal_probe",
+      "test_config": {
+        "method": "GET",
+        "path": "/wp-content/debug.log",
+        "expected_status": 403
+      }
+    },
+    {
+      "type": "textarea",
+      "key": "operational_notes",
+      "label": "Operational Notes",
+      "rows": 3,
+      "read_only": true,
+      "default_value": "This feature uses .htaccess rules to return a 403 Forbidden status for sensitive files. Ensure your server runs Apache."
+    }
+  ],
+  "enforcement": {
+    "driver": "htaccess",
+    "mappings": {
+      "block_sensitive_files": "<FilesMatch \"^(wp-config\\.php|readme\\.html|license\\.txt|debug\\.log|error\\.log)\">\n    <IfModule mod_authz_core.c>\n        Require all denied\n    </IfModule>\n    <IfModule !mod_authz_core.c>\n        Order allow,deny\n        Deny from all\n    </IfModule>\n</FilesMatch>"
+    }
+  }
+}
