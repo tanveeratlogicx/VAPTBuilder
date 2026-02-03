@@ -54,6 +54,16 @@ class VAPT_DB
   }
 
   /**
+   * Get a single feature record (status + timestamps)
+   */
+  public static function get_feature($key)
+  {
+    global $wpdb;
+    $table = $wpdb->prefix . 'vapt_feature_status';
+    return $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE feature_key = %s", $key), ARRAY_A);
+  }
+
+  /**
    * Get feature status including implemented_at
    */
   public static function get_feature_statuses_full()
@@ -86,13 +96,18 @@ class VAPT_DB
       'category'             => '',
       'test_method'          => '',
       'verification_steps'   => '',
-      'include_test_method'  => 0,
-      'include_verification' => 0,
-      'include_verification_engine' => 0,
-      'is_enforced'          => 0,
+      'include_test_method'           => 0,
+      'include_verification'          => 0,
+      'include_verification_engine'   => 0,
+      'include_verification_guidance' => 1,
+      'include_manual_protocol'       => 1,
+      'include_operational_notes'      => 1,
+      'is_enforced'                   => 0,
       'wireframe_url'        => null,
       'generated_schema'     => null,
       'implementation_data'  => null,
+      'override_schema'      => null,
+      'override_implementation_data' => null,
     );
 
     $existing = self::get_feature_meta($key);
@@ -101,7 +116,7 @@ class VAPT_DB
     return $wpdb->replace(
       $table,
       $final_data,
-      array('%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%s', '%s', '%s')
+      array('%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s')
     );
   }
 

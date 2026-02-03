@@ -200,6 +200,7 @@
     padding: 6px 10px;
     border: 1px solid #ddd;
     text-align: left;
+    vertical-align: middle !important;
 }
 
 .vapt-feature-table th {
@@ -876,4 +877,63 @@
     100% {
         background-position: 0 0;
     }
+}
+
+/* Premium Button Styling */
+.vapt-premium-btn {
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+    font-size: 10px !important;
+    letter-spacing: 0.02em !important;
+    text-transform: uppercase !important;
+    box-shadow: 0 4px 8px rgba(34, 197, 94, 0.25) !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    cursor: pointer !important;
+    height: auto !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+.vapt-premium-btn.is-custom {
+    background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%) !important;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25) !important;
+}
+
+.vapt-premium-btn.is-custom:hover {
+    background: linear-gradient(135deg, #93c5fd 0%, #3b82f6 100%) !important;
+    box-shadow: 0 6px 12px rgba(37, 99, 235, 0.35) !important;
+}
+
+.vapt-premium-btn:hover {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+    box-shadow: 0 4px 6px rgba(34, 197, 94, 0.3) !important;
+    transform: translateY(-1px);
+}
+
+.vapt-premium-btn:active {
+    transform: translateY(0);
+}
+
+.vapt-premium-btn .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+/* Prevent Sidebar Menu Wrapping */
+#adminmenu a.wp-has-submenu.wp-not-current-submenu.vapt-builder-menu-item,
+#adminmenu .wp-has-current-submenu ul.wp-submenu li a {
+    white-space: nowrap !important;
+}
+
+/* Specific fix for our renamed menu */
+#adminmenu .wp-submenu a[href*="page=vapt-builder"] {
+    white-space: nowrap !important;
 }

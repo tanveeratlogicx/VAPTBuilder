@@ -22,7 +22,7 @@ class VAPT_Admin
   public function ajax_process_scan()
   {
     // This endpoint triggers the actual scan work
-    if (!current_user_can('manage_options')) {
+    if (!is_vapt_superadmin()) {
       wp_send_json_error('Unauthorized');
     }
 
@@ -72,7 +72,7 @@ class VAPT_Admin
 
   public function ajax_check_progress()
   {
-    if (!current_user_can('manage_options')) {
+    if (!is_vapt_superadmin()) {
       wp_send_json_error('Unauthorized');
     }
 
@@ -131,15 +131,17 @@ class VAPT_Admin
 
   public function add_admin_menu()
   {
-    add_menu_page(
-      'VAPT Auditor',
-      'VAPT Auditor',
-      'manage_options',
-      'vapt-auditor',
-      array($this, 'admin_page'),
-      'dashicons-shield',
-      30
-    );
+    if (is_vapt_superadmin()) {
+      add_menu_page(
+        'VAPT Auditor',
+        'VAPT Auditor',
+        'manage_options',
+        'vapt-auditor',
+        array($this, 'admin_page'),
+        'dashicons-shield',
+        30
+      );
+    }
   }
 
   public function enqueue_scripts($hook)
@@ -160,7 +162,7 @@ class VAPT_Admin
   public function admin_page()
   {
     global $wpdb;
-    if (!current_user_can('manage_options')) {
+    if (!is_vapt_superadmin()) {
       wp_die(__('You do not have sufficient permissions to access this page.'));
     }
 

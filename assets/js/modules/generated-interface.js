@@ -8,6 +8,21 @@
   const { __, sprintf } = wp.i18n;
 
   /**
+   * Helper: Safely render a value that might be an object
+   */
+  const safeRender = (val) => {
+    if (val === null || val === undefined) return '';
+    if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') return val.toString();
+    if (typeof val === 'object') {
+      if (val.label) return safeRender(val.label);
+      if (val.message) return safeRender(val.message);
+      if (val.content) return safeRender(val.content);
+      return JSON.stringify(val);
+    }
+    return '';
+  };
+
+  /**
    * PROBE REGISTRY: Global Verification Handlers
    */
   const PROBE_REGISTRY = {
@@ -371,12 +386,7 @@
     };
 
     const handleClick = () => {
-      if (status !== 'idle' && result) {
-        setResult(null);
-        setStatus('idle');
-      } else {
-        runTest();
-      }
+      runTest();
     };
 
     let rpmValue = parseInt(featureData['rpm'] || featureData['rate_limit'], 10);
@@ -445,6 +455,10 @@
       const { type, label, key, help, options, rows, action } = control;
       const value = currentData[key] !== undefined ? currentData[key] : (control.default || '');
       const uniqueKey = key || `ctrl-${index}`;
+      const isEnforced = feature.is_enforced === true || feature.is_enforced === 1 || feature.is_enforced === '1';
+      // const conditionalTypes = ['info', 'html', 'warning', 'alert'];
+
+      // if (conditionalTypes.includes(type) && isEnforced) return null; // Removed per user request v3.3.9
 
       switch (type) {
         case 'test_action':
@@ -457,13 +471,15 @@
               onClick: () => {
                 if (action === 'reset_validation_logs') setLocalAlert({ message: __('Reset signal sent.', 'vapt-builder'), type: 'success' });
               }
-            }, label),
-            help && el('p', { style: { margin: '5px 0 0', fontSize: '12px', color: '#666' } }, help)
+            }, safeRender(label)),
+            help && el('p', { style: { margin: '5px 0 0', fontSize: '12px', color: '#666' } }, safeRender(help))
           ]);
 
         case 'toggle':
           return el(ToggleControl, {
-            key: uniqueKey, label, help,
+            key: uniqueKey,
+            label: el('strong', { style: { fontSize: '12px', color: '#334155' } }, safeRender(label)),
+            help: safeRender(help),
             checked: !!value,
             onChange: (val) => handleChange(key, val)
           });
@@ -471,8 +487,8 @@
         case 'input':
           return el('div', { key: uniqueKey, style: { marginBottom: '15px', padding: '10px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '4px' } }, [
             el(TextControl, {
-              label: el('strong', null, label),
-              help: help,
+              label: el('strong', null, safeRender(label)),
+              help: safeRender(help),
               value: value ? value.toString() : '',
               onChange: (val) => handleChange(key, val),
               __nextHasNoMarginBottom: true,
@@ -482,9 +498,11 @@
 
         case 'select':
           return el(SelectControl, {
-            key: uniqueKey, label, help,
+            key: uniqueKey,
+            label: safeRender(label),
+            help: safeRender(help),
             value: value,
-            options: options || [],
+            options: (options || []).map(o => ({ label: safeRender(o.label || o), value: o.value !== undefined ? o.value : o })),
             onChange: (val) => handleChange(key, val)
           });
 
@@ -492,8 +510,8 @@
         case 'code':
           return el('div', { key: uniqueKey, style: { marginBottom: '10px' } }, [
             el('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' } }, [
-              el('label', { style: { fontSize: '12px', fontWeight: '600', color: '#334155' } }, label),
-              help && el(Tooltip, { text: help }, el(Icon, { icon: 'info-outline', size: 14, style: { color: '#94a3b8', cursor: 'help' } }))
+              el('label', { style: { fontSize: '12px', fontWeight: '600', color: '#334155' } }, safeRender(label)),
+              help && el(Tooltip, { text: safeRender(help) }, el(Icon, { icon: 'info-outline', size: 14, style: { color: '#94a3b8', cursor: 'help' } }))
             ]),
             el(TextareaControl, {
               value: value,
@@ -506,32 +524,32 @@
           ]);
 
         case 'header':
-          return el('h3', { key: uniqueKey, style: { fontSize: '14px', fontWeight: '700', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px', marginTop: '8px', marginBottom: '8px', color: '#1e293b' } }, label);
+          return el('h3', { key: uniqueKey, style: { fontSize: '14px', fontWeight: '700', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px', marginTop: '8px', marginBottom: '8px', color: '#1e293b' } }, safeRender(label));
 
         case 'section':
-          return el('h4', { key: uniqueKey, style: { fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: '#64748b', marginTop: '12px', marginBottom: '6px', letterSpacing: '0.025em' } }, label);
+          return el('h4', { key: uniqueKey, style: { fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: '#64748b', marginTop: '12px', marginBottom: '6px', letterSpacing: '0.025em' } }, safeRender(label));
 
         case 'risk_indicators':
           return el('div', { key: uniqueKey, style: { padding: '10px 0' } }, [
-            label && el('strong', { style: { display: 'block', fontSize: '11px', color: '#991b1b', marginBottom: '5px', textTransform: 'uppercase' } }, label),
+            label && el('strong', { style: { display: 'block', fontSize: '11px', color: '#991b1b', marginBottom: '5px', textTransform: 'uppercase' } }, safeRender(label)),
             el('ul', { style: { margin: 0, paddingLeft: '18px', color: '#b91c1c', fontSize: '12px', listStyleType: 'disc' } },
-              (control.risks || control.items || []).map((r, i) => el('li', { key: i, style: { marginBottom: '4px' } }, r)))
+              (control.risks || control.items || []).map((r, i) => el('li', { key: i, style: { marginBottom: '4px' } }, safeRender(r))))
           ]);
 
         case 'assurance_badges':
           return el('div', { key: uniqueKey, style: { display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '10px 0', marginTop: '10px', borderTop: '1px solid #fed7aa' } },
             (control.badges || control.items || []).map((b, i) => el('span', { key: i, style: { display: 'flex', alignItems: 'center', background: '#ffffff', color: '#166534', padding: '4px 10px', borderRadius: '15px', fontSize: '12px', border: '1px solid #bbf7d0', fontWeight: '600', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' } }, [
               el('span', { style: { marginRight: '6px', fontSize: '14px' } }, '🛡️'),
-              b
+              safeRender(b)
             ]))
           );
 
         case 'test_checklist':
         case 'evidence_list':
           return el('div', { key: uniqueKey, style: { marginBottom: '10px' } }, [
-            label && el('strong', { style: { display: 'block', fontSize: '12px', color: '#334155', marginBottom: '6px' } }, label),
+            label && el('strong', { style: { display: 'block', fontSize: '12px', color: '#334155', marginBottom: '6px' } }, safeRender(label)),
             el('ol', { style: { margin: 0, paddingLeft: '20px', color: '#475569', fontSize: '12px' } },
-              (control.items || control.tests || control.checklist || control.evidence || []).map((item, i) => el('li', { key: i, style: { marginBottom: '4px' } }, item)))
+              (control.items || control.tests || control.checklist || control.evidence || []).map((item, i) => el('li', { key: i, style: { marginBottom: '4px' } }, safeRender(item))))
           ]);
 
         case 'info':
@@ -540,7 +558,40 @@
 
         case 'warning':
         case 'alert':
-          return el('div', { key: uniqueKey, style: { padding: '10px', background: '#fff7ed', borderLeft: '3px solid #f97316', fontSize: '12px', color: '#7c2d12', marginBottom: '10px' }, dangerouslySetInnerHTML: { __html: label || control.content } });
+          const alertType = (label || 'info').toLowerCase();
+          const alertMap = {
+            success: { icon: 'yes', color: '#166534', bg: '#f0fdf4', border: '#bbf7d0' },
+            warning: { icon: 'warning', color: '#9a3412', bg: '#fff7ed', border: '#fed7aa' },
+            error: { icon: 'no', color: '#991b1b', bg: '#fef2f2', border: '#fecaca' },
+            info: { icon: 'info', color: '#0c4a6e', bg: '#f0f9ff', border: '#bae6fd' },
+            tip: { icon: 'lightbulb', color: '#3f6212', bg: '#f7fee7', border: '#d9f99d' },
+            alert: { icon: 'warning', color: '#9a3412', bg: '#fff7ed', border: '#fed7aa' }
+          };
+          const style = alertMap[alertType] || alertMap.info;
+          return el('div', {
+            key: uniqueKey,
+            style: {
+              display: 'flex',
+              gap: '10px',
+              padding: '12px',
+              background: style.bg,
+              borderLeft: `4px solid ${style.color}`,
+              borderTop: `1px solid ${style.border}`,
+              borderRight: `1px solid ${style.border}`,
+              borderBottom: `1px solid ${style.border}`,
+              borderRadius: '4px',
+              fontSize: '13px',
+              color: style.color,
+              marginBottom: '15px',
+              alignItems: 'center'
+            }
+          }, [
+            el(Icon, { icon: style.icon, size: 20, style: { flexShrink: 0 } }),
+            el('div', {
+              style: { lineHeight: '1.5' },
+              dangerouslySetInnerHTML: { __html: control.message || control.content || label }
+            })
+          ]);
 
         case 'remediation_steps':
         case 'evidence_uploader':
@@ -554,9 +605,17 @@
     const verificationTypes = ['verification_action', 'automated_test', 'risk_indicators', 'assurance_badges'];
     const guideTypes = ['test_checklist', 'evidence_list', 'remediation_steps', 'evidence_uploader'];
 
-    const mainControls = schema.controls.filter(c => {
+    const mainControlsRaw = schema.controls.filter(c => {
       const isVerification = verificationTypes.includes(c.type);
       const isGuide = guideTypes.includes(c.type);
+
+      // Hide empty Operational Notes for non-superadmins
+      if (c.key === 'operational_notes') {
+        const isSuper = window.vaptSettings?.isSuper || false;
+        const val = currentData[c.key];
+        const hasContent = val && val.toString().trim().length > 0;
+        if (!isSuper && !hasContent) return false;
+      }
 
       if (isGuidePanel) {
         return isGuide;
@@ -577,6 +636,15 @@
         }
         return true;
       }
+    });
+
+    // Orphan Logic (v3.3.1) - Remove headers/sections that have no following content
+    const mainControls = mainControlsRaw.filter((c, i) => {
+      if (['header', 'section'].includes(c.type)) {
+        const nextContent = mainControlsRaw.slice(i + 1).find(nc => !['header', 'section', 'divider', 'group'].includes(nc.type));
+        return !!nextContent;
+      }
+      return true;
     });
 
     const riskControls = schema.controls.filter(c => c.type === 'risk_indicators');
@@ -605,7 +673,7 @@
         el('div', { style: { display: 'flex', flexDirection: 'column', gap: '15px' } }, mainControls.map(renderControl)),
       ]),
 
-      (riskControls.length > 0 || otherVerificationControls.length > 0) && el('div', {
+      (feature.include_verification_guidance == 1 || feature.include_verification_guidance === true || feature.include_verification_guidance === undefined) && (riskControls.length > 0 || otherVerificationControls.length > 0) && el('div', {
         className: 'vapt-threat-panel',
         style: {
           background: '#fff7ed',
@@ -619,7 +687,7 @@
         otherVerificationControls.map(renderControl)
       ]),
 
-      badgeControls.length > 0 && el('div', {
+      (feature.include_verification_guidance == 1 || feature.include_verification_guidance === true || feature.include_verification_guidance === undefined) && badgeControls.length > 0 && el('div', {
         className: 'vapt-badges-row',
         style: { display: 'flex', flexWrap: 'wrap', gap: '10px' }
       },
@@ -640,7 +708,7 @@
       }, [
         el('div', { style: { display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '15px' } }, [
           localAlert.type === 'success' && el(Icon, { icon: 'yes', size: 24, style: { color: 'green', background: '#dcfce7', borderRadius: '50%', padding: '4px' } }),
-          el('p', { style: { fontSize: '14px', color: '#1f2937', margin: 0 } }, localAlert.message)
+          el('p', { style: { fontSize: '14px', color: '#1f2937', margin: 0 } }, safeRender(localAlert.message))
         ]),
         el('div', { style: { textAlign: 'right' } },
           el(Button, { isPrimary: true, onClick: () => setLocalAlert(null) }, __('OK', 'vapt-builder'))

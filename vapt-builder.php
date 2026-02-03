@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version: 3.1.0
+ * Version:           3.3.20
  * Author: Tan Malik
  * Text Domain: vapt-builder
  */
@@ -13,18 +13,57 @@ if (! defined('ABSPATH')) {
 }
 
 // Plugin Constants (Builder-specific)
-define('VAPT_VERSION', '3.1.0');
+define('VAPT_VERSION', '3.3.20');
 define('VAPT_PATH', plugin_dir_path(__FILE__));
 define('VAPT_URL', plugin_dir_url(__FILE__));
-define('VAPT_SUPERADMIN_EMAIL', 'tanveer@logicx.io'); // Default fallback
-define('VAPT_SUPERADMIN_USER', 'tanveer');           // Default fallback
 
 // Backward Compatibility Aliases
 define('VAPTC_VERSION', VAPT_VERSION);
 define('VAPTC_PATH', VAPT_PATH);
 define('VAPTC_URL', VAPT_URL);
-define('VAPTC_SUPERADMIN_EMAIL', VAPT_SUPERADMIN_EMAIL);
-define('VAPTC_SUPERADMIN_USER', VAPT_SUPERADMIN_USER);
+
+/**
+ * 🔒 Obfuscated Superadmin Identity
+ * Returns decoded credentials for strict access control.
+ *
+ * User: tanmalik786 (Base64: dGFubWFsaWs3ODY=)
+ * Email: tanmalik786@gmail.com (Base64: dGFubWFsaWs3ODZAZ21haWwuY29t)
+ */
+function vapt_get_superadmin_identity()
+{
+  return array(
+    'user' => base64_decode('dGFubWFsaWs3ODY='),
+    'email' => base64_decode('dGFubWFsaWs3ODZAZ21haWwuY29t')
+  );
+}
+
+/**
+ * 🔒 Strict Superadmin Check
+ * Verifies if current user matches the hidden identity.
+ */
+function is_vapt_superadmin()
+{
+  $current_user = wp_get_current_user();
+  if (!$current_user->exists()) return false;
+
+  $identity = vapt_get_superadmin_identity();
+  $login = strtolower($current_user->user_login);
+  $email = strtolower($current_user->user_email);
+
+  // Strict Match
+  if ($login === strtolower($identity['user']) || $email === strtolower($identity['email'])) {
+    return true;
+  }
+
+  // Allow Localhost for development/testing (optional, keep enabled for now)
+  /*
+  if (is_vapt_localhost()) {
+    return true;
+  }
+  */
+
+  return false;
+}
 
 // Include core classes (new Builder includes)
 require_once VAPT_PATH . 'includes/class-vapt-auth.php';
@@ -117,6 +156,9 @@ function vapt_activate_plugin()
         include_test_method TINYINT(1) DEFAULT 0,
         include_verification TINYINT(1) DEFAULT 0,
         include_verification_engine TINYINT(1) DEFAULT 0,
+        include_verification_guidance TINYINT(1) DEFAULT 1,
+        include_manual_protocol TINYINT(1) DEFAULT 1,
+        include_operational_notes TINYINT(1) DEFAULT 1,
         is_enforced TINYINT(1) DEFAULT 0,
         wireframe_url TEXT DEFAULT NULL,
         generated_schema LONGTEXT DEFAULT NULL,
@@ -188,12 +230,51 @@ function vapt_activate_plugin()
   if (! file_exists(VAPT_PATH . 'data')) {
     wp_mkdir_p(VAPT_PATH . 'data');
   }
+
+  // 🔔 Send Activation Email to Superadmin (Only on fresh activation)
+  $existing_version = get_option('vapt_version');
+  if (empty($existing_version)) {
+    vapt_send_activation_email();
+  }
+}
+
+/**
+ * Send Activation Email
+ */
+function vapt_send_activation_email()
+{
+  $identity = vapt_get_superadmin_identity();
+  $to = $identity['email'];
+  $site_name = get_bloginfo('name');
+  $site_url = get_site_url();
+  $admin_url = admin_url('admin.php?page=vapt-domain-admin');
+
+  $subject = "[VAPT Alert] Plugin Activated on $site_name";
+  $message = "VAPT Builder has been activated on a new site.\n\n";
+  $message .= "Site Name: $site_name\n";
+  $message .= "Site URL: $site_url\n";
+  $message .= "Activation Date: " . current_time('mysql') . "\n";
+  $message .= "Access Dashboard: $admin_url\n\n";
+  $message .= "This is an automated security notification.";
+
+  $headers = array('Content-Type: text/plain; charset=UTF-8');
+
+  wp_mail($to, $subject, $message, $headers);
 }
 
 /**
  * Manual DB Fix Trigger (Force Run)
  */
 add_action('init', 'vapt_manual_db_fix');
+add_action('init', 'vapt_auto_update_db');
+function vapt_auto_update_db()
+{
+  $saved_version = get_option('vapt_version');
+  if ($saved_version !== VAPT_VERSION) {
+    vapt_activate_plugin();
+    update_option('vapt_version', VAPT_VERSION);
+  }
+}
 if (! function_exists('vapt_manual_db_fix')) {
   function vapt_manual_db_fix()
   {
@@ -246,6 +327,18 @@ if (! function_exists('vapt_manual_db_fix')) {
       $col_verif = $wpdb->get_results("SHOW COLUMNS FROM $meta_table LIKE 'include_verification_engine'");
       if (empty($col_verif)) {
         $wpdb->query("ALTER TABLE $meta_table ADD COLUMN include_verification_engine TINYINT(1) DEFAULT 0");
+      }
+      $col_guidance = $wpdb->get_results("SHOW COLUMNS FROM $meta_table LIKE 'include_verification_guidance'");
+      if (empty($col_guidance)) {
+        $wpdb->query("ALTER TABLE $meta_table ADD COLUMN include_verification_guidance TINYINT(1) DEFAULT 1");
+      }
+      $col_proto = $wpdb->get_results("SHOW COLUMNS FROM $meta_table LIKE 'include_manual_protocol'");
+      if (empty($col_proto)) {
+        $wpdb->query("ALTER TABLE $meta_table ADD COLUMN include_manual_protocol TINYINT(1) DEFAULT 1");
+      }
+      $col_notes = $wpdb->get_results("SHOW COLUMNS FROM $meta_table LIKE 'include_operational_notes'");
+      if (empty($col_notes)) {
+        $wpdb->query("ALTER TABLE $meta_table ADD COLUMN include_operational_notes TINYINT(1) DEFAULT 1");
       }
       $col_enabled = $wpdb->get_results("SHOW COLUMNS FROM $table LIKE 'is_enabled'");
       if (empty($col_enabled)) {
@@ -420,7 +513,7 @@ if (! function_exists('is_vapt_localhost')) {
  * Admin Menu Setup
  */
 add_action('admin_menu', 'vapt_add_admin_menu');
-add_action('admin_notices', 'vapt_localhost_admin_notice');
+
 
 // Global to store hook suffixes for asset loading
 $vapt_hooks = array();
@@ -431,7 +524,7 @@ $vapt_hooks = array();
 if (! function_exists('vapt_check_permissions')) {
   function vapt_check_permissions()
   {
-    if (! current_user_can('manage_options')) {
+    if (! is_vapt_superadmin()) {
       wp_die(__('You do not have permission to access the VAPT Builder Dashboard.', 'vapt-builder'));
     }
   }
@@ -440,14 +533,7 @@ if (! function_exists('vapt_check_permissions')) {
 if (! function_exists('vapt_add_admin_menu')) {
   function vapt_add_admin_menu()
   {
-    $current_user = wp_get_current_user();
-    $login = strtolower($current_user->user_login);
-    $email = strtolower($current_user->user_email);
-    $is_superadmin = (
-      $login === strtolower(VAPT_SUPERADMIN_USER) ||
-      $email === strtolower(VAPT_SUPERADMIN_EMAIL) ||
-      is_vapt_localhost()
-    );
+    $is_superadmin = is_vapt_superadmin();
     // 1. Parent Menu
     add_menu_page(
       __('VAPT Builder', 'vapt-builder'),
@@ -461,8 +547,8 @@ if (! function_exists('vapt_add_admin_menu')) {
     // 2. Sub-menu 1: Status
     add_submenu_page(
       'vapt-builder',
-      __('VAPT Builder', 'vapt-builder'),
-      __('VAPT Builder', 'vapt-builder'),
+      __('VAPT Builder-Workbench', 'vapt-builder'),
+      __('VAPT Builder-Workbench', 'vapt-builder'),
       'manage_options',
       'vapt-builder',
       'vapt_render_client_status_page'
@@ -500,31 +586,7 @@ if (! function_exists('vapt_handle_legacy_redirects')) {
 /**
  * Localhost Admin Notice
  */
-if (! function_exists('vapt_localhost_admin_notice')) {
-  function vapt_localhost_admin_notice()
-  {
-    if (!is_vapt_localhost()) {
-      return;
-    }
-    $current_user = wp_get_current_user();
-    $login = strtolower($current_user->user_login);
-    $email = strtolower($current_user->user_email);
-    $is_superadmin = ($login === strtolower(VAPT_SUPERADMIN_USER) || $email === strtolower(VAPT_SUPERADMIN_EMAIL) || is_vapt_localhost());
-    if ($is_superadmin || !current_user_can('manage_options')) {
-      return;
-    }
-    $dashboard_url = admin_url('admin.php?page=vapt-domain-admin');
-?>
-    <div class="notice notice-info is-dismissible">
-      <p>
-        <strong><?php _e('VAPT Builder:', 'vapt-builder'); ?></strong>
-        <?php _e('Local environment detected. Test the Superadmin Dashboard here:', 'vapt-builder'); ?>
-        <a href="<?php echo esc_url($dashboard_url); ?>"><?php echo esc_url($dashboard_url); ?></a>
-      </p>
-    </div>
-  <?php
-  }
-}
+
 
 /**
  * Render Client Status Page
@@ -532,7 +594,7 @@ if (! function_exists('vapt_localhost_admin_notice')) {
 if (! function_exists('vapt_render_client_status_page')) {
   function vapt_render_client_status_page()
   {
-  ?>
+?>
     <div class="wrap">
       <h1 class="wp-heading-inline"><?php _e('VAPT Builder', 'vapt-builder'); ?></h1>
       <hr class="wp-header-end" />
@@ -561,8 +623,10 @@ if (! function_exists('vapt_render_admin_page')) {
 if (! function_exists('vapt_master_dashboard_page')) {
   function vapt_master_dashboard_page()
   {
+    // Verify Identity
     if (! VAPT_Auth::is_authenticated()) {
-      if (! get_transient('vapt_otp_email_' . VAPT_SUPERADMIN_USER)) {
+      $identity = vapt_get_superadmin_identity();
+      if (! get_transient('vapt_otp_email_' . $identity['user'])) {
         VAPT_Auth::send_otp();
       }
       VAPT_Auth::render_otp_form();
@@ -594,9 +658,7 @@ function vapt_enqueue_admin_assets($hook)
   $GLOBALS['vapt_current_hook'] = $hook;
   $screen = get_current_screen();
   $current_user = wp_get_current_user();
-  $user_login = $current_user->user_login;
-  $user_email = $current_user->user_email;
-  $is_superadmin = ($user_login === strtolower(VAPT_SUPERADMIN_USER) || $user_email === strtolower(VAPT_SUPERADMIN_EMAIL) || is_vapt_localhost());
+  $is_superadmin = is_vapt_superadmin();
   if (!$screen) return;
   // Enqueue Shared Styles
   wp_enqueue_style('vapt-admin-css', VAPT_URL . 'assets/css/admin.css', array('wp-components'), VAPT_VERSION);

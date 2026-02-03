@@ -23,7 +23,8 @@ class VAPT_Htaccess_Driver
     'Deny',
     'Allow',
     'Directory',
-    'DirectoryMatch'
+    'DirectoryMatch',
+    'Require'
   ];
 
   /**
@@ -42,48 +43,28 @@ class VAPT_Htaccess_Driver
     '/SetHandler\s/i'
   ];
 
-  public static function enforce($data, $schema)
+  /**
+   * Generates a list of valid .htaccess rules based on the provided data and schema.
+   * Does NOT write to file.
+   *
+   * @param array $data Implementation data (user inputs)
+   * @param array $schema Feature schema containing enforcement mappings
+   * @return array List of valid .htaccess directives
+   */
+  public static function generate_rules($data, $schema)
   {
-    $log = "[Htaccess Debug " . date('Y-m-d H:i:s') . "] Enforce Called.\n";
-    $log .= "Data Keys: " . implode(',', array_keys($data)) . "\n";
     $enf_config = isset($schema['enforcement']) ? $schema['enforcement'] : array();
-    $target_key = isset($enf_config['target']) ? $enf_config['target'] : 'root';
-
-    $htaccess_path = ABSPATH . '.htaccess';
-    if ($target_key === 'uploads') {
-      $upload_dir = wp_upload_dir();
-      $htaccess_path = $upload_dir['basedir'] . '/.htaccess';
-    }
-
-    if (empty($data) && $target_key !== 'root') {
-      if (file_exists($htaccess_path)) {
-        @unlink($htaccess_path);
-      }
-      return;
-    }
-
-    $dir = dirname($htaccess_path);
-    if (!is_dir($dir)) {
-      wp_mkdir_p($dir);
-    }
-
-    $content = "";
-    if (file_exists($htaccess_path)) {
-      $content = file_get_contents($htaccess_path);
-    }
-
-    // Support both old and new markers for replacement during transition
-    $start_marker = "# BEGIN VAPT SECURITY RULES";
-    $end_marker = "# END VAPT SECURITY RULES";
-
-    $old_start_marker = "# BEGIN VAPTC SECURITY RULES";
-    $old_end_marker = "# END VAPTC SECURITY RULES";
-
     $rules = array();
     $mappings = isset($enf_config['mappings']) ? $enf_config['mappings'] : array();
 
+    // 1. Iterate mappings and bind data
     foreach ($mappings as $key => $directive) {
       if (!empty($data[$key])) {
+        // Simple substitution? Or is the directive itself the rule?
+        // The current logic simply takes the directive string if the key is truthy in $data.
+        // It does NOT appear to do variable substitution (e.g. {{value}}) yet, 
+        // effectively treating the data as a "Toggle".
+
         $validation = self::validate_htaccess_directive($directive);
         if ($validation['valid']) {
           $rules[] = $directive;
@@ -94,60 +75,116 @@ class VAPT_Htaccess_Driver
             $key,
             $validation['reason']
           ));
-          set_transient(
-            'vapt_htaccess_validation_error_' . time(),
-            sprintf(
-              'Security: Invalid .htaccess directive rejected for "%s". Reason: %s',
-              $key,
-              $validation['reason']
-            ),
-            300
-          );
         }
       }
     }
 
-    $rules_string = "";
-    if (!empty($rules)) {
-      $rules_string = "\n" . $start_marker . "\n" . implode("\n\n", $rules) . "\n" . $end_marker . "\n";
+    return $rules;
+  }
+
+  /**
+   * Writes a complete batch of rules to the .htaccess file, replacing the previous VAPT block.
+   *
+   * @param array $all_rules_array Flat array of all .htaccess rules to write
+   * @param string $target_key 'root' or 'uploads'
+   * @return bool Success status
+   */
+  public static function write_batch($all_rules_array, $target_key = 'root')
+  {
+    $log = "[Htaccess Batch Write " . date('Y-m-d H:i:s') . "] Writing " . count($all_rules_array) . " rules.\n";
+
+    $htaccess_path = ABSPATH . '.htaccess';
+    if ($target_key === 'uploads') {
+      $upload_dir = wp_upload_dir();
+      $htaccess_path = $upload_dir['basedir'] . '/.htaccess';
     }
-    file_put_contents(WP_CONTENT_DIR . '/vapt-htaccess-debug.txt', $log, FILE_APPEND);
 
-    if ($target_key === 'root') {
-      // Try new pattern first
-      $pattern = "/# BEGIN VAPT SECURITY RULES.*?# END VAPT SECURITY RULES/s";
-      $old_pattern = "/# BEGIN VAPTC SECURITY RULES.*?# END VAPTC SECURITY RULES/s";
+    // Ensure directory exists
+    $dir = dirname($htaccess_path);
+    if (!is_dir($dir)) {
+      wp_mkdir_p($dir);
+    }
 
-      if (preg_match($pattern, $content)) {
-        $new_content = preg_replace($pattern, trim($rules_string), $content);
-      } else if (preg_match($old_pattern, $content)) {
-        $new_content = preg_replace($old_pattern, trim($rules_string), $content);
-      } else {
+    // Read existing content
+    $content = "";
+    if (file_exists($htaccess_path)) {
+      $content = file_get_contents($htaccess_path);
+    }
+
+    // Prepare new VAPT block
+    $start_marker = "# BEGIN VAPT SECURITY RULES";
+    $end_marker = "# END VAPT SECURITY RULES";
+    $rules_string = "";
+
+    if (!empty($all_rules_array)) {
+      $rules_string = "\n" . $start_marker . "\n" . implode("\n\n", $all_rules_array) . "\n" . $end_marker . "\n";
+    }
+
+    // Replace or Append
+    // 1. Remove old block if exists (supporting both old/new markers)
+    $pattern = "/# BEGIN VAPT SECURITY RULES.*?# END VAPT SECURITY RULES/s";
+    $old_pattern = "/# BEGIN VAPTC SECURITY RULES.*?# END VAPTC SECURITY RULES/s";
+
+    $new_content = $content;
+
+    if (preg_match($pattern, $content)) {
+      $new_content = preg_replace($pattern, trim($rules_string), $content);
+    } else if (preg_match($old_pattern, $content)) {
+      $new_content = preg_replace($old_pattern, trim($rules_string), $content);
+    } else {
+      // Append if not found
+      if ($target_key === 'root') {
         if (strpos($content, "# END WordPress") !== false) {
           $new_content = str_replace("# END WordPress", "# END WordPress\n" . $rules_string, $content);
         } else {
           $new_content = $content . $rules_string;
         }
-      }
-    } else {
-      $new_content = trim($rules_string);
-      if (empty($new_content)) {
-        if (file_exists($htaccess_path)) @unlink($htaccess_path);
-        return;
+      } else {
+        // For non-root (like uploads), usually we control the whole file, but let's be safe and just append/replace block
+        // Actually for uploads, we might just be the only owner. 
+        // But adhering to the block strategy is safer.
+        $new_content = $content . $rules_string;
       }
     }
 
-    if (!empty($new_content) || file_exists($htaccess_path)) {
+    // Clean up empty lines? 
+    // Just ensure we don't end up with huge gaps.
+
+    // Write
+    if ($new_content !== $content || !file_exists($htaccess_path)) {
       $result = @file_put_contents($htaccess_path, trim($new_content) . "\n");
-      if ($result === false) {
-        error_log("VAPT: Failed to write .htaccess to $htaccess_path. Check file permissions.");
-        set_transient(
-          'vapt_htaccess_write_error_' . time(),
-          "Failed to update .htaccess file. Please check file permissions.",
-          300
-        );
+      if ($result !== false) {
+        $log .= "Write SUCCESS: " . strlen($new_content) . " bytes written to $htaccess_path.\n";
+        delete_transient('vapt_active_enforcements');
+      } else {
+        $log .= "Write FAILURE: Could not write to $htaccess_path. Check file permissions.\n";
+        error_log("VAPT: Failed to write .htaccess to $htaccess_path.");
+        set_transient('vapt_htaccess_write_error_' . time(), "Failed to update .htaccess file. check perms.", 300);
+        return false;
       }
+    } else {
+      $log .= "No changes detected. Write skipped.\n";
     }
+
+    // Persistent Log
+    $debug_file = WP_CONTENT_DIR . '/vapt-htaccess-debug.txt';
+    @file_put_contents($debug_file, $log, FILE_APPEND);
+
+    return true;
+  }
+
+  /**
+   * Legacy method for single-feature enforcement.
+   * Now proxies to generate + write, BUT logic warns this is partial.
+   * Kept for signature compatibility.
+   */
+  public static function enforce($data, $schema)
+  {
+    // Note: Direct calling of this will overwrite the file with ONLY this feature's rules.
+    // This should only be used if we are sure we want that, or during testing.
+    //Ideally, we should trigger a full rebuild from Enforcer instead.
+    $rules = self::generate_rules($data, $schema);
+    self::write_batch($rules, isset($schema['enforcement']['target']) ? $schema['enforcement']['target'] : 'root');
   }
 
   private static function validate_htaccess_directive($directive)

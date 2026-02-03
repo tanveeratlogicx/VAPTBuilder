@@ -34,15 +34,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A6:2021-Vulnerable and Outdated Components",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual inspection & automated scanning",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -182,7 +193,11 @@
             "message": "WordPress Version Disclosure protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -241,15 +256,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A7:2017-Identification and Authentication Failures",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual testing & automated brute force",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -374,12 +400,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-weak-password-policy-enforcement-001"]
+            "dependencies": [
+              "UI-weak-password-policy-enforcement-001"
+            ]
           }
         ],
         "layout": {
@@ -409,7 +441,11 @@
             "message": "Weak Password Policy Enforcement protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -438,7 +474,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "high", "weak-password-policy"]
+        "tags": [
+          "authentication",
+          "high",
+          "weak-password-policy"
+        ]
       }
     },
     {
@@ -464,15 +504,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A03:2021-Injection",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Automated scanning & manual payload testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -642,7 +693,11 @@
             "message": "SQL Injection Protection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -671,7 +726,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "critical", "sql-injection"]
+        "tags": [
+          "injection",
+          "critical",
+          "sql-injection"
+        ]
       }
     },
     {
@@ -697,15 +756,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A03:2021-Injection",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual payload testing & automated scanning",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -872,7 +942,11 @@
             "message": "Cross-Site Scripting (XSS) Protection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -901,7 +975,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "high", "xss-protection"]
+        "tags": [
+          "injection",
+          "high",
+          "xss-protection"
+        ]
       }
     },
     {
@@ -927,15 +1005,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A04:2017-XML External Entities (XXE)",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual XML payload testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -1093,7 +1182,11 @@
             "message": "XML External Entity (XXE) Protection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -1122,7 +1215,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "high", "xxe-protection"]
+        "tags": [
+          "injection",
+          "high",
+          "xxe-protection"
+        ]
       }
     },
     {
@@ -1148,15 +1245,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A01:2021-Broken Access Control",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual testing with privilege escalation attempts",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -1288,12 +1396,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-broken-access-control-001"]
+            "dependencies": [
+              "UI-broken-access-control-001"
+            ]
           }
         ],
         "layout": {
@@ -1323,7 +1437,11 @@
             "message": "Broken Access Control protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -1352,7 +1470,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["access control", "high", "broken-access-control"]
+        "tags": [
+          "access control",
+          "high",
+          "broken-access-control"
+        ]
       }
     },
     {
@@ -1378,15 +1500,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Configuration review & automated scanning",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -1547,7 +1680,11 @@
             "message": "Security Misconfiguration protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -1576,7 +1713,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "medium", "security-misconfiguration"]
+        "tags": [
+          "configuration",
+          "medium",
+          "security-misconfiguration"
+        ]
       }
     },
     {
@@ -1602,15 +1743,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A08:2017-Insecure Deserialization",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual payload testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -1763,7 +1915,11 @@
             "message": "Insecure Deserialization protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -1792,7 +1948,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "critical", "insecure-deserialization"]
+        "tags": [
+          "injection",
+          "critical",
+          "insecure-deserialization"
+        ]
       }
     },
     {
@@ -1818,15 +1978,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A06:2021-Vulnerable and Outdated Components",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Automated vulnerability scanning",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -1980,7 +2151,11 @@
             "message": "Using Components with Known Vulnerabilities protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -2009,7 +2184,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["dependencies", "high", "known-vulnerabilities"]
+        "tags": [
+          "dependencies",
+          "high",
+          "known-vulnerabilities"
+        ]
       }
     },
     {
@@ -2035,15 +2214,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A09:2021-Security Logging and Monitoring Failures",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual review & log analysis",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -2215,7 +2405,11 @@
             "message": "Insufficient Logging & Monitoring protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -2244,7 +2438,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["logging", "medium", "insufficient-logging-&-monitoring"]
+        "tags": [
+          "logging",
+          "medium",
+          "insufficient-logging-&-monitoring"
+        ]
       }
     },
     {
@@ -2270,15 +2468,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A01:2021-Broken Access Control",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual testing with token manipulation",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -2410,7 +2619,11 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
@@ -2447,7 +2660,11 @@
             "message": "Cross-Site Request Forgery (CSRF) Protection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -2476,7 +2693,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["access control", "medium", "csrf-protection"]
+        "tags": [
+          "access control",
+          "medium",
+          "csrf-protection"
+        ]
       }
     },
     {
@@ -2502,15 +2723,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A10:2021-Server-Side Request Forgery",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual payload testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -2675,7 +2907,11 @@
             "message": "Server-Side Request Forgery (SSRF) protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -2704,7 +2940,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "high", "ssrf-protection"]
+        "tags": [
+          "injection",
+          "high",
+          "ssrf-protection"
+        ]
       }
     },
     {
@@ -2730,15 +2970,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A03:2021-Injection",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual file upload testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -2899,7 +3150,11 @@
             "message": "File Upload Security protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -2928,7 +3183,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "high", "file-upload-security"]
+        "tags": [
+          "input validation",
+          "high",
+          "file-upload-security"
+        ]
       }
     },
     {
@@ -2954,15 +3213,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual path traversal testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -3094,12 +3364,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-directory-traversal-001"]
+            "dependencies": [
+              "UI-directory-traversal-001"
+            ]
           }
         ],
         "layout": {
@@ -3129,7 +3405,11 @@
             "message": "Directory Traversal protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -3158,7 +3438,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["access control", "high", "directory-traversal"]
+        "tags": [
+          "access control",
+          "high",
+          "directory-traversal"
+        ]
       }
     },
     {
@@ -3184,15 +3468,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual access testing & configuration review",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -3331,12 +3626,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-admin-interface-protection-001"]
+            "dependencies": [
+              "UI-admin-interface-protection-001"
+            ]
           }
         ],
         "layout": {
@@ -3366,7 +3667,11 @@
             "message": "Admin Interface Protection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -3395,7 +3700,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "critical", "admin-interface-protection"]
+        "tags": [
+          "authentication",
+          "critical",
+          "admin-interface-protection"
+        ]
       }
     },
     {
@@ -3421,15 +3730,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual API testing & automated scanning",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -3582,7 +3902,11 @@
             "message": "XML-RPC API Security protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -3611,7 +3935,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["api security", "medium", "xml-rpc-security"]
+        "tags": [
+          "api security",
+          "medium",
+          "xml-rpc-security"
+        ]
       }
     },
     {
@@ -3637,15 +3965,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual API testing & automated scanning",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -3806,7 +4145,11 @@
             "message": "REST API Endpoint Security protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -3835,7 +4178,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["api security", "medium", "rest-api-endpoint-security"]
+        "tags": [
+          "api security",
+          "medium",
+          "rest-api-endpoint-security"
+        ]
       }
     },
     {
@@ -3861,15 +4208,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual testing & automated scanning",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -4023,7 +4381,11 @@
             "message": "User Enumeration protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -4052,7 +4414,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "low", "user-enumeration"]
+        "tags": [
+          "information disclosure",
+          "low",
+          "user-enumeration"
+        ]
       }
     },
     {
@@ -4078,15 +4444,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Automated brute force testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -4225,12 +4602,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-brute-force-protection-001"]
+            "dependencies": [
+              "UI-brute-force-protection-001"
+            ]
           }
         ],
         "layout": {
@@ -4260,7 +4643,11 @@
             "message": "Brute Force Protection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -4289,7 +4676,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "high", "brute-force-protection"]
+        "tags": [
+          "authentication",
+          "high",
+          "brute-force-protection"
+        ]
       }
     },
     {
@@ -4315,15 +4706,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A07:2017-Identification and Authentication Failures",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual session testing & cookie analysis",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -4484,7 +4886,11 @@
             "message": "Session Management Security protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -4513,7 +4919,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["session management", "high", "session-management"]
+        "tags": [
+          "session management",
+          "high",
+          "session-management"
+        ]
       }
     },
     {
@@ -4539,15 +4949,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Automated header scanning",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -4714,7 +5135,11 @@
             "message": "HTTP Security Headers protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -4743,7 +5168,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "medium", "security-headers"]
+        "tags": [
+          "configuration",
+          "medium",
+          "security-headers"
+        ]
       }
     },
     {
@@ -4769,15 +5198,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Automated SSL scanning",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -4938,7 +5378,11 @@
             "message": "SSL/TLS Configuration protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -4967,7 +5411,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["cryptography", "high", "ssl-tls-configuration"]
+        "tags": [
+          "cryptography",
+          "high",
+          "ssl-tls-configuration"
+        ]
       }
     },
     {
@@ -4993,15 +5441,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Configuration review & manual testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -5173,7 +5632,11 @@
             "message": "Database Security Configuration protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -5202,7 +5665,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "high", "database-security-config"]
+        "tags": [
+          "configuration",
+          "high",
+          "database-security-config"
+        ]
       }
     },
     {
@@ -5228,15 +5695,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual permission checking",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -5397,7 +5875,11 @@
             "message": "File Permissions protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -5426,7 +5908,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "medium", "file-permissions"]
+        "tags": [
+          "configuration",
+          "medium",
+          "file-permissions"
+        ]
       }
     },
     {
@@ -5452,15 +5938,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Configuration review & direct access testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -5621,7 +6118,11 @@
             "message": "wp-config.php Protection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -5650,7 +6151,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "critical", "wp-config-protection"]
+        "tags": [
+          "configuration",
+          "critical",
+          "wp-config-protection"
+        ]
       }
     },
     {
@@ -5676,15 +6181,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Configuration review",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -5845,7 +6361,11 @@
             "message": ".htaccess Security Rules protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -5874,7 +6394,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "medium", "htaccess-security-rules"]
+        "tags": [
+          "configuration",
+          "medium",
+          "htaccess-security-rules"
+        ]
       }
     },
     {
@@ -5900,15 +6424,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Configuration review & error testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -6062,7 +6597,11 @@
             "message": "Debug Mode Exposure protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -6091,7 +6630,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "medium", "debug-mode-exposure"]
+        "tags": [
+          "information disclosure",
+          "medium",
+          "debug-mode-exposure"
+        ]
       }
     },
     {
@@ -6117,15 +6660,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual error triggering",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -6297,7 +6851,11 @@
             "message": "Database Error Disclosure protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -6356,15 +6914,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Configuration review & error testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -6518,7 +7087,11 @@
             "message": "PHP Error Reporting protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -6547,7 +7120,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "low", "php-error-reporting"]
+        "tags": [
+          "information disclosure",
+          "low",
+          "php-error-reporting"
+        ]
       }
     },
     {
@@ -6573,15 +7150,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual directory access testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -6735,7 +7323,11 @@
             "message": "Directory Listing protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -6764,7 +7356,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "low", "directory-listing"]
+        "tags": [
+          "information disclosure",
+          "low",
+          "directory-listing"
+        ]
       }
     },
     {
@@ -6790,15 +7386,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Automated file discovery",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -6952,7 +7559,11 @@
             "message": "Backup File Exposure protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -6981,7 +7592,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "high", "backup-file-exposure"]
+        "tags": [
+          "information disclosure",
+          "high",
+          "backup-file-exposure"
+        ]
       }
     },
     {
@@ -7007,15 +7622,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Automated file discovery",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -7169,7 +7795,11 @@
             "message": "Configuration File Exposure protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -7228,15 +7858,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual file discovery",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -7390,7 +8031,11 @@
             "message": "Log File Exposure protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -7419,7 +8064,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "high", "log-file-exposure"]
+        "tags": [
+          "information disclosure",
+          "high",
+          "log-file-exposure"
+        ]
       }
     },
     {
@@ -7445,15 +8094,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual testing & file access attempts",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -7607,7 +8267,11 @@
             "message": "Source Code Disclosure protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -7636,7 +8300,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "medium", "source-code-disclosure"]
+        "tags": [
+          "information disclosure",
+          "medium",
+          "source-code-disclosure"
+        ]
       }
     },
     {
@@ -7662,15 +8330,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Header analysis & manual testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -7824,7 +8503,11 @@
             "message": "Clickjacking Protection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -7853,7 +8536,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["client-side security", "medium", "clickjacking-protection"]
+        "tags": [
+          "client-side security",
+          "medium",
+          "clickjacking-protection"
+        ]
       }
     },
     {
@@ -7879,15 +8566,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Header analysis",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -8041,7 +8739,11 @@
             "message": "MIME Type Sniffing Protection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -8070,7 +8772,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["client-side security", "low", "mime-type-sniffing-protection"]
+        "tags": [
+          "client-side security",
+          "low",
+          "mime-type-sniffing-protection"
+        ]
       }
     },
     {
@@ -8096,15 +8802,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual CORS testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -8236,12 +8953,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-cross-origin-resource-sharing-(cors)-001"]
+            "dependencies": [
+              "UI-cross-origin-resource-sharing-(cors)-001"
+            ]
           }
         ],
         "layout": {
@@ -8271,7 +8994,11 @@
             "message": "Cross-Origin Resource Sharing (CORS) protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -8300,7 +9027,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["access control", "medium", "cors-configuration"]
+        "tags": [
+          "access control",
+          "medium",
+          "cors-configuration"
+        ]
       }
     },
     {
@@ -8326,15 +9057,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual HTML inspection",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -8488,7 +9230,11 @@
             "message": "Subresource Integrity (SRI) protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -8517,7 +9263,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["client-side security", "low", "subresource-integrity"]
+        "tags": [
+          "client-side security",
+          "low",
+          "subresource-integrity"
+        ]
       }
     },
     {
@@ -8543,15 +9293,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Header analysis & policy testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -8705,7 +9466,11 @@
             "message": "Content Security Policy (CSP) protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -8734,7 +9499,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["client-side security", "medium", "content-security-policy"]
+        "tags": [
+          "client-side security",
+          "medium",
+          "content-security-policy"
+        ]
       }
     },
     {
@@ -8760,15 +9529,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Header analysis",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -8922,7 +9702,11 @@
             "message": "Referrer Policy protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -8951,7 +9735,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "low", "referrer-policy"]
+        "tags": [
+          "information disclosure",
+          "low",
+          "referrer-policy"
+        ]
       }
     },
     {
@@ -8977,15 +9765,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Header analysis",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -9139,7 +9938,11 @@
             "message": "Feature Policy / Permissions Policy protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -9198,15 +10001,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual HTTP method testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -9360,7 +10174,11 @@
             "message": "Insecure HTTP Methods protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -9389,7 +10207,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "medium", "insecure-http-methods"]
+        "tags": [
+          "configuration",
+          "medium",
+          "insecure-http-methods"
+        ]
       }
     },
     {
@@ -9415,15 +10237,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual method manipulation testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -9555,12 +10388,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-http-verb-tampering-001"]
+            "dependencies": [
+              "UI-http-verb-tampering-001"
+            ]
           }
         ],
         "layout": {
@@ -9590,7 +10429,11 @@
             "message": "HTTP Verb Tampering protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -9619,7 +10462,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["access control", "high", "http-verb-tampering"]
+        "tags": [
+          "access control",
+          "high",
+          "http-verb-tampering"
+        ]
       }
     },
     {
@@ -9645,15 +10492,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual cache testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -9807,7 +10665,11 @@
             "message": "Cache Poisoning protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -9836,7 +10698,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "medium", "cache-poisoning"]
+        "tags": [
+          "configuration",
+          "medium",
+          "cache-poisoning"
+        ]
       }
     },
     {
@@ -9862,15 +10728,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual header manipulation testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -10030,7 +10907,11 @@
             "message": "Host Header Injection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -10059,7 +10940,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "medium", "host-header-injection"]
+        "tags": [
+          "injection",
+          "medium",
+          "host-header-injection"
+        ]
       }
     },
     {
@@ -10085,15 +10970,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual redirect testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -10247,7 +11143,11 @@
             "message": "Open Redirect protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -10276,7 +11176,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "low", "open-redirect"]
+        "tags": [
+          "input validation",
+          "low",
+          "open-redirect"
+        ]
       }
     },
     {
@@ -10302,15 +11206,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual path traversal testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -10470,7 +11385,11 @@
             "message": "Local File Inclusion (LFI) protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -10499,7 +11418,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "high", "lfi-protection"]
+        "tags": [
+          "injection",
+          "high",
+          "lfi-protection"
+        ]
       }
     },
     {
@@ -10525,15 +11448,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual URL inclusion testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -10693,7 +11627,11 @@
             "message": "Remote File Inclusion (RFI) protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -10722,7 +11660,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "critical", "rfi-protection"]
+        "tags": [
+          "injection",
+          "critical",
+          "rfi-protection"
+        ]
       }
     },
     {
@@ -10748,15 +11690,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual command payload testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -10916,7 +11869,11 @@
             "message": "Command Injection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -10945,7 +11902,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "critical", "command-injection-protection"]
+        "tags": [
+          "injection",
+          "critical",
+          "command-injection-protection"
+        ]
       }
     },
     {
@@ -10971,15 +11932,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual template payload testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -11139,7 +12111,11 @@
             "message": "Template Injection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -11168,7 +12144,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "high", "template-injection-protection"]
+        "tags": [
+          "injection",
+          "high",
+          "template-injection-protection"
+        ]
       }
     },
     {
@@ -11194,15 +12174,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual email header testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -11362,7 +12353,11 @@
             "message": "Email Header Injection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -11391,7 +12386,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["injection", "medium", "email-header-injection-protection"]
+        "tags": [
+          "injection",
+          "medium",
+          "email-header-injection-protection"
+        ]
       }
     },
     {
@@ -11417,15 +12416,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual password reset testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -11557,12 +12567,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-password-reset-vulnerability-001"]
+            "dependencies": [
+              "UI-password-reset-vulnerability-001"
+            ]
           }
         ],
         "layout": {
@@ -11592,7 +12608,11 @@
             "message": "Password Reset Vulnerability protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -11621,7 +12641,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "high", "password-reset-vulnerability"]
+        "tags": [
+          "authentication",
+          "high",
+          "password-reset-vulnerability"
+        ]
       }
     },
     {
@@ -11647,15 +12671,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual email change testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -11787,12 +12822,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-account-takeover-via-email-change-001"]
+            "dependencies": [
+              "UI-account-takeover-via-email-change-001"
+            ]
           }
         ],
         "layout": {
@@ -11822,7 +12863,11 @@
             "message": "Account Takeover via Email Change protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -11851,7 +12896,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "high", "account-takeover-email-change"]
+        "tags": [
+          "authentication",
+          "high",
+          "account-takeover-email-change"
+        ]
       }
     },
     {
@@ -11877,15 +12926,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual session testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -12039,7 +13099,11 @@
             "message": "Session Fixation protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -12068,7 +13132,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["session management", "medium", "session-fixation-protection"]
+        "tags": [
+          "session management",
+          "medium",
+          "session-fixation-protection"
+        ]
       }
     },
     {
@@ -12094,15 +13162,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual session duration testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -12256,7 +13335,11 @@
             "message": "Session Timeout protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -12285,7 +13368,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["session management", "medium", "session-timeout-protection"]
+        "tags": [
+          "session management",
+          "medium",
+          "session-timeout-protection"
+        ]
       }
     },
     {
@@ -12311,15 +13398,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual concurrent session testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -12473,7 +13571,11 @@
             "message": "Concurrent Session Control protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -12502,7 +13604,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["session management", "low", "concurrent-session-control"]
+        "tags": [
+          "session management",
+          "low",
+          "concurrent-session-control"
+        ]
       }
     },
     {
@@ -12528,15 +13634,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Cookie analysis",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -12690,7 +13807,11 @@
             "message": "Cookie Security Attributes protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -12719,7 +13840,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["session management", "medium", "cookie-security-attributes"]
+        "tags": [
+          "session management",
+          "medium",
+          "cookie-security-attributes"
+        ]
       }
     },
     {
@@ -12745,15 +13870,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "URL parameter analysis",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -12907,7 +14043,11 @@
             "message": "Sensitive Data in URL protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -12936,7 +14076,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "medium", "sensitive-data-in-url"]
+        "tags": [
+          "information disclosure",
+          "medium",
+          "sensitive-data-in-url"
+        ]
       }
     },
     {
@@ -12962,15 +14106,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Log file analysis",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -13124,7 +14279,11 @@
             "message": "Sensitive Data in Logs protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -13153,7 +14312,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "high", "sensitive-data-in-logs"]
+        "tags": [
+          "information disclosure",
+          "high",
+          "sensitive-data-in-logs"
+        ]
       }
     },
     {
@@ -13179,15 +14342,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Configuration review & data inspection",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -13341,7 +14515,11 @@
             "message": "Data Encryption at Rest protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -13370,7 +14548,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["cryptography", "high", "data-encryption-at-rest"]
+        "tags": [
+          "cryptography",
+          "high",
+          "data-encryption-at-rest"
+        ]
       }
     },
     {
@@ -13396,15 +14578,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Automated SSL scanning",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -13558,7 +14751,11 @@
             "message": "Data Encryption in Transit protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -13587,7 +14784,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["cryptography", "high", "data-encryption-in-transit"]
+        "tags": [
+          "cryptography",
+          "high",
+          "data-encryption-in-transit"
+        ]
       }
     },
     {
@@ -13613,15 +14814,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Configuration review & code analysis",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -13775,7 +14987,11 @@
             "message": "Weak Cryptographic Algorithms protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -13804,7 +15020,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["cryptography", "high", "weak-cryptographic-algorithms"]
+        "tags": [
+          "cryptography",
+          "high",
+          "weak-cryptographic-algorithms"
+        ]
       }
     },
     {
@@ -13830,15 +15050,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Code review & randomness testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -13992,7 +15223,11 @@
             "message": "Insecure Random Number Generation protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -14021,7 +15256,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["cryptography", "high", "insecure-random-number-generation"]
+        "tags": [
+          "cryptography",
+          "high",
+          "insecure-random-number-generation"
+        ]
       }
     },
     {
@@ -14047,15 +15286,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual business logic testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -14209,7 +15459,11 @@
             "message": "Business Logic Vulnerabilities protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -14238,7 +15492,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["business logic", "medium", "business-logic-vulnerabilities"]
+        "tags": [
+          "business logic",
+          "medium",
+          "business-logic-vulnerabilities"
+        ]
       }
     },
     {
@@ -14264,15 +15522,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Concurrent request testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -14426,7 +15695,11 @@
             "message": "Race Conditions protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -14455,7 +15728,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["concurrency", "medium", "race-conditions"]
+        "tags": [
+          "concurrency",
+          "medium",
+          "race-conditions"
+        ]
       }
     },
     {
@@ -14481,15 +15758,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Automated rate limit testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -14643,7 +15931,11 @@
             "message": "API Rate Limiting protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -14672,7 +15964,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["availability", "medium", "api-rate-limiting"]
+        "tags": [
+          "availability",
+          "medium",
+          "api-rate-limiting"
+        ]
       }
     },
     {
@@ -14698,15 +15994,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Load testing & resource exhaustion testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -14860,7 +16167,11 @@
             "message": "Denial of Service (DoS) Protection protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -14889,7 +16200,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["availability", "high", "dos-protection"]
+        "tags": [
+          "availability",
+          "high",
+          "dos-protection"
+        ]
       }
     },
     {
@@ -14915,15 +16230,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual WAF evasion testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -15088,7 +16414,11 @@
             "message": "Web Application Firewall (WAF) Bypass protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -15117,7 +16447,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["protection bypass", "high", "waf-bypass"]
+        "tags": [
+          "protection bypass",
+          "high",
+          "waf-bypass"
+        ]
       }
     },
     {
@@ -15143,15 +16477,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual input manipulation testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -15305,7 +16650,11 @@
             "message": "Input Validation Bypass protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -15334,7 +16683,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "high", "input-validation-bypass"]
+        "tags": [
+          "input validation",
+          "high",
+          "input-validation-bypass"
+        ]
       }
     },
     {
@@ -15360,15 +16713,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual authentication testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -15511,12 +16875,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-authentication-bypass-001"]
+            "dependencies": [
+              "UI-authentication-bypass-001"
+            ]
           }
         ],
         "layout": {
@@ -15546,7 +16916,11 @@
             "message": "Authentication Bypass protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -15575,7 +16949,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "critical", "authentication-bypass"]
+        "tags": [
+          "authentication",
+          "critical",
+          "authentication-bypass"
+        ]
       }
     },
     {
@@ -15601,15 +16979,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual access control testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -15741,12 +17130,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-admin-functionality-exposure-001"]
+            "dependencies": [
+              "UI-admin-functionality-exposure-001"
+            ]
           }
         ],
         "layout": {
@@ -15776,7 +17171,11 @@
             "message": "Admin Functionality Exposure protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -15805,7 +17204,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["access control", "critical", "admin-functionality-exposure"]
+        "tags": [
+          "access control",
+          "critical",
+          "admin-functionality-exposure"
+        ]
       }
     },
     {
@@ -15831,15 +17234,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual privilege testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -15971,12 +17385,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-privilege-escalation-001"]
+            "dependencies": [
+              "UI-privilege-escalation-001"
+            ]
           }
         ],
         "layout": {
@@ -16006,7 +17426,11 @@
             "message": "Privilege Escalation protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -16035,7 +17459,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["access control", "critical", "privilege-escalation"]
+        "tags": [
+          "access control",
+          "critical",
+          "privilege-escalation"
+        ]
       }
     },
     {
@@ -16061,15 +17489,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual parameter tampering",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -16223,7 +17662,11 @@
             "message": "Mass Assignment protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -16252,7 +17695,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "medium", "mass-assignment"]
+        "tags": [
+          "input validation",
+          "medium",
+          "mass-assignment"
+        ]
       }
     },
     {
@@ -16278,15 +17725,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual ID manipulation testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -16418,12 +17876,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-insecure-direct-object-references-(idor)-001"]
+            "dependencies": [
+              "UI-insecure-direct-object-references-(idor)-001"
+            ]
           }
         ],
         "layout": {
@@ -16453,7 +17917,11 @@
             "message": "Insecure Direct Object References (IDOR) protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -16482,7 +17950,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["access control", "high", "idor-extended"]
+        "tags": [
+          "access control",
+          "high",
+          "idor-extended"
+        ]
       }
     },
     {
@@ -16508,15 +17980,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual path traversal testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -16670,7 +18153,11 @@
             "message": "File Path Traversal protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -16699,7 +18186,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "high", "file-path-traversal-extended"]
+        "tags": [
+          "input validation",
+          "high",
+          "file-path-traversal-extended"
+        ]
       }
     },
     {
@@ -16725,15 +18216,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual file upload testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -16887,7 +18389,11 @@
             "message": "Unrestricted File Upload protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -16916,7 +18422,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "critical", "unrestricted-file-upload"]
+        "tags": [
+          "input validation",
+          "critical",
+          "unrestricted-file-upload"
+        ]
       }
     },
     {
@@ -16942,15 +18452,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual validation bypass testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -17104,7 +18625,11 @@
             "message": "Server-Side Validation Bypass protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -17133,7 +18658,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "high", "server-side-validation-bypass"]
+        "tags": [
+          "input validation",
+          "high",
+          "server-side-validation-bypass"
+        ]
       }
     },
     {
@@ -17159,15 +18688,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual JavaScript bypass testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -17321,7 +18861,11 @@
             "message": "Client-Side Validation Only protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -17350,7 +18894,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "high", "client-side-validation-only"]
+        "tags": [
+          "input validation",
+          "high",
+          "client-side-validation-only"
+        ]
       }
     },
     {
@@ -17376,15 +18924,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Integration testing & configuration review",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -17538,7 +19097,11 @@
             "message": "Insecure Third-Party Integrations protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -17567,7 +19130,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["third-party", "medium", "insecure-third-party-integrations"]
+        "tags": [
+          "third-party",
+          "medium",
+          "insecure-third-party-integrations"
+        ]
       }
     },
     {
@@ -17593,15 +19160,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Automated scanning & manual access testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -17766,7 +19344,11 @@
             "message": "Exposed Adminer/phpMyAdmin protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -17825,15 +19407,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Configuration review & access testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -17987,7 +19580,11 @@
             "message": "WordPress File Editor Access protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -18016,7 +19613,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "high", "wordpress-file-editor-access"]
+        "tags": [
+          "configuration",
+          "high",
+          "wordpress-file-editor-access"
+        ]
       }
     },
     {
@@ -18042,15 +19643,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual editor testing",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -18204,7 +19816,11 @@
             "message": "Plugin/Theme Editor Vulnerability protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -18263,15 +19879,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual cron testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -18425,7 +20052,11 @@
             "message": "wp-cron.php Security protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -18454,7 +20085,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "medium", "wp-cron-security"]
+        "tags": [
+          "configuration",
+          "medium",
+          "wp-cron-security"
+        ]
       }
     },
     {
@@ -18480,15 +20115,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual registration testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -18620,12 +20266,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-user-registration-security-001"]
+            "dependencies": [
+              "UI-user-registration-security-001"
+            ]
           }
         ],
         "layout": {
@@ -18655,7 +20307,11 @@
             "message": "User Registration Security protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -18684,7 +20340,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "medium", "user-registration-security"]
+        "tags": [
+          "authentication",
+          "medium",
+          "user-registration-security"
+        ]
       }
     },
     {
@@ -18710,15 +20370,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual comment testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -18878,7 +20549,11 @@
             "message": "Comment Security protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -18907,7 +20582,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "low", "comment-security"]
+        "tags": [
+          "input validation",
+          "low",
+          "comment-security"
+        ]
       }
     },
     {
@@ -18933,15 +20612,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual search testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -19111,7 +20801,11 @@
             "message": "Search Functionality Security protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -19140,7 +20834,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "medium", "search-functionality-security"]
+        "tags": [
+          "input validation",
+          "medium",
+          "search-functionality-security"
+        ]
       }
     },
     {
@@ -19166,15 +20864,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A00:2021-Security Risk",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Manual form testing",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -19334,7 +21043,11 @@
             "message": "Contact Form Security protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -19363,7 +21076,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["input validation", "medium", "contact-form-security"]
+        "tags": [
+          "input validation",
+          "medium",
+          "contact-form-security"
+        ]
       }
     },
     {
@@ -19389,15 +21106,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A04:2021 - Insecure Design",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Direct endpoint access",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -19530,7 +21258,11 @@
             "message": "wp-cron.php Enabled Leads to DoS Attack protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -19559,7 +21291,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "high", "1"]
+        "tags": [
+          "configuration",
+          "high",
+          "1"
+        ]
       }
     },
     {
@@ -19585,15 +21321,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021 - Security Misconfiguration",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "XML-RPC pingback test",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -19726,7 +21473,11 @@
             "message": "Xmlrpc enabled Leads to Ping back attack protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -19755,7 +21506,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "high", "2"]
+        "tags": [
+          "information disclosure",
+          "high",
+          "2"
+        ]
       }
     },
     {
@@ -19781,15 +21536,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A01:2021 - Broken Access Control",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "REST API enumeration",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -19900,7 +21666,11 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
@@ -19937,7 +21707,11 @@
             "message": "Username Enumeration via WordPress REST API protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -19966,7 +21740,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "medium", "3"]
+        "tags": [
+          "authentication",
+          "medium",
+          "3"
+        ]
       }
     },
     {
@@ -19992,15 +21770,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A07:2021 - Identification and Authentication Failures",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Password reset spam",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -20111,12 +21900,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-email-flooding-via-password-reset-001"]
+            "dependencies": [
+              "UI-email-flooding-via-password-reset-001"
+            ]
           }
         ],
         "layout": {
@@ -20146,7 +21941,11 @@
             "message": "Email Flooding via Password Reset protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -20175,7 +21974,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "medium", "4"]
+        "tags": [
+          "authentication",
+          "medium",
+          "4"
+        ]
       }
     },
     {
@@ -20201,15 +22004,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A01:2021 - Broken Access Control",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Author ID enumeration",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -20342,7 +22156,11 @@
             "message": "Exposed WordPress Admin Username via Author Query protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -20371,7 +22189,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "medium", "5"]
+        "tags": [
+          "information disclosure",
+          "medium",
+          "5"
+        ]
       }
     },
     {
@@ -20397,15 +22219,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021 - Security Misconfiguration",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "REST API discovery",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -20538,7 +22371,11 @@
             "message": "Endpoint Disclosure (auto-generated WP REST routes) protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -20567,7 +22404,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["api security", "low", "6"]
+        "tags": [
+          "api security",
+          "low",
+          "6"
+        ]
       }
     },
     {
@@ -20593,15 +22434,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A07:2021 - Identification and Authentication Failures",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Brute-force simulation",
         "difficulty": "medium",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -20712,12 +22564,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-lack-of-rate-limiting-on-wordpress-login-001"]
+            "dependencies": [
+              "UI-lack-of-rate-limiting-on-wordpress-login-001"
+            ]
           }
         ],
         "layout": {
@@ -20747,7 +22605,11 @@
             "message": "Lack of Rate Limiting on WordPress Login protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -20776,7 +22638,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "high", "7"]
+        "tags": [
+          "authentication",
+          "high",
+          "7"
+        ]
       }
     },
     {
@@ -20802,15 +22668,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A07:2021 - Identification and Authentication Failures",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Login error analysis",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -20921,12 +22798,18 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": ["permissive", "moderate", "strict"],
+            "options": [
+              "permissive",
+              "moderate",
+              "strict"
+            ],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": ["UI-username-enumeration-via-wp-login.php-001"]
+            "dependencies": [
+              "UI-username-enumeration-via-wp-login.php-001"
+            ]
           }
         ],
         "layout": {
@@ -20956,7 +22839,11 @@
             "message": "Username Enumeration via wp-login.php protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -20985,7 +22872,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["authentication", "medium", "8"]
+        "tags": [
+          "authentication",
+          "medium",
+          "8"
+        ]
       }
     },
     {
@@ -21011,15 +22902,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A04:2021 - Insecure Design",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Form spam test",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -21152,7 +23054,11 @@
             "message": "Lack of Rate Limiting on Contact and Registration Forms protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -21181,7 +23087,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "medium", "9"]
+        "tags": [
+          "configuration",
+          "medium",
+          "9"
+        ]
       }
     },
     {
@@ -21207,15 +23117,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021 - Security Misconfiguration",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Header inspection",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -21348,7 +23269,11 @@
             "message": "Server Banner Grabbing protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -21377,7 +23302,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "low", "10"]
+        "tags": [
+          "information disclosure",
+          "low",
+          "10"
+        ]
       }
     },
     {
@@ -21391,7 +23320,7 @@
         "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
       },
       "description": {
-        "summary": "Root readme.html exposes exact WordPress version to attackers. New",
+        "summary": "Root readme.html exposes exact WordPress version to attackers.",
         "detailed": "Root readme.html exposes exact WordPress version to attackers.",
         "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
         "affected_components": [
@@ -21403,15 +23332,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021 - Security Misconfiguration",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Static file access",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -21544,7 +23484,11 @@
             "message": "Information Disclosure via readme.html protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -21573,7 +23517,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["information disclosure", "medium", "11"]
+        "tags": [
+          "information disclosure",
+          "medium",
+          "11"
+        ]
       }
     },
     {
@@ -21599,15 +23547,26 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021 - Security Misconfiguration",
-        "pci_dss": ["Requirement-6.5"],
-        "gdpr": ["Article-32"],
-        "nist_csf": ["PR.DS-5"],
-        "cwe": ["CWE-000"]
+        "pci_dss": [
+          "Requirement-6.5"
+        ],
+        "gdpr": [
+          "Article-32"
+        ],
+        "nist_csf": [
+          "PR.DS-5"
+        ],
+        "cwe": [
+          "CWE-000"
+        ]
       },
       "testing": {
         "test_method": "Header scan",
         "difficulty": "easy",
-        "tools_required": ["Manual testing", "Browser DevTools"],
+        "tools_required": [
+          "Manual testing",
+          "Browser DevTools"
+        ],
         "verification_steps": [
           {
             "step_number": 1,
@@ -21740,7 +23699,11 @@
             "message": "HSTS Not Implemented protection active"
           }
         ],
-        "export_formats": ["pdf", "json", "csv"],
+        "export_formats": [
+          "pdf",
+          "json",
+          "csv"
+        ],
         "share_capability": true
       },
       "code_examples": [
@@ -21769,7 +23732,11 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": ["configuration", "medium", "12"]
+        "tags": [
+          "configuration",
+          "medium",
+          "12"
+        ]
       }
     }
   ],

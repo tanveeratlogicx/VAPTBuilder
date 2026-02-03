@@ -1,4 +1,4 @@
-// Global check-in for diagnostics - ABSOLUTE TOP
+﻿// Global check-in for diagnostics - ABSOLUTE TOP
 window.vaptScriptLoaded = true;
 
 (function () {
@@ -123,6 +123,798 @@ window.vaptScriptLoaded = true;
         el(Button, { isSecondary: true, onClick: onCancel }, __('Cancel', 'vapt-builder')),
         el(Button, { isDestructive: isDestructive, isPrimary: !isDestructive, onClick: onConfirm }, confirmLabel)
       ])
+    ]);
+  };
+
+  // History Modal Component
+  const HistoryModal = ({ feature, updateFeature, onClose }) => {
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      apiFetch({ path: `vapt/v1/features/${feature.key || feature.id}/history` })
+        .then(res => {
+          setHistory(res);
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    }, [feature.key || feature.id]);
+
+    const [confirmState, setConfirmState] = useState(null);
+
+    const resetHistory = () => {
+      setConfirmState({
+        message: sprintf(__('Are you sure you want to reset history for "%s"?\n\nThis will:\n1. Clear all history records.\n2. Reset status to "Draft".', 'vapt-builder'), feature.label),
+        isDestructive: true,
+        onConfirm: () => {
+          setConfirmState(null);
+          setLoading(true);
+          updateFeature(feature.key || feature.id, {
+            status: 'Draft',
+            reset_history: true,
+            has_history: false,
+            history_note: 'History Reset by User'
+          }).then(() => {
+            setLoading(false);
+            onClose();
+          });
+        }
+      });
+    };
+
+    return el(Modal, {
+      title: sprintf(__('History: %s', 'vapt-builder'), feature.name || feature.label),
+      onRequestClose: onClose,
+      className: 'vapt-history-modal'
+    }, [
+      el('div', { style: { display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' } },
+        el(Button, {
+          isDestructive: true,
+          isSmall: true,
+          icon: 'trash',
+          onClick: resetHistory,
+          disabled: loading || history.length === 0
+        }, __('Reset History & Status', 'vapt-builder'))
+      ),
+      loading ? el(Spinner) : el('div', { style: { minWidth: '500px' } }, [
+        history.length === 0 ? el('p', null, __('No history recorded yet.', 'vapt-builder')) :
+          el('table', { className: 'wp-list-table widefat fixed striped' }, [
+            el('thead', null, el('tr', null, [
+              el('th', { style: { width: '120px' } }, __('Date', 'vapt-builder')),
+              el('th', { style: { width: '100px' } }, __('From', 'vapt-builder')),
+              el('th', { style: { width: '100px' } }, __('To', 'vapt-builder')),
+              el('th', { style: { width: '120px' } }, __('User', 'vapt-builder')),
+              el('th', null, __('Note', 'vapt-builder')),
+            ])),
+            el('tbody', null, history.map((h, i) => el('tr', { key: i }, [
+              el('td', null, new Date(h.created_at).toLocaleString()),
+              el('td', null, el('span', { className: `vapt-status-badge status-${h.old_status}` }, h.old_status)),
+              el('td', null, el('span', { className: `vapt-status-badge status-${h.new_status}` }, h.new_status)),
+              el('td', null, h.user_name || __('System', 'vapt-builder')),
+              el('td', null, h.note || '-')
+            ])))
+          ])
+      ]),
+      el('div', { style: { marginTop: '20px', textAlign: 'right' } }, [
+        el(Button, { isPrimary: true, onClick: onClose }, __('Close', 'vapt-builder'))
+      ]),
+      confirmState && el(VAPT_ConfirmModal, {
+        isOpen: true,
+        message: confirmState.message,
+        isDestructive: confirmState.isDestructive,
+        onConfirm: confirmState.onConfirm,
+        onCancel: () => setConfirmState(null)
+      })
+    ]);
+  };
+
+
+  // Design/Schema Modal
+  const DesignModal = ({ feature, onClose, updateFeature, designPromptConfig, setDesignPromptConfig, setIsPromptConfigModalOpen, selectedFile }) => {
+    // Default prompt for guidance but still valid JSON
+    const defaultState = {
+      controls: [],
+      _instructions: "STOP! Do NOT copy this text. 1. Click 'Copy AI Design Prompt' button below. 2. Paste that into Antigravity Chat. 3. Paste the JSON result back here."
+    };
+    const getInitialSchema = () => {
+      if (!feature.generated_schema) return defaultState;
+      if (typeof feature.generated_schema === 'string') {
+        try {
+          const parsed = JSON.parse(feature.generated_schema);
+          // If double-encoded, parse again
+          if (typeof parsed === 'string') return JSON.parse(parsed);
+          return parsed;
+        } catch (e) {
+          return defaultState;
+        }
+      }
+      return feature.generated_schema;
+    };
+
+    const initialParsed = getInitialSchema();
+    const defaultValue = JSON.stringify(initialParsed, null, 2);
+
+    const [schemaText, setSchemaText] = useState(defaultValue);
+    const [parsedSchema, setParsedSchema] = useState(initialParsed);
+    const [localImplData, setLocalImplData] = useState(
+      feature.implementation_data ? (typeof feature.implementation_data === 'string' ? JSON.parse(feature.implementation_data) : feature.implementation_data) : {}
+    );
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveStatus, setSaveStatus] = useState(null);
+
+    // Toggles for Feature Display (v3.3.1)
+    const [includeGuidance, setIncludeGuidance] = useState((feature.include_verification_guidance === undefined || feature.include_verification_guidance === null) ? true : feature.include_verification_guidance == 1);
+    const [includeProtocol, setIncludeProtocol] = useState((feature.include_manual_protocol === undefined || feature.include_manual_protocol === null) ? true : feature.include_manual_protocol == 1);
+    const [includeNotes, setIncludeNotes] = useState((feature.include_operational_notes === undefined || feature.include_operational_notes === null) ? true : feature.include_operational_notes == 1);
+
+    // New: Hover state for paste logic
+    const [isHoveringSchema, setIsHoveringSchema] = useState(false);
+
+    // Handle "Replace on Hover" Paste Logic
+    useEffect(() => {
+      const handleGlobalPaste = (e) => {
+        if (isHoveringSchema) {
+          e.preventDefault();
+          const text = (e.clipboardData || window.clipboardData).getData('text');
+          if (text) {
+            onJsonChange(text);
+            setSaveStatus({ message: __('Content Replaced from Clipboard!', 'vapt-builder'), type: 'success' });
+            setTimeout(() => setSaveStatus(null), 2000);
+          }
+        }
+      };
+      window.addEventListener('paste', handleGlobalPaste);
+      return () => window.removeEventListener('paste', handleGlobalPaste);
+    }, [isHoveringSchema]);
+
+    // Prevent body scroll when modal is open
+    useEffect(() => {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }, []);
+
+    // State for Alerts and Confirms
+    const [alertState, setAlertState] = useState(null);
+    const [confirmState, setConfirmState] = useState(null);
+
+    // State for Remove Confirmation Modal
+    const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
+
+    // Handle real-time preview
+    const onJsonChange = (val) => {
+      setSchemaText(val);
+      try {
+        const parsed = JSON.parse(val);
+        if (parsed && parsed.controls) setParsedSchema(parsed);
+      } catch (e) {
+        // Silent fail for preview while typing
+      }
+    };
+
+    const handleSave = () => {
+      try {
+        // Attempt to clean common paste artifacts (Markdown code blocks & invisible chars)
+        let cleanText = schemaText.trim();
+
+        // Remove markdown code fences if present at start/end
+        if (cleanText.startsWith('```')) {
+          cleanText = cleanText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+        }
+
+        // Replace non-breaking spaces with normal spaces
+        cleanText = cleanText.replace(/\u00A0/g, ' ');
+        // Remove zero-width spaces and other invisible formatting chars
+        cleanText = cleanText.replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
+
+        const parsed = JSON.parse(cleanText);
+        const controls = Array.isArray(parsed.controls) ? parsed.controls : [];
+        const hasTestActions = controls.some(c => c.type === 'test_action');
+
+        setIsSaving(true);
+        updateFeature(feature.key || feature.id, {
+          generated_schema: JSON.stringify(parsed),
+          include_verification_engine: hasTestActions ? 1 : 0,
+          include_verification_guidance: includeGuidance ? 1 : 0,
+          include_manual_protocol: includeProtocol ? 1 : 0,
+          include_operational_notes: includeNotes ? 1 : 0,
+          implementation_data: JSON.stringify(localImplData)
+        })
+          .then(() => {
+            setIsSaving(false);
+            onClose();
+          })
+          .catch(() => setIsSaving(false));
+      } catch (e) {
+        console.error('VAPT Design Save Error:', e);
+        if (e instanceof SyntaxError) {
+          setAlertState({ message: sprintf(__('Invalid JSON format: %s. Check for hidden characters or syntax errors.', 'vapt-builder'), e.message) });
+        } else {
+          setAlertState({ message: sprintf(__('Execution Error: %s. Please report this to support.', 'vapt-builder'), e.message) });
+        }
+      }
+    };
+
+    const handleRemoveConfirm = () => {
+      setIsSaving(true);
+      updateFeature(feature.key || feature.id, {
+        status: 'Draft',
+        generated_schema: null,
+        implementation_data: null,
+        include_verification_engine: 0,
+        include_verification_guidance: 0,
+        reset_history: true,
+        has_history: false
+      })
+        .then(() => {
+          setIsSaving(false);
+          setIsRemoveConfirmOpen(false); // Close confirm modal
+          onClose(); // Close main modal
+        })
+        .catch(() => {
+          setIsSaving(false);
+          setIsRemoveConfirmOpen(false);
+          setAlertState({ message: __('Failed to remove implementation.', 'vapt-builder') });
+        });
+    };
+
+    const copyContext = () => {
+      let contextJson = '';
+
+      if (designPromptConfig) {
+        contextJson = typeof designPromptConfig === 'string'
+          ? designPromptConfig
+          : JSON.stringify(designPromptConfig, null, 2);
+      } else {
+        const defaultTemplate = {
+          "design_prompt": {
+            "interface_type": "Interactive Security Assessment Interface",
+            "schema_definition": "WordPress VAPT schema with standardized control fields",
+            "id": "{{id}}",
+            "title": "{{title}}",
+            "description": "{{description}}",
+            "severity": "{{severity}}",
+            "category": "{{category}}",
+            "compliance_references": "{{owasp}}",
+            "cwe_reference": "{{cwe}}",
+            "remediation_strategy": "{{remediation}}",
+            "evidence_requirements": "{{evidence_requirements}}",
+            "verification_steps": "{{verification_steps}}",
+            "test_method": "{{test_method}}",
+            "ui_components": {
+              "primary_card": "{{automation_prompts.ai_ui}}",
+              "test_checklist": "{{tests}}",
+              "risk_indicators": "{{risks}}",
+              "assurance_badges": "{{assurance}}",
+              "evidence_list": "{{evidence}}"
+            },
+            "interface_layout": {
+              "grid_structure": "Two-Column (Controls Left, Status Right)",
+              "functional_blocks": [
+                "Implementation Notes (Contextual Textarea)",
+                "Manual Verification (Full-Width Protocol & Evidence Checklist)",
+                "Automated Verification (Trigger Actions & Live Status)"
+              ],
+              "styling": "Standardized cards with subtle shadows, 24px padding, and clear hierarchy."
+            },
+            "automation_context": {
+              "ai_check_prompt": "{{automation_prompts.ai_check}}",
+              "ai_schema_fields": "{{automation_prompts.ai_schema}}"
+            },
+            "implementation_strategy": {
+              "execution_driver": "Hybrid (Htaccess + PHP Hook Driver)",
+              "enforcement_mechanism": "Intelligent automated selection based on target type.",
+              "decision_matrix": {
+                "driver: htaccess": "Use for physical files (.html, .txt, .php.bak, .env, xmlrpc.php) or server-wide blocking (Directory Browsing). Requires target: root.",
+                "driver: hook": "Use for dynamic PHP logic, headers, or request interceptions (e.g. wp_head, init, login_init)."
+              },
+              "available_methods": [
+                "limit_login_attempts - Enforces rate limiting (requires 'limit' or 'rate_limit' key)",
+                "block_xmlrpc - Blocks XML-RPC requests (requires toggle)",
+                "disable_directory_browsing - Blocks directory listing",
+                "enable_security_headers - Injects security headers",
+                "block_null_byte_injection - blocks null byte chars",
+                "hide_wp_version - Hides version",
+                "block_debug_exposure - Blocks debug.log access",
+                "block_author_enumeration - Blocks author archives",
+                "disable_xmlrpc_pingback - Disables XML-RPC pingbacks",
+                "block_sensitive_files - Blocks readme.html, license.txt, etc."
+              ],
+              "data_binding": "Controls must use 'key' to bind to method arguments."
+            },
+            "verification_protocol": {
+              "operational_notes": "Contextual help and operational guidance (Right Column)",
+              "manual_verification": "Step-by-step human verification (Evidence Checklist)",
+              "automated_verification": "Interactive test actions for real-time proof"
+            },
+            "threat_model": {
+              "risks": "{{risks}}",
+              "assurance_against": "{{assurance_against}}"
+            },
+            "raw_feature_context": "{{raw_json}}",
+            "previous_implementation": "{{previous_schema}}"
+          }
+        };
+
+        contextJson = JSON.stringify(defaultTemplate, null, 2);
+      }
+
+      // Replace Placeholders in the JSON portion
+      const replaceAll = (str, key, val) => {
+        const value = Array.isArray(val) ? val.join(', ') : (val || '');
+        return str.split(`{{${key}}}`).join(value).split(`{${key}}`).join(value);
+      };
+
+      contextJson = replaceAll(contextJson, 'id', feature.id || 'N/A');
+      contextJson = replaceAll(contextJson, 'title', feature.name || feature.label || feature.title || '');
+      contextJson = replaceAll(contextJson, 'category', feature.category || 'General');
+      contextJson = replaceAll(contextJson, 'description', feature.description || 'None provided');
+      contextJson = replaceAll(contextJson, 'severity', feature.severity || 'Medium');
+      contextJson = replaceAll(contextJson, 'remediation', Array.isArray(feature.remediation) ? feature.remediation.join('\n') : (feature.remediation || ''));
+      contextJson = replaceAll(contextJson, 'assurance_against', Array.isArray(feature.assurance_against) ? feature.assurance_against.join(', ') : (feature.assurance_against || ''));
+      contextJson = replaceAll(contextJson, 'assurance', Array.isArray(feature.assurance) ? feature.assurance.join(', ') : (feature.assurance || ''));
+      contextJson = replaceAll(contextJson, 'tests', Array.isArray(feature.tests) ? feature.tests.join(', ') : (feature.tests || ''));
+      contextJson = replaceAll(contextJson, 'evidence', Array.isArray(feature.evidence) ? feature.evidence.join(', ') : (feature.evidence || ''));
+      contextJson = replaceAll(contextJson, 'schema_hints.fields', feature.schema_hints?.fields?.map(f => `${f.name} (${f.type})`).join(', '));
+      contextJson = replaceAll(contextJson, 'test_method', feature.test_method || '');
+      contextJson = replaceAll(contextJson, 'owasp', feature.owasp || '');
+      contextJson = replaceAll(contextJson, 'cwe', feature.cwe || '');
+      contextJson = replaceAll(contextJson, 'risks', Array.isArray(feature.risks) ? feature.risks.join(', ') : (feature.risks || ''));
+      contextJson = replaceAll(contextJson, 'evidence_requirements', Array.isArray(feature.evidence_requirements) ? feature.evidence_requirements.join(', ') : (feature.evidence_requirements || ''));
+      contextJson = replaceAll(contextJson, 'verification_steps', Array.isArray(feature.verification_steps) ? feature.verification_steps.join(', ') : (feature.verification_steps || ''));
+
+      // Structural Alignment (v3.3.3)
+      const rawContext = { ...feature };
+      delete rawContext.generated_schema;
+      delete rawContext.implementation_data;
+      contextJson = replaceAll(contextJson, 'raw_json', JSON.stringify(rawContext, null, 2));
+      contextJson = replaceAll(contextJson, 'previous_schema', feature.generated_schema || 'None');
+
+      // Dynamic Substitution from automation_prompts
+      const prompts = feature.automation_prompts || {};
+      contextJson = replaceAll(contextJson, 'automation_prompts.ai_ui', prompts.ai_ui || `Interactive JSON Schema for VAPT Workbench.`);
+      contextJson = replaceAll(contextJson, 'automation_prompts.ai_check', prompts.ai_check || `PHP verification logic for ${feature.label || 'this feature'}.`);
+      contextJson = replaceAll(contextJson, 'automation_prompts.ai_schema', prompts.ai_schema || `Essential schema fields for ${feature.label || 'this feature'}.`);
+
+      // Assemble HYBRID PROMPT
+      const finalPrompt = `You are an Expert WordPress Security Engineer, UI Designer, and VAPT Specialist. Your core mandate is to implement security controls that adhere to VAPT and OWASP Top 10 risks and WordPress Coding Standards.
+
+I need you to generate a highly optimized JSON Schema for a 'Functional Workbench' interface for the following security feature:
+
+--- DESIGN CONTEXT ---
+${contextJson}
+--- 
+
+INSTRUCTIONS & CRITICAL RULES:
+1. **Response Format**: Provide ONLY a JSON block. No preamble or conversation.
+2. **Schema Structure**: You MUST include both 'controls' and 'enforcement' blocks.
+3. **Control Properties (MANDATORY)**:
+   - Every object in the 'controls' array **MUST** have a 'type' field.
+   - **Functional**: 'toggle', 'input', 'select', 'textarea', 'code', 'test_action', 'button', 'password'. (MUST HAVE 'key' & 'default').
+   - **Presentational**: 'info', 'alert', 'section', 'group', 'divider', 'html', 'header', 'label'. (NO 'key' required).
+   - **Rich UI**: 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'. (NO 'key' required).
+4. **JSON Skeleton**:
+\`\`\`json
+{
+  "controls": [
+    { "type": "header", "label": "Implementation" },
+    { "type": "toggle", "label": "Enable Feature", "key": "feat_enabled", "default": true },
+    { "type": "test_action", "label": "Verify Protection", "key": "verify_feat", "test_logic": "universal_probe", "test_config": { ... } }
+  ],
+  "enforcement": { 
+    "driver": "hook", 
+    "mappings": { "feat_enabled": "backend_method_name" } 
+  },
+  "// Alternative Htaccess Driver": {
+    "enforcement": {
+      "driver": "htaccess",
+      "target": "root",
+      "mappings": {
+        "feat_enabled": "<FilesMatch \"readme\\.html\">\\nOrder allow,deny\\nDeny from all\\n</FilesMatch>"
+      }
+    }
+  }
+}
+\`\`\`
+5. **Enforcement Drivers (INTELLIGENT SELECTION)**:
+   - **MANDATORY**: Use 'htaccess' for any feature targeting physical files (e.g. readme.html, license.txt, xmlrpc.php, .env). PHP hooks CANNOT block these effectively on Apache.
+   - Use 'hook' for dynamic logic, API interceptions, or header injections.
+   - For 'htaccess', ALWAYS include 'target': 'root' in the enforcement block.
+\`\`\`json
+{
+  "controls": [...],
+  "enforcement": { 
+     "driver": "htaccess", 
+     "target": "root",
+     "mappings": { "feat_enabled": "<FilesMatch \\"readme\\\\.html\\">\\nRequire all denied\\n</FilesMatch>" }
+  }
+}
+\`\`\`
+6. **Visibility Overrides**:
+   - ${includeGuidance ? "INCLUDE 'test_checklist' and 'evidence_list' for verification." : "EXCLUDE 'test_checklist' and 'evidence_list'."}
+   - ${includeNotes ? "INCLUDE a 'textarea' with key 'operational_notes' for implementation notes." : "EXCLUDE operational notes textarea."}
+7. **No Orphan Headers**: Do NOT include 'header' or 'section' controls if they are not followed by functional controls.
+8. **Automated Verification (CRITICAL)**:
+   - Use 'test_action' for verification buttons.
+   - **MUST** include 'test_logic'. Valid options: 'universal_probe', 'check_headers', 'spam_requests', 'block_xmlrpc', 'disable_directory_browsing', 'hide_wp_version', 'block_null_byte_injection'.
+   - For 'universal_probe', ensure 'test_config' is complete: { "method": "GET|POST", "path": "/", "expected_status": [200|403|429], "expected_text": "text_to_find" }.
+   - If information is missing for a valid test, add an 'alert' control explaining exactly what is needed (e.g., "Missing endpoint path").
+8. **Toggle Labels**: All 'toggle' controls MUST have a clear 'label' explaining what they enable/disable.
+9. **Enforcement Logic**: Ensure 'enforcement.mappings' bind the functional keys (e.g., toggles) to the backend strategy.
+
+Feature Name: ${feature.name || feature.label || feature.title}
+Feature ID: ${feature.id || 'N/A'}
+`;
+
+      // Personalize Domain (v3.3.0)
+      const currentDomain = (settings.currentDomain || window.location.hostname || 'hermasnet.local').split(':')[0];
+      const placeholders = [/domain\.com/gi, /yourdomain\.com/gi, /example\.com/gi, /mysite\.com/gi];
+      let personalizedPrompt = finalPrompt;
+      placeholders.forEach(regex => {
+        personalizedPrompt = personalizedPrompt.replace(regex, currentDomain);
+      });
+
+      const copyToClipboard = (text) => {
+        if (navigator.clipboard) return navigator.clipboard.writeText(text);
+        let textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try { document.execCommand('copy'); } catch (err) { console.error('Copy failed', err); }
+        document.body.removeChild(textArea);
+        return Promise.resolve();
+      };
+
+      copyToClipboard(personalizedPrompt)
+        .then(() => {
+          setSaveStatus({ message: __('Design Prompt copied!', 'vapt-builder'), type: 'success' });
+          setTimeout(() => setSaveStatus(null), 3000);
+        });
+    };
+
+    return el(Modal, {
+      title: el('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } }, [
+        el('span', null, sprintf(__('Design Implementation: %s', 'vapt-builder'), feature.label)),
+        el(Button, {
+          isDestructive: true,
+          isSmall: true,
+          onClick: () => setIsRemoveConfirmOpen(true),
+          disabled: isSaving || !feature.generated_schema,
+          icon: 'trash'
+        }, __('Remove Implementation', 'vapt-builder'))
+      ]),
+      onRequestClose: onClose,
+      className: 'vapt-design-modal',
+      style: { width: '1000px', maxWidth: '98%' }
+    }, [
+      saveStatus && el('div', {
+        style: {
+          position: 'absolute', top: '20px', right: '50%', transform: 'translateX(50%)',
+          background: saveStatus.type === 'error' ? '#fde8e8' : '#def7ec',
+          color: saveStatus.type === 'error' ? '#9b1c1c' : '#03543f',
+          padding: '10px 20px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          zIndex: 100, fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px'
+        }
+      }, [
+        el(Icon, { icon: saveStatus.type === 'error' ? 'warning' : 'yes', size: 20 }),
+        saveStatus.message
+      ]),
+
+      el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', height: 'calc(100vh - 160px)', maxHeight: '800px', overflow: 'hidden' } }, [
+        el('div', { style: { display: 'flex', flexDirection: 'column', height: '100%', paddingRight: '10px' } }, [
+          el('p', { style: { margin: '0 0 10px 0', fontSize: '13px', color: '#666' } }, __('Paste the JSON schema generated via Antigravity (the AI Proxy) below.', 'vapt-builder')),
+
+          el('div', { style: { display: 'flex', gap: '10px', marginBottom: '15px' } }, [
+            el(Button, { style: { flex: 1, justifyContent: 'center' }, isSecondary: true, onClick: copyContext, icon: 'clipboard' }, __('Copy Design Prompt', 'vapt-builder')),
+            el(Button, {
+              isDestructive: true,
+              icon: 'trash',
+              onClick: () => {
+                setConfirmState({
+                  message: __('Are you sure you want to reset the schema? This will wash away any changes.', 'vapt-builder'),
+                  isDestructive: true,
+                  onConfirm: () => {
+                    setConfirmState(null);
+                    onJsonChange(JSON.stringify(defaultState, null, 2));
+                    setSaveStatus({ message: __('Schema Reset!', 'vapt-builder'), type: 'success' });
+                    setTimeout(() => setSaveStatus(null), 2000);
+                  }
+                });
+              }
+            }, __('Reset', 'vapt-builder'))
+          ]),
+
+          el('div', { style: { marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '5px' } }, [
+            el(ToggleControl, {
+              label: __('Include Verification & Evidence in Interface', 'vapt-builder'),
+              checked: includeGuidance,
+              onChange: setIncludeGuidance,
+              help: __('Include detailed verification section.', 'vapt-builder')
+            }),
+            el(ToggleControl, {
+              label: __('Include Manual Verification Protocol', 'vapt-builder'),
+              checked: includeProtocol,
+              onChange: setIncludeProtocol
+            }),
+            el(ToggleControl, {
+              label: __('Include Operational Notes Section', 'vapt-builder'),
+              checked: includeNotes,
+              onChange: setIncludeNotes
+            })
+          ]),
+
+          el('div', {
+            style: { flex: 1, display: 'flex', flexDirection: 'column', minHeight: '300px', marginBottom: '10px' },
+            onMouseEnter: () => setIsHoveringSchema(true),
+            onMouseLeave: () => setIsHoveringSchema(false)
+          }, [
+            el('label', { style: { fontSize: '11px', fontWeight: '500', marginBottom: '4px', textTransform: 'uppercase', color: '#101517' } }, __('Interface JSON Schema', 'vapt-builder')),
+            el('div', { style: { fontSize: '11px', color: '#666', marginBottom: '8px' } }, __('Hover and Ctrl+V to replace content.', 'vapt-builder')),
+            el('textarea', {
+              value: schemaText,
+              onChange: (e) => onJsonChange(e.target.value),
+              style: {
+                fontFamily: 'monospace', fontSize: '12px', background: isHoveringSchema ? '#f0fdf4' : '#fcfcfc',
+                lineHeight: '1.4', flex: 1, resize: 'none', width: '100%', border: '1px solid #757575',
+                borderRadius: '4px', padding: '8px', boxSizing: 'border-box', transition: 'background 0.2s'
+              }
+            })
+          ]),
+        ]),
+
+        el('div', { style: { background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' } }, [
+          el('div', { style: { padding: '10px 15px', borderBottom: '1px solid #e5e7eb', background: '#fff', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', flexShrink: 0 } }, [
+            el('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
+              el(Icon, { icon: 'visibility', size: 16 }),
+              el('strong', { style: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#4b5563' } }, __('Live Implementation Preview'))
+            ]),
+            el('div', { style: { display: 'flex', gap: '10px' } }, [
+              el(Button, { isSecondary: true, isSmall: true, onClick: onClose }, __('Cancel', 'vapt-builder')),
+              el(Button, { isPrimary: true, isSmall: true, onClick: handleSave, isBusy: isSaving }, __('Save & Deploy', 'vapt-builder'))
+            ])
+          ]),
+          el('div', { style: { padding: '15px', flex: '1 1 auto', overflowY: 'auto', minHeight: 0 } }, [
+            (() => {
+              const schema = parsedSchema || { controls: [] };
+              const boxStyle = { padding: '15px', background: '#fff', borderRadius: '8px', border: '1px solid #eee', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' };
+              return el('div', { style: { display: 'flex', flexDirection: 'column', gap: '20px' } }, [
+                el('div', { style: boxStyle }, [
+                  el('h4', { style: { margin: '0 0 10px 0', fontSize: '13px', fontWeight: 700, color: '#111827' } }, __('Functional Implementation')),
+                  GeneratedInterface
+                    ? el(GeneratedInterface, {
+                      feature: { ...feature, generated_schema: schema, implementation_data: localImplData },
+                      onUpdate: (newData) => setLocalImplData(newData)
+                    })
+                    : el('p', null, __('Loading Preview Interface...', 'vapt-builder'))
+                ])
+              ]);
+            })()
+          ])
+        ])
+      ]),
+
+      isRemoveConfirmOpen && el(Modal, {
+        title: __('Confirm Removal', 'vapt-builder'),
+        onRequestClose: () => setIsRemoveConfirmOpen(false),
+        style: { maxWidth: '450px' }
+      }, [
+        el('div', { style: { padding: '25px', textAlign: 'center' } }, [
+          el(Icon, { icon: 'warning', size: 42, style: { color: '#dc2626', marginBottom: '15px' } }),
+          el('h3', null, __('Remove Implementation?', 'vapt-builder')),
+          el('p', { style: { fontSize: '13px', color: '#6b7280' } }, __('Are you sure? This cannot be undone.', 'vapt-builder')),
+          el('div', { style: { display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px' } }, [
+            el(Button, { isSecondary: true, onClick: () => setIsRemoveConfirmOpen(false) }, __('Cancel', 'vapt-builder')),
+            el(Button, { isDestructive: true, onClick: handleRemoveConfirm, isBusy: isSaving }, __('Yes, Remove It', 'vapt-builder'))
+          ])
+        ])
+      ]),
+
+      alertState && el(VAPT_AlertModal, {
+        isOpen: true,
+        message: alertState.message,
+        type: alertState.type,
+        onClose: () => setAlertState(null)
+      }),
+      confirmState && el(VAPT_ConfirmModal, {
+        isOpen: true,
+        message: confirmState.message,
+        isDestructive: confirmState.isDestructive,
+        onConfirm: confirmState.onConfirm,
+        onCancel: () => setConfirmState(null)
+      })
+    ]);
+  };
+
+  // Prompt Configuration Modal
+  const PromptConfigModal = ({ isOpen, onClose, feature, designPromptConfig, setDesignPromptConfig, selectedFile }) => {
+    const [promptText, setPromptText] = useState(
+      designPromptConfig ? (typeof designPromptConfig === 'string' ? designPromptConfig : JSON.stringify(designPromptConfig, null, 2)) : ''
+    );
+
+    const handleSave = () => {
+      setDesignPromptConfig(promptText);
+      onClose();
+    };
+
+    return el(Modal, {
+      title: __('AI Design Prompt Configuration', 'vapt-builder'),
+      onRequestClose: onClose,
+      className: 'vapt-prompt-config-modal'
+    }, [
+      el('p', null, __('Customize the instructions sent to the AI for interface generation.', 'vapt-builder')),
+      el(TextareaControl, {
+        label: __('System Prompt / Context Template', 'vapt-builder'),
+        value: promptText,
+        onChange: setPromptText,
+        rows: 20,
+        style: { fontFamily: 'monospace', fontSize: '12px' }
+      }),
+      el('div', { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '15px' } }, [
+        el(Button, { isSecondary: true, onClick: onClose }, __('Cancel', 'vapt-builder')),
+        el(Button, { isPrimary: true, onClick: handleSave }, __('Save Configuration', 'vapt-builder'))
+      ])
+    ]);
+  };
+
+  // Field Mapping Modal Component
+  const FieldMappingModal = ({ isOpen, onClose, fieldMapping, setFieldMapping, allKeys }) => {
+    return el(Modal, {
+      title: __('Field Smart-Mapping Configuration', 'vapt-builder'),
+      onRequestClose: onClose,
+      className: 'vapt-mapping-modal'
+    }, [
+      el('div', { style: { padding: '5px' } }, [
+        el('p', null, __('Map your raw data fields to VAPT Builder interactive components. When you enable a feature sub-type (like Test Method), the system will attempt to auto-populate from these source fields.', 'vapt-builder')),
+
+        el('div', { style: { display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' } }, [
+          el(SelectControl, {
+            label: __('Source for "Test Method"', 'vapt-builder'),
+            value: fieldMapping.test_method,
+            options: [{ label: __('--- Select Source Field ---', 'vapt-builder'), value: '' }, ...allKeys.map(k => ({ label: k, value: k }))],
+            onChange: (val) => setFieldMapping({ ...fieldMapping, test_method: val })
+          }),
+          el(SelectControl, {
+            label: __('Source for "Verification Steps"', 'vapt-builder'),
+            value: fieldMapping.verification_steps,
+            options: [{ label: __('--- Select Source Field ---', 'vapt-builder'), value: '' }, ...allKeys.map(k => ({ label: k, value: k }))],
+            onChange: (val) => setFieldMapping({ ...fieldMapping, verification_steps: val })
+          }),
+          el(SelectControl, {
+            label: __('Source for "Verification Engine (JSON Schema)"', 'vapt-builder'),
+            value: fieldMapping.verification_engine,
+            options: [{ label: __('--- Select Source Field ---', 'vapt-builder'), value: '' }, ...allKeys.map(k => ({ label: k, value: k }))],
+            onChange: (val) => setFieldMapping({ ...fieldMapping, verification_engine: val })
+          })
+        ]),
+
+        el('div', { style: { marginTop: '25px', display: 'flex', justifyContent: 'flex-end' } }, [
+          el(Button, { isPrimary: true, onClick: onClose }, __('Done', 'vapt-builder'))
+        ])
+      ])
+    ]);
+  };
+
+  // Transition Note Modal Component
+  const TransitionNoteModal = ({ transitioning, onConfirm, onCancel }) => {
+    const [formValues, setFormValues] = useState({
+      note: transitioning.note || '',
+      devInstruct: transitioning.devInstruct || '',
+      wireframeUrl: transitioning.wireframeUrl || ''
+    });
+    const [modalSaveStatus, setModalSaveStatus] = useState(null);
+
+    return el(Modal, {
+      title: sprintf(__('Transition to %s', 'vapt-builder'), transitioning.nextStatus),
+      onRequestClose: onCancel,
+      className: 'vapt-transition-modal',
+      style: {
+        width: '600px',
+        maxWidth: '95%',
+        maxHeight: '800px',
+        overflow: 'hidden'
+      }
+    }, [
+      el('div', {
+        style: { height: '100%', display: 'flex', flexDirection: 'column' },
+        onPaste: (e) => {
+          if (transitioning.nextStatus !== 'Develop') return;
+          const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+          for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
+              const blob = item.getAsFile();
+              setModalSaveStatus({ message: __('Uploading pasted image...', 'vapt-builder'), type: 'info' });
+
+              const formData = new FormData();
+              formData.append('file', blob);
+              formData.append('title', 'Pasted Wireframe - ' + transitioning.key);
+
+              wp.apiFetch({
+                path: 'vapt/v1/upload-media',
+                method: 'POST',
+                body: formData
+              }).then(res => {
+                setFormValues({ ...formValues, wireframeUrl: res.url });
+                setModalSaveStatus({ message: __('Image Uploaded', 'vapt-builder'), type: 'success' });
+              }).catch(err => {
+                setModalSaveStatus({ message: __('Paste failed', 'vapt-builder'), type: 'error' });
+              });
+            }
+          }
+        }
+      }, [
+        el('div', { style: { flexGrow: 1, paddingBottom: '10px' } }, [
+          el('p', { style: { fontWeight: '600', marginBottom: '10px' } }, sprintf(__('Moving "%s" to %s.', 'vapt-builder'), transitioning.key, transitioning.nextStatus)),
+
+          el(TextareaControl, {
+            label: __('Internal Transition Note', 'vapt-builder'),
+            help: __('Reason for status change, logged in history.', 'vapt-builder'),
+            value: formValues.note,
+            onChange: (val) => setFormValues({ ...formValues, note: val }),
+          }),
+
+          transitioning.nextStatus === 'Develop' && el(Fragment, null, [
+            el(TextareaControl, {
+              label: __('Development Instructions (AI Guidance)', 'vapt-builder'),
+              help: __('Instructions for the workbench designer (e.g. "Add a rate limiting slider").', 'vapt-builder'),
+              value: formValues.devInstruct,
+              onChange: (val) => setFormValues({ ...formValues, devInstruct: val }),
+            }),
+            el(TextControl, {
+              label: __('Wireframe / Design URL', 'vapt-builder'),
+              value: formValues.wireframeUrl,
+              onChange: (val) => setValues({ ...formValues, wireframeUrl: val }),
+              help: __('Paste image from clipboard directly into this modal.', 'vapt-builder')
+            }),
+            modalSaveStatus && el(Notice, {
+              status: modalSaveStatus.type,
+              isDismissible: false
+            }, modalSaveStatus.message)
+          ])
+        ]),
+
+        el('div', { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '15px', borderTop: '1px solid #ddd' } }, [
+          el(Button, { isSecondary: true, onClick: onCancel }, __('Cancel', 'vapt-builder')),
+          el(Button, {
+            isPrimary: true,
+            onClick: () => onConfirm(formValues)
+          }, sprintf(__('Confirm to %s', 'vapt-builder'), transitioning.nextStatus))
+        ])
+      ])
+    ]);
+  };
+
+  // Lifecycle Indicator Component
+  const LifecycleIndicator = ({ feature, onChange }) => {
+    // Normalize to Title Case for UI display if needed, but DB is now migrated.
+    const activeStep = feature.status;
+
+    const steps = [
+      { id: 'Draft', label: __('Draft', 'vapt-builder') },
+      { id: 'Develop', label: __('Develop', 'vapt-builder') },
+      { id: 'Test', label: __('Test', 'vapt-builder') },
+      { id: 'Release', label: __('Release', 'vapt-builder') }
+    ];
+
+    return el('div', { className: 'vapt-lifecycle-radios', style: { display: 'flex', gap: '10px', fontSize: '12px', alignItems: 'center' } }, [
+      ...steps.map((step) => {
+        const isChecked = step.id === activeStep;
+        return el('label', {
+          key: step.id,
+          style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? '#2271b1' : 'inherit', fontWeight: isChecked ? '600' : 'normal' }
+        }, [
+          el('input', {
+            type: 'radio',
+            name: `lifecycle_${feature.key || feature.id}_${Math.random()}`,
+            checked: isChecked,
+            onChange: () => onChange(step.id),
+            style: { margin: 0 }
+          }),
+          step.label
+        ]);
+      })
     ]);
   };
 
@@ -1354,7 +2146,10 @@ window.vaptScriptLoaded = true;
     ]);
   };
 
-  const FeatureList = ({ features, schema, updateFeature, loading, dataFiles, selectedFile, onSelectFile, onUpload, allFiles, hiddenFiles, onUpdateHiddenFiles, manageSourcesStatus, isManageModalOpen, setIsManageModalOpen, designPromptConfig, setDesignPromptConfig, isPromptConfigModalOpen, setIsPromptConfigModalOpen }) => {
+  const FeatureList = ({
+    features, schema, updateFeature, loading, dataFiles, selectedFile, onSelectFile, onUpload, allFiles, hiddenFiles, onUpdateHiddenFiles, manageSourcesStatus, isManageModalOpen, setIsManageModalOpen, designPromptConfig, setDesignPromptConfig,
+    historyFeature, setHistoryFeature, designFeature, setDesignFeature, transitioning, setTransitioning, isPromptConfigModalOpen, setIsPromptConfigModalOpen, isMappingModalOpen, setIsMappingModalOpen
+  }) => {
     const [columnOrder, setColumnOrder] = useState(() => {
       const saved = localStorage.getItem(`vapt_col_order_${selectedFile}`);
       return saved ? JSON.parse(saved) : ['title', 'category', 'severity', 'description'];
@@ -1449,7 +2244,7 @@ window.vaptScriptLoaded = true;
     const [sortOrder, setSortOrder] = useState(() => localStorage.getItem('vapt_sort_order') || 'asc');
     const [searchQuery, setSearchQuery] = useState(() => localStorage.getItem('vapt_search_query') || '');
     const [fieldMapping, setFieldMapping] = useState({ test_method: '', verification_steps: '', verification_engine: '' });
-    const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
+
 
     // Load/Save Field Mapping per File
     useEffect(() => {
@@ -1486,41 +2281,10 @@ window.vaptScriptLoaded = true;
       localStorage.setItem('vapt_search_query', searchQuery);
     }, [filterStatus, selectedCategories, selectedSeverities, sortBy, sortOrder, searchQuery]);
 
-    const [historyFeature, setHistoryFeature] = useState(null);
-    const [designFeature, setDesignFeature] = useState(null);
-    const [transitioning, setTransitioning] = useState(null); // { key, nextStatus, note }
     const [saveStatus, setSaveStatus] = useState(null); // Feedback for media/clipboard uploads
 
-    const confirmTransition = (formValues) => {
-      if (!transitioning) return;
-      const { key, nextStatus } = transitioning;
-      const { note, devInstruct, wireframeUrl } = formValues;
+    // confirmTransition moved to VAPTAdmin to avoid modal flicker when state updates
 
-      const safeFeatures = Array.isArray(features) ? features : [];
-      const feature = safeFeatures.find(f => f.key === key);
-      let updates = { status: nextStatus, history_note: note };
-
-      // Save Wireframe if provided
-      if (wireframeUrl) {
-        updates.wireframe_url = wireframeUrl;
-      }
-
-      // Auto-Generate Interface when moving to 'Develop' (Phase 6 transition)
-      if (nextStatus === 'Develop' && Generator && feature && feature.remediation) {
-        try {
-          const schema = Generator.generate(feature.remediation, devInstruct);
-          if (schema) {
-            updates.generated_schema = schema;
-            console.log('VAPT Builder: Auto-generated schema for ' + key, schema);
-          }
-        } catch (e) {
-          console.error('VAPT Builder: Generation error', e);
-        }
-      }
-
-      updateFeature(key, updates);
-      setTransitioning(null);
-    };
 
     // Smart Toggle Handling
     const handleSmartToggle = (feature, toggleKey) => {
@@ -1615,10 +2379,10 @@ window.vaptScriptLoaded = true;
     const stats = {
       unfilteredTotal: safeFeatures.length,
       total: processedFeatures.length,
-      draft: processedFeatures.filter(f => f.status === 'Draft' || f.status === 'draft' || f.status === 'available').length,
-      develop: processedFeatures.filter(f => f.status === 'Develop' || f.status === 'develop' || f.status === 'in_progress').length,
-      test: processedFeatures.filter(f => f.status === 'Test' || f.status === 'test').length,
-      release: processedFeatures.filter(f => f.status === 'Release' || f.status === 'release' || f.status === 'implemented').length
+      draft: processedFeatures.filter(f => f.status === 'Draft').length,
+      develop: processedFeatures.filter(f => f.status === 'Develop').length,
+      test: processedFeatures.filter(f => f.status === 'Test').length,
+      release: processedFeatures.filter(f => f.status === 'Release').length
     };
 
     const resetFilters = () => {
@@ -1631,10 +2395,12 @@ window.vaptScriptLoaded = true;
     // Status Filter Second
     if (filterStatus !== 'all') {
       processedFeatures = processedFeatures.filter(f => {
-        if (filterStatus === 'Draft' || filterStatus === 'draft') return f.status === 'Draft' || f.status === 'draft' || f.status === 'available';
-        if (filterStatus === 'Develop' || filterStatus === 'develop') return f.status === 'Develop' || f.status === 'develop' || f.status === 'in_progress';
-        if (filterStatus === 'Release' || filterStatus === 'release') return f.status === 'Release' || f.status === 'release' || f.status === 'implemented';
-        if (filterStatus === 'Test' || filterStatus === 'test') return f.status === 'Test' || f.status === 'test';
+        // Handle legacy lowercase filters from localStorage
+        const s = filterStatus.toLowerCase();
+        if (s === 'draft') return f.status === 'Draft';
+        if (s === 'develop') return f.status === 'Develop';
+        if (s === 'test') return f.status === 'Test';
+        if (s === 'release') return f.status === 'Release';
         return f.status === filterStatus;
       });
     }
@@ -1663,10 +2429,10 @@ window.vaptScriptLoaded = true;
       else if (sortBy === 'severity') comparison = sevA - sevB;
       else if (sortBy === 'status') {
         const priority = {
-          'Release': 4, 'release': 4, 'implemented': 4,
-          'Test': 3, 'test': 3,
-          'Develop': 2, 'develop': 2, 'in_progress': 2,
-          'Draft': 1, 'draft': 1, 'available': 1
+          'Release': 4,
+          'Test': 3,
+          'Develop': 2,
+          'Draft': 1
         };
         comparison = (priority[a.status] || 0) - (priority[b.status] || 0);
       }
@@ -1674,1180 +2440,7 @@ window.vaptScriptLoaded = true;
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
-    // History Modal Component
-    const HistoryModal = ({ feature, updateFeature, onClose }) => {
-      const [history, setHistory] = useState([]);
-      const [loading, setLoading] = useState(true);
 
-      useEffect(() => {
-        apiFetch({ path: `vapt/v1/features/${feature.key || feature.id}/history` })
-          .then(res => {
-            setHistory(res);
-            setLoading(false);
-          })
-          .catch(() => setLoading(false));
-      }, [feature.key || feature.id]);
-
-      const [confirmState, setConfirmState] = useState(null);
-
-      const resetHistory = () => {
-        setConfirmState({
-          message: sprintf(__('Are you sure you want to reset history for "%s"?\n\nThis will:\n1. Clear all history records.\n2. Reset status to "Draft".', 'vapt-builder'), feature.label),
-          isDestructive: true,
-          onConfirm: () => {
-            setConfirmState(null);
-            setLoading(true);
-            updateFeature(feature.key || feature.id, {
-              status: 'Draft',
-              reset_history: true,
-              has_history: false,
-              history_note: 'History Reset by User'
-            }).then(() => {
-              setLoading(false);
-              onClose();
-            });
-          }
-        });
-      };
-
-      return el(Modal, {
-        title: sprintf(__('History: %s', 'vapt-builder'), feature.name || feature.label),
-        onRequestClose: onClose,
-        className: 'vapt-history-modal'
-      }, [
-        el('div', { style: { display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' } },
-          el(Button, {
-            isDestructive: true,
-            isSmall: true,
-            icon: 'trash',
-            onClick: resetHistory,
-            disabled: loading || history.length === 0
-          }, __('Reset History & Status', 'vapt-builder'))
-        ),
-        loading ? el(Spinner) : el('div', { style: { minWidth: '500px' } }, [
-          history.length === 0 ? el('p', null, __('No history recorded yet.', 'vapt-builder')) :
-            el('table', { className: 'wp-list-table widefat fixed striped' }, [
-              el('thead', null, el('tr', null, [
-                el('th', { style: { width: '120px' } }, __('Date', 'vapt-builder')),
-                el('th', { style: { width: '100px' } }, __('From', 'vapt-builder')),
-                el('th', { style: { width: '100px' } }, __('To', 'vapt-builder')),
-                el('th', { style: { width: '120px' } }, __('User', 'vapt-builder')),
-                el('th', null, __('Note', 'vapt-builder')),
-              ])),
-              el('tbody', null, history.map((h, i) => el('tr', { key: i }, [
-                el('td', null, new Date(h.created_at).toLocaleString()),
-                el('td', null, el('span', { className: `vapt-status-badge status-${h.old_status}` }, h.old_status)),
-                el('td', null, el('span', { className: `vapt-status-badge status-${h.new_status}` }, h.new_status)),
-                el('td', null, h.user_name || __('System', 'vapt-builder')),
-                el('td', null, h.note || '-')
-              ])))
-            ])
-        ]),
-        el('div', { style: { marginTop: '20px', textAlign: 'right' } }, [
-          el(Button, { isPrimary: true, onClick: onClose }, __('Close', 'vapt-builder'))
-        ]),
-        confirmState && el(VAPT_ConfirmModal, {
-          isOpen: true,
-          message: confirmState.message,
-          isDestructive: confirmState.isDestructive,
-          onConfirm: confirmState.onConfirm,
-          onCancel: () => setConfirmState(null)
-        })
-      ]);
-    };
-
-    // Design/Schema Modal
-    const DesignModal = ({ feature, onClose }) => {
-      // Default prompt for guidance but still valid JSON
-      const defaultState = {
-        controls: [],
-        _instructions: "STOP! Do NOT copy this text. 1. Click 'Copy AI Design Prompt' button below. 2. Paste that into Antigravity Chat. 3. Paste the JSON result back here."
-      };
-      const getInitialSchema = () => {
-        if (!feature.generated_schema) return defaultState;
-        if (typeof feature.generated_schema === 'string') {
-          try {
-            const parsed = JSON.parse(feature.generated_schema);
-            // If double-encoded, parse again
-            if (typeof parsed === 'string') return JSON.parse(parsed);
-            return parsed;
-          } catch (e) {
-            return defaultState;
-          }
-        }
-        return feature.generated_schema;
-      };
-
-      const initialParsed = getInitialSchema();
-      const defaultValue = JSON.stringify(initialParsed, null, 2);
-
-      const [schemaText, setSchemaText] = useState(defaultValue);
-      const [parsedSchema, setParsedSchema] = useState(initialParsed);
-      const [localImplData, setLocalImplData] = useState(
-        feature.implementation_data ? (typeof feature.implementation_data === 'string' ? JSON.parse(feature.implementation_data) : feature.implementation_data) : {}
-      );
-      const [isSaving, setIsSaving] = useState(false);
-      const [saveStatus, setSaveStatus] = useState(null);
-
-      // New: Toggle for Verification Guidance
-      // New: Toggle for Verification Guidance
-      const [includeGuidance, setIncludeGuidance] = useState((feature.include_verification_guidance === undefined || feature.include_verification_guidance === null) ? true : feature.include_verification_guidance == 1);
-      // New: Hover state for paste logic
-      const [isHoveringSchema, setIsHoveringSchema] = useState(false);
-
-      // Handle "Replace on Hover" Paste Logic
-      useEffect(() => {
-        const handleGlobalPaste = (e) => {
-          if (isHoveringSchema) {
-            e.preventDefault();
-            const text = (e.clipboardData || window.clipboardData).getData('text');
-            if (text) {
-              onJsonChange(text);
-              setSaveStatus({ message: __('Content Replaced from Clipboard!', 'vapt-builder'), type: 'success' });
-              setTimeout(() => setSaveStatus(null), 2000);
-            }
-          }
-        };
-        window.addEventListener('paste', handleGlobalPaste);
-        return () => window.removeEventListener('paste', handleGlobalPaste);
-      }, [isHoveringSchema]);
-
-      // Prevent body scroll when modal is open
-      useEffect(() => {
-        const originalOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-        return () => {
-          document.body.style.overflow = originalOverflow;
-        };
-      }, []);
-
-      // State for Alerts and Confirms
-      const [alertState, setAlertState] = useState(null);
-      const [confirmState, setConfirmState] = useState(null);
-
-      // State for Remove Confirmation Modal
-      const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
-
-
-      // Handle real-time preview
-      const onJsonChange = (val) => {
-        setSchemaText(val);
-        try {
-          const parsed = JSON.parse(val);
-          if (parsed && parsed.controls) setParsedSchema(parsed);
-        } catch (e) {
-          // Silent fail for preview while typing
-        }
-      };
-
-      const handleSave = () => {
-        try {
-          const parsed = JSON.parse(schemaText);
-          const hasTestActions = parsed.controls && parsed.controls.some(c => c.type === 'test_action');
-
-          setIsSaving(true);
-          updateFeature(feature.key || feature.id, {
-            generated_schema: JSON.stringify(parsed),
-            include_verification_engine: hasTestActions ? 1 : 0,
-            include_verification_guidance: includeGuidance ? 1 : 0,
-            implementation_data: JSON.stringify(localImplData)
-          })
-            .then(() => {
-              setIsSaving(false);
-              onClose();
-            })
-            .catch(() => setIsSaving(false));
-        } catch (e) {
-          setAlertState({ message: __('Invalid JSON format. Please check your syntax.', 'vapt-builder') });
-        }
-      };
-
-      const handleRemoveConfirm = () => {
-        setIsSaving(true);
-        updateFeature(feature.key || feature.id, {
-          status: 'Draft',
-          generated_schema: null,
-          implementation_data: null,
-          include_verification_engine: 0,
-          include_verification_guidance: 0,
-          reset_history: true,
-          has_history: false
-        })
-          .then(() => {
-            setIsSaving(false);
-            setIsRemoveConfirmOpen(false); // Close confirm modal
-            onClose(); // Close main modal
-          })
-          .catch(() => {
-            setIsSaving(false);
-            setIsRemoveConfirmOpen(false);
-            setAlertState({ message: __('Failed to remove implementation.', 'vapt-builder') });
-          });
-      };
-
-      const copyContext = () => {
-        let contextJson = '';
-
-        if (designPromptConfig) {
-          contextJson = typeof designPromptConfig === 'string'
-            ? designPromptConfig
-            : JSON.stringify(designPromptConfig, null, 2);
-        } else {
-          // New Default JSON Template per User Request
-          // const defaultTemplate = {
-          //   "design_prompt": {
-          //     "interface_type": "{automation_prompts.ai_ui}",
-          //     "schema_definition": "{schema_hints}",
-          //     "title": "{title}",
-          //     "description": "{description}",
-          //     "severity": "{severity}",
-          //     "validation_rules": "{automation_prompts.ai_check}",
-          //     "context": "{category}"
-          //   }
-          const defaultTemplate = {
-            "design_prompt": {
-              "interface_type": "Interactive Security Assessment Interface",
-              "schema_definition": "WordPress VAPT schema with standardized control fields",
-              "id": "{{id}}",
-              "title": "{{title}}",
-              "description": "{{description}}",
-              "severity": "{{severity}}",
-              "category": "{{category}}",
-              "compliance_references": "{{owasp}}",
-              "cwe_reference": "{{cwe}}",
-              "remediation_strategy": "{{remediation}}",
-              "evidence_requirements": "{{evidence_requirements}}",
-              "verification_steps": "{{verification_steps}}",
-              "test_method": "{{test_method}}",
-              "ui_components": {
-                "primary_card": "{{automation_prompts.ai_ui}}",
-                "test_checklist": "{{tests}}",
-                "risk_indicators": "{{risks}}",
-                "assurance_badges": "{{assurance}}",
-                "evidence_list": "{{evidence}}"
-              },
-              "interface_layout": {
-                "grid_structure": "Two-Column (Controls Left, Status Right)",
-                "functional_blocks": [
-                  "Implementation Notes (Contextual Textarea)",
-                  "Manual Verification (Full-Width Protocol & Evidence Checklist)",
-                  "Automated Verification (Trigger Actions & Live Status)"
-                ],
-                "styling": "Standardized cards with subtle shadows, 24px padding, and clear hierarchy."
-              },
-              "automation_context": {
-                "ai_check_prompt": "{{automation_prompts.ai_check}}",
-                "ai_schema_fields": "{{automation_prompts.ai_schema}}"
-              },
-              "implementation_strategy": {
-                "execution_driver": "Universal PHP Hook Driver (class-vapt-hook-driver.php)",
-                "enforcement_mechanism": "Dynamic mapping of JSON control values to backend security methods.",
-                "available_methods": [
-                  "limit_login_attempts - Enforces rate limiting (requires 'limit' or 'rate_limit' key)",
-                  "block_xmlrpc - Blocks XML-RPC requests (requires toggle)",
-                  "disable_directory_browsing - Blocks directory listing",
-                  "enable_security_headers - Injects security headers",
-                  "block_null_byte_injection - blocks null byte chars",
-                  "hide_wp_version - Hides version",
-                  "block_debug_exposure - Blocks debug.log access",
-                  "block_author_enumeration - Blocks author archives",
-                  "disable_xmlrpc_pingback - Disables XML-RPC pingbacks"
-                ],
-                "data_binding": "Controls must use 'key' to bind to method arguments."
-              },
-              "verification_protocol": {
-                "operational_notes": "Contextual help and operational guidance (Right Column)",
-                "manual_verification": "Step-by-step human verification (Evidence Checklist)",
-                "automated_verification": "Interactive test actions for real-time proof"
-              },
-              "threat_model": {
-                "risks": "{{risks}}",
-                "assurance_against": "{{assurance_against}}"
-              }
-            }
-          };
-
-          contextJson = JSON.stringify(defaultTemplate, null, 2);
-        }
-
-        // Replace Placeholders in the JSON portion
-        const replaceAll = (str, key, val) => {
-          const value = Array.isArray(val) ? val.join(', ') : (val || '');
-          return str.split(`{{${key}}}`).join(value).split(`{${key}}`).join(value);
-        };
-
-        contextJson = replaceAll(contextJson, 'id', feature.id || 'N/A');
-        contextJson = replaceAll(contextJson, 'title', feature.name || feature.label || feature.title || '');
-        contextJson = replaceAll(contextJson, 'category', feature.category || 'General');
-        contextJson = replaceAll(contextJson, 'description', feature.description || 'None provided');
-        contextJson = replaceAll(contextJson, 'severity', feature.severity || 'Medium');
-        contextJson = replaceAll(contextJson, 'remediation', Array.isArray(feature.remediation) ? feature.remediation.join('\n') : (feature.remediation || ''));
-        contextJson = replaceAll(contextJson, 'assurance_against', Array.isArray(feature.assurance_against) ? feature.assurance_against.join(', ') : (feature.assurance_against || ''));
-        contextJson = replaceAll(contextJson, 'assurance', Array.isArray(feature.assurance) ? feature.assurance.join(', ') : (feature.assurance || ''));
-        contextJson = replaceAll(contextJson, 'tests', Array.isArray(feature.tests) ? feature.tests.join(', ') : (feature.tests || ''));
-        contextJson = replaceAll(contextJson, 'evidence', Array.isArray(feature.evidence) ? feature.evidence.join(', ') : (feature.evidence || ''));
-        contextJson = replaceAll(contextJson, 'schema_hints.fields', feature.schema_hints?.fields?.map(f => `${f.name} (${f.type})`).join(', '));
-        contextJson = replaceAll(contextJson, 'test_method', feature.test_method || '');
-        contextJson = replaceAll(contextJson, 'owasp', feature.owasp || '');
-        contextJson = replaceAll(contextJson, 'cwe', feature.cwe || '');
-        contextJson = replaceAll(contextJson, 'risks', Array.isArray(feature.risks) ? feature.risks.join(', ') : (feature.risks || ''));
-        contextJson = replaceAll(contextJson, 'evidence_requirements', Array.isArray(feature.evidence_requirements) ? feature.evidence_requirements.join(', ') : (feature.evidence_requirements || ''));
-        contextJson = replaceAll(contextJson, 'verification_steps', Array.isArray(feature.verification_steps) ? feature.verification_steps.join(', ') : (feature.verification_steps || ''));
-
-        // Dynamic Substitution from automation_prompts
-        const prompts = feature.automation_prompts || {};
-        contextJson = replaceAll(contextJson, 'automation_prompts.ai_ui', prompts.ai_ui || `Interactive JSON Schema for VAPT Workbench.`);
-        contextJson = replaceAll(contextJson, 'automation_prompts.ai_check', prompts.ai_check || `PHP verification logic for ${feature.label || 'this feature'}.`);
-        contextJson = replaceAll(contextJson, 'automation_prompts.ai_schema', prompts.ai_schema || `Essential schema fields for ${feature.label || 'this feature'}.`);
-
-        // Include File Metadata for improved context
-        if (schema && schema.metadata) {
-          const meta = schema.metadata;
-          contextJson = `/* File Metadata: Focus: ${meta.focus || 'N/A'}, Version: ${meta.version || '1.0.0'} */\n${contextJson}`;
-        }
-
-        // Assemble HYBRID PROMPT (Context + Instructions)
-        const finalPrompt = `You are an Expert WordPress Security Engineer, UI Designer, and VAPT Specialist. Your core mandate is to implement security controls that adhere to VAPT and OWASP Top 10 risks and WordPress Coding Standards.
-
-I need you to generate a highly optimized JSON Schema for a 'Functional Workbench' interface for the following security feature:
-
---- DESIGN CONTEXT ---
-${contextJson}
---- 
-
-INSTRUCTIONS & CRITICAL RULES:
-1. **Response Format**: Provide ONLY a JSON block. No preamble or conversation.
-2. **Schema Structure**: You MUST include both 'controls' and 'enforcement' blocks.
-3. **Control Types**:
-   - **Functional**: 'toggle', 'input', 'select', 'textarea', 'code', 'test_action', 'button', 'password'. (MUST HAVE 'key' & 'default').
-   - **Presentational**: 'info', 'alert', 'section', 'group', 'divider', 'html', 'header', 'label'. (NO 'key' required).
-   - **Rich UI**: 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'. (NO 'key' required).
-4. **Default Values**: Every functional control MUST have a 'default' property (e.g. "5", true, "off"). This is CRITICAL for backend baseline enforcement.
-5. **Enforcement Mappings & Evidence**: Use the following reference for 'mappings' and 'expected_headers':
-   | Method | Use in Mapping | Expected Header (X-VAPT-Enforced) |
-   | :--- | :--- | :--- |
-   | Rate Limiting | limit_login_attempts | php-rate-limit |
-   | Block XML-RPC | block_xmlrpc | php-xmlrpc |
-   | Directory Browsing | disable_directory_browsing | php-dir |
-   | Security Headers | enable_security_headers | php-headers |
-   | Null Byte Block | block_null_byte_injection | php-null-byte |
-   | Hide WP Version | hide_wp_version | php-version-hide |
-   | Debug Exposure | block_debug_exposure | php-debug-exposure |
-   | Restrict Author | block_author_enumeration | php-author-enum |
-   | Disable XML-RPC Pingback | disable_xmlrpc_pingback | php-pingback |
-   - Driver: Always use "driver": "hook" for these methods.
-6. **Reset Logic**: For ANY rate-limiting feature, a reset 'test_action' is MANDATORY.
-   - Logic: "test_logic": "universal_probe"
-   - Config: {"method": "GET", "path": "/", "params": {"vapt_action": "reset_rate_limits"}, "expected_status": 200}
-7. **Dynamic Testing**: For 'spam_requests', ensure the RPM is resolved from the 'rate_limit' or 'limit' key in sibling controls.
-8. **Evidence-to-Assertion Mapping**: You MUST correlate the 'Evidence' description with functional 'test_config' assertions.
-9. **Self-Verifying Tests**: Any 'test_action' MUST define its own success criteria. You MUST include 'expected_headers' (containing the 'X-VAPT-Enforced' key from the table above) for any blocking feature.
-10. **Unified Verification**: For features that have a single mapping method, generate one authoritative 'Verify' control instead of multiple fragmented tests.
-11. **Truthful Reporting**: To differentiate between VAPT enforcement and external plugins/server rules, your test MUST fail if the 'X-VAPT-Enforced' header is missing, even if the HTTP status (e.g., 403) is correct.
-12. **Interface Layout (MANDATORY)**: You MUST follow a two-column grid structure. Primary functional controls (toggles, inputs) go on the left. Status indicators, alerts, and feedback blocks go on the right. Functional Verification (Manual and Automated) should be clearly separated and prominent.
-13. **Verification & Evidence (MANDATORY)**: You MUST include specific sections for: Operational Notes (textarea with key 'operational_notes', placed in the Right Column), Manual Verification (checklist), Automated Verification (test_action).
-14. **Reference JSON Structure**:
-   {
-     "controls": [
-       { "type": "section", "label": "Configuration" },
-       { "type": "toggle", "label": "Enable Feature", "key": "status", "default": true },
-       { "type": "input", "label": "Max Attempts", "key": "rate_limit", "default": "5" },
-       { "type": "divider" },
-       { "type": "test_action", "label": "Verify", "key": "v1", "test_logic": "spam_requests" },
-       { "type": "test_action", "label": "Reset", "key": "reset", "test_logic": "universal_probe", "test_config": {"method": "GET", "path": "/", "params": {"vaptc_action": "reset_rate_limits"}, "expected_status": 200} },
-       { "type": "evidence_list", "label": "Evidence", "items": ["Screenshot of block", "Log entry"] }
-     ],
-     "enforcement": {
-       "driver": "hook",
-       "mappings": { "status": "limit_login_attempts", "rate_limit": "limit_login_attempts" }
-     }
-   }
-
-Feature Name: ${feature.name || feature.label || feature.title}
-Feature ID: ${feature.id || 'N/A'}
-CWE: ${feature.cwe || 'N/A'}
-Remediation (Core Logic): ${Array.isArray(feature.remediation) ? feature.remediation.join('\n- ') : (feature.remediation || 'None provided')}
-Protection Against (Risks): ${Array.isArray(feature.assurance_against) ? feature.assurance_against.join('\n- ') : (feature.owasp || 'None provided')}
-Success Goals (Assurance): ${Array.isArray(feature.assurance) ? feature.assurance.join('\n- ') : (feature.assurance || 'None provided')}
-Test Protocol (Required Tests): ${Array.isArray(feature.verification_steps) && feature.verification_steps.length > 0 ? feature.verification_steps.join('\n- ') : (Array.isArray(feature.tests) ? feature.tests.join('\n- ') : (feature.tests || 'None provided'))}
-Evidence (Success Markers): ${Array.isArray(feature.evidence_requirements) && feature.evidence_requirements.length > 0 ? feature.evidence_requirements.join('\n- ') : (Array.isArray(feature.evidence) ? feature.evidence.join('\n- ') : 'NONE PROVIDED - Generate 3-5 concrete success markers based on VAPT standards.')}
-Schema Hints: ${feature.schema_hints?.fields ? feature.schema_hints.fields.map(f => `${f.name} (${f.type})`).join(', ') : 'None provided'}
-Test Method: ${feature.test_method || 'None provided'}
-`;
-
-        // Robust Copy Function
-        const copyToClipboard = (text) => {
-          if (navigator.clipboard && window.isSecureContext) {
-            return navigator.clipboard.writeText(text);
-          } else {
-            // Fallback for older browsers or non-secure contexts
-            let textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.left = "0";
-            textArea.style.top = "0";
-            textArea.style.opacity = "0";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            return new Promise((resolve, reject) => {
-              try {
-                document.execCommand('copy') ? resolve() : reject(new Error('Copy failed'));
-              } catch (e) { reject(e); }
-              document.body.removeChild(textArea);
-            });
-          }
-        };
-
-        copyToClipboard(finalPrompt)
-          .then(() => {
-            setSaveStatus({ message: __('Design Prompt copied!', 'vapt-builder'), type: 'success' });
-            setTimeout(() => setSaveStatus(null), 3000);
-          })
-          .catch((err) => {
-            setSaveStatus({ message: __('Design Prompt copied!', 'vapt-builder'), type: 'success' });
-            setTimeout(() => setSaveStatus(null), 3000);
-          })
-          .catch((err) => {
-            console.error('Copy failed', err);
-            setAlertState({ message: __('Failed to copy to clipboard.', 'vapt-builder') });
-          });
-      };
-
-      return el(Modal, {
-        title: el('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } }, [
-          el('span', null, sprintf(__('Design Implementation: %s', 'vapt-builder'), feature.label)),
-          el(Button, {
-            isDestructive: true,
-            isSmall: true,
-            onClick: () => setIsRemoveConfirmOpen(true),
-            disabled: isSaving || !feature.generated_schema,
-            icon: 'trash'
-          }, __('Remove Implementation', 'vapt-builder'))
-        ]),
-        onRequestClose: onClose,
-        className: 'vapt-design-modal',
-        style: { width: '1000px', maxWidth: '98%' }
-      }, [
-        // Toast Notification (Fixed Overlay)
-        saveStatus && el('div', {
-          style: {
-            position: 'absolute', top: '20px', right: '50%', transform: 'translateX(50%)',
-            background: saveStatus.type === 'error' ? '#fde8e8' : '#def7ec',
-            color: saveStatus.type === 'error' ? '#9b1c1c' : '#03543f',
-            padding: '10px 20px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-            zIndex: 100, fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px'
-          }
-        }, [
-          el(Icon, { icon: saveStatus.type === 'error' ? 'warning' : 'yes', size: 20 }),
-          saveStatus.message
-        ]),
-
-        // Grid Layout (Left: Editor, Right: Preview)
-        // Grid Layout (Left: Editor, Right: Preview)
-        el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', height: 'calc(100vh - 160px)', maxHeight: '800px', overflow: 'hidden' } }, [
-          // Left Side: The Editor
-          el('div', { style: { display: 'flex', flexDirection: 'column', height: '100%', paddingRight: '10px' } }, [
-            el('p', { style: { margin: '0 0 10px 0', fontSize: '13px', color: '#666' } }, __('Paste the JSON schema generated via Antigravity (the AI Proxy) below.', 'vapt-builder')),
-
-            // Buttons Row (Moved to Top)
-            el('div', { style: { display: 'flex', gap: '10px', marginBottom: '15px' } }, [
-              el(Button, { style: { flex: 1, justifyContent: 'center' }, isSecondary: true, onClick: copyContext, icon: 'clipboard' }, __('Copy Design Prompt', 'vapt-builder')),
-              el(Button, {
-                isDestructive: true,
-                icon: 'trash',
-                onClick: () => {
-                  setConfirmState({
-                    message: __('Are you sure you want to reset the schema? This will wash away any changes.', 'vapt-builder'),
-                    isDestructive: true,
-                    onConfirm: () => {
-                      setConfirmState(null);
-                      onJsonChange(JSON.stringify(defaultState, null, 2));
-                      setSaveStatus({ message: __('Schema Reset!', 'vapt-builder'), type: 'success' });
-                      setTimeout(() => setSaveStatus(null), 2000);
-                    }
-                  });
-                }
-              }, __('Reset', 'vapt-builder'))
-            ]),
-
-            // New Toggle
-            el('div', { style: { marginBottom: '10px' } },
-              el(ToggleControl, {
-                label: __('Include Verification & Evidence in Interface', 'vapt-builder'),
-                checked: includeGuidance,
-                onChange: setIncludeGuidance,
-                help: __('If enabled, the AI prompt will request a dedicated section for verification steps.', 'vapt-builder')
-              })
-            ),
-
-            el('div', {
-              style: { flex: 1, display: 'flex', flexDirection: 'column', minHeight: '300px', marginBottom: '10px' },
-              onMouseEnter: () => setIsHoveringSchema(true),
-              onMouseLeave: () => setIsHoveringSchema(false)
-            }, [
-              el('label', { style: { fontSize: '11px', fontWeight: '500', marginBottom: '4px', textTransform: 'uppercase', color: '#101517' } }, __('Interface JSON Schema', 'vapt-builder')),
-              el('div', { style: { fontSize: '11px', color: '#666', marginBottom: '8px' } }, __('Hover and Ctrl+V to replace content.', 'vapt-builder')),
-              el('textarea', {
-                value: schemaText,
-                onChange: (e) => onJsonChange(e.target.value),
-                style: {
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                  background: isHoveringSchema ? '#f0fdf4' : '#fcfcfc',
-                  lineHeight: '1.4',
-                  flex: 1,
-                  resize: 'none',
-                  width: '100%',
-                  border: '1px solid #757575',
-                  borderRadius: '4px',
-                  padding: '8px',
-                  boxSizing: 'border-box',
-                  transition: 'background 0.2s'
-                }
-              })
-            ]),
-
-          ]),
-
-          // Right Side: Live Preview
-          el('div', { style: { background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' } }, [
-            el('div', { style: { padding: '10px 15px', borderBottom: '1px solid #e5e7eb', background: '#fff', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', flexShrink: 0 } }, [
-              el('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
-                el(Icon, { icon: 'visibility', size: 16 }),
-                el('strong', { style: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#4b5563' } }, __('Live Implementation Preview'))
-              ]),
-              // Moved Buttons to Top
-              el('div', { style: { display: 'flex', gap: '10px' } }, [
-                el(Button, { isSecondary: true, isSmall: true, onClick: onClose }, __('Cancel', 'vapt-builder')),
-                el(Button, { isPrimary: true, isSmall: true, onClick: handleSave, isBusy: isSaving }, __('Save & Deploy', 'vapt-builder'))
-              ])
-            ]),
-            el('div', { style: { padding: '15px', flex: '1 1 auto', overflowY: 'auto', minHeight: 0 } }, [
-              (() => {
-                const schema = parsedSchema || { controls: [] };
-                const [isPreviewVerifOpen, setIsPreviewVerifOpen] = useState(false);
-
-                // Split Controls
-                const isNoteOrContext = (c) => c.label?.toLowerCase().includes('notes') || c.label?.toLowerCase().includes('context') || c.label?.toLowerCase().includes('guidance');
-                const implControls = schema.controls ? schema.controls.filter(c => !['test_action', 'button', 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'].includes(c.type) && !isNoteOrContext(c)) : [];
-                const verifActions = schema.controls ? schema.controls.filter(c => ['test_action', 'button'].includes(c.type) || isNoteOrContext(c)) : [];
-                const supportControls = schema.controls ? schema.controls.filter(c => ['risk_indicators', 'assurance_badges'].includes(c.type)) : [];
-
-                const boxStyle = { padding: '15px', background: '#fff', borderRadius: '8px', border: '1px solid #eee', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' };
-
-                return el(Fragment, null, [
-                  el('div', { id: 'vapt-preview-stack', style: { display: 'flex', flexDirection: 'column', gap: '20px' } }, [
-                    // 1. Functional Implementation
-                    el('div', { id: 'vapt-preview-panel-functional', style: boxStyle }, [
-                      el('h4', { style: { margin: '0 0 10px 0', fontSize: '13px', fontWeight: 700, color: '#111827' } }, __('Functional Implementation')),
-                      GeneratedInterface
-                        ? el(GeneratedInterface, {
-                          feature: { ...feature, generated_schema: { ...schema, controls: implControls }, implementation_data: localImplData },
-                          onUpdate: (newData) => setLocalImplData(newData)
-                        })
-                        : el('p', null, __('Loading Preview Interface...', 'vapt-builder')),
-
-
-
-                      el('div', { style: { marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '10px', fontSize: '10px', color: '#888' } },
-                        `Feature Reference: ${(feature.key || feature.id || '').toUpperCase()}`
-                      )
-                    ]),
-
-                    // 2. Verification Preview (Always Visible)
-                    (verifActions.length > 0 || supportControls.length > 0 || feature.test_method || feature.verification_steps.length > 0) && el('div', {
-                      style: {
-                        marginTop: '10px', padding: '15px', background: '#f8fafc', borderRadius: '8px', border: '2px solid #e2e8f0',
-                        display: 'grid', gridTemplateColumns: '1fr', gap: '20px'
-                      }
-                    }, [
-                      el('h4', { style: { margin: 0, fontSize: '12px', fontWeight: 700, color: '#334155', textTransform: 'uppercase' } }, __('Verification Preview')),
-
-                      // Automated
-                      verifActions.length > 0 && el('div', { style: boxStyle }, [
-                        el('h4', { style: { margin: '0 0 10px 0', fontSize: '13px', fontWeight: 700, color: '#0f766e', display: 'flex', alignItems: 'center', gap: '6px' } }, [
-                          el(Icon, { icon: 'shield', size: 16 }),
-                          __('Verification Engine')
-                        ]),
-                        el(GeneratedInterface, {
-                          feature: { ...feature, generated_schema: { ...schema, controls: verifActions }, implementation_data: localImplData },
-                          onUpdate: (newData) => setLocalImplData(newData)
-                        })
-                      ]),
-
-                      // Manual
-                      (() => {
-                        const protocol = (feature.test_method || '').trim();
-                        const checklist = typeof feature.verification_steps === 'string' ? JSON.parse(feature.verification_steps) : (feature.verification_steps || []);
-                        const guideItems = schema.controls ? schema.controls.filter(c => ['test_checklist', 'evidence_list'].includes(c.type)) : [];
-
-                        if (!protocol && checklist.length === 0 && guideItems.length === 0) return null;
-
-                        return el('div', { style: { ...boxStyle, background: '#f8fafc' } }, [
-                          el('h5', { style: { margin: '0 0 12px 0', fontSize: '12px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' } }, __('Manual Verification')),
-                          el('div', { style: { display: 'flex', flexDirection: 'column', gap: '15px' } }, [
-                            protocol && el('div', null, [
-                              el('label', { style: { display: 'block', fontSize: '10px', fontWeight: 700, color: '#92400e', marginBottom: '8px', textTransform: 'uppercase' } }, __('Test Protocol')),
-                              el('ol', { style: { margin: 0, paddingLeft: '18px', fontSize: '12px', color: '#4b5563', lineHeight: '1.5' } },
-                                protocol.split('\n').filter(l => l.trim()).map((l, i) => el('li', { key: i, style: { marginBottom: '4px' } }, l.replace(/^\d+\.\s*/, '')))
-                              )
-                            ]),
-                            checklist.length > 0 && el('div', null, [
-                              el('label', { style: { display: 'block', fontSize: '10px', fontWeight: 700, color: '#0369a1', marginBottom: '8px', textTransform: 'uppercase' } }, __('Evidence Checklist')),
-                              el('ol', { style: { margin: 0, padding: 0, listStyle: 'none' } },
-                                checklist.map((step, i) => el('li', { key: i, style: { fontSize: '12px', color: '#4b5563', display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '6px' } }, [
-                                  el('input', { type: 'checkbox', style: { margin: '2px 0 0 0', width: '13px', height: '13px' } }),
-                                  el('span', null, step)
-                                ]))
-                              )
-                            ]),
-                            guideItems.length > 0 && el(GeneratedInterface, {
-                              feature: { ...feature, generated_schema: { ...schema, controls: guideItems }, implementation_data: localImplData },
-                              onUpdate: (newData) => setLocalImplData(newData),
-                              isGuidePanel: true
-                            })
-                          ])
-                        ]);
-                      })(),
-
-                      // Assurance
-                      supportControls.length > 0 && el('div', { style: { ...boxStyle, background: '#f0fdf4', border: '1px solid #bbf7d0' } }, [
-                        el('h5', { style: { margin: '0 0 10px 0', fontSize: '11px', fontWeight: 700, color: '#166534', textTransform: 'uppercase' } }, __('Assurance')),
-                        el(GeneratedInterface, {
-                          feature: { ...feature, generated_schema: { ...schema, controls: supportControls }, implementation_data: localImplData },
-                          onUpdate: (newData) => setLocalImplData(newData)
-                        })
-                      ])
-                    ])
-                  ])
-                ]);
-              })(),
-            ])
-            // Bottom bar removed
-          ])
-        ]),
-
-        // Confirmation Modal (Centered)
-        isRemoveConfirmOpen && el(Modal, {
-          title: __('Confirm Removal', 'vapt-builder'),
-          onRequestClose: () => setIsRemoveConfirmOpen(false),
-          style: { maxWidth: '450px', borderRadius: '8px', padding: '0' },
-          className: 'vapt-confirm-modal'
-        }, [
-          el('div', { style: { padding: '25px', textAlign: 'center' } }, [
-            el(Icon, { icon: 'warning', size: 42, style: { color: '#dc2626', marginBottom: '15px', background: '#fef2f2', padding: '10px', borderRadius: '50%' } }),
-            el('h3', { style: { fontSize: '16px', fontWeight: 'bold', margin: '0 0 10px 0', color: '#1f2937' } }, __('Remove Implementation?', 'vapt-builder')),
-            el('p', { style: { fontSize: '13px', color: '#6b7280', margin: '0 0 25px 0', lineHeight: '1.6' } },
-              __('Are you sure you want to completely remove this feature? This action will explicitly delete the assigned schema, wipe all history records, and reset the status to "Draft". This cannot be undone.', 'vapt-builder')
-            ),
-            el('div', { style: { display: 'flex', gap: '12px', justifyContent: 'center' } }, [
-              el(Button, { isSecondary: true, onClick: () => setIsRemoveConfirmOpen(false), style: { width: '100px', justifyContent: 'center' } }, __('Cancel', 'vapt-builder')),
-              el(Button, { isDestructive: true, onClick: handleRemoveConfirm, isBusy: isSaving, style: { width: '140px', justifyContent: 'center' } }, __('Yes, Remove It', 'vapt-builder'))
-            ])
-          ])
-        ]),
-
-        // Render Shared Modals
-        alertState && el(VAPT_AlertModal, {
-          isOpen: true,
-          message: alertState.message,
-          type: alertState.type,
-          onClose: () => setAlertState(null)
-        }),
-        confirmState && el(VAPT_ConfirmModal, {
-          isOpen: true,
-          message: confirmState.message,
-          isDestructive: confirmState.isDestructive,
-          onConfirm: confirmState.onConfirm,
-          onCancel: () => setConfirmState(null)
-        })
-
-      ]);
-    };
-
-    // Prompt Configuration Modal
-    const PromptConfigModal = ({ isOpen, onClose, feature }) => {
-      const [localConfig, setLocalConfig] = useState('');
-      const [isSaving, setIsSaving] = useState(false);
-      const [alertState, setAlertState] = useState(null);
-      const [confirmState, setConfirmState] = useState(null);
-
-      useEffect(() => {
-        if (isOpen) {
-          const val = designPromptConfig
-            ? (typeof designPromptConfig === 'string' ? designPromptConfig : JSON.stringify(designPromptConfig, null, 2))
-            : '';
-          setLocalConfig(val || JSON.stringify({
-            "design_prompt": {
-              "title": "{title}",
-              "description": "{description}",
-              "context": "{category}"
-            }
-          }, null, 2));
-        }
-      }, [isOpen]);
-
-      const save = () => {
-        try {
-          const parsed = JSON.parse(localConfig);
-          setIsSaving(true);
-          apiFetch({
-            path: 'vapt/v1/data-files/meta',
-            method: 'POST',
-            data: {
-              file: selectedFile,
-              key: 'design_prompt',
-              value: parsed
-            }
-          })
-            .then(res => {
-              setDesignPromptConfig(parsed); // Update global state
-              setIsSaving(false);
-              onClose(); // Close modal to return to Design Hub
-              setSaveStatus({ message: __('Prompt Config Saved!', 'vapt-builder'), type: 'success' });
-            })
-            .catch(err => {
-              console.error(err);
-              setIsSaving(false);
-              setAlertState({ message: 'Failed to save configuration.' });
-            });
-        } catch (e) {
-          setAlertState({ message: 'Invalid JSON. Please fix syntax before saving.' });
-        }
-      };
-
-
-
-      const resetToDefault = () => {
-        setConfirmState({
-          message: __('Are you sure you want to reset to the default system prompt? This will delete your custom configuration.', 'vapt-builder'),
-          isDestructive: true,
-          onConfirm: () => {
-            setConfirmState(null);
-            setIsSaving(true);
-            apiFetch({
-              path: 'vapt/v1/data-files/meta',
-              method: 'POST',
-              data: {
-                file: selectedFile,
-                key: 'design_prompt',
-                value: null
-              }
-            }).then(() => {
-              setDesignPromptConfig(null);
-              setIsSaving(false);
-              onClose();
-              setSaveStatus({ message: __('Reset to Default!', 'vapt-builder'), type: 'success' });
-            });
-          }
-        });
-      };
-
-      return el(Fragment, null, [
-        el(Modal, {
-          title: __('Configure AI Design Prompt Template', 'vapt-builder'),
-          onRequestClose: onClose,
-          style: { maxWidth: '600px' }
-        }, [
-          el('p', { style: { fontSize: '13px', color: '#666', marginBottom: '10px' } },
-            __('Customize the JSON payload copied to the clipboard. This configuration is saved to the active JSON file.', 'vapt-builder')
-          ),
-          el(wp.components.TextareaControl, {
-            label: __('Template JSON', 'vapt-builder'),
-            value: localConfig,
-            onChange: setLocalConfig,
-            rows: 15,
-            style: { fontFamily: 'monospace', fontSize: '12px', whiteSpace: 'pre' }
-          }),
-          el('div', { style: { background: '#f0f0f1', padding: '10px', borderRadius: '4px', fontSize: '11px', color: '#555', marginBottom: '15px' } }, [
-            el('strong', null, 'Available Variables: '),
-            '{title}, {description}, {category}, {severity}, {test_method}, {remediation}'
-          ]),
-          el('div', { style: { display: 'flex', justifyContent: 'space-between', gap: '10px' } }, [
-            // Left: Test Copy & Reset
-            el('div', { style: { display: 'flex', gap: '5px' } }, [
-              feature ? el(Button, {
-                isSecondary: true,
-                icon: 'clipboard',
-                onClick: () => {
-                  try {
-                    let template = localConfig;
-                    // Replace Placeholders on local config (preview)
-                    template = template.replace(/{title}/g, feature.label || '');
-                    template = template.replace(/{category}/g, feature.category || 'General');
-                    template = template.replace(/{description}/g, feature.description || 'None provided');
-                    template = template.replace(/{severity}/g, feature.severity || 'Medium');
-                    template = template.replace(/{remediation}/g, feature.remediation || 'None provided');
-                    template = template.replace(/{test_method}/g, feature.test_method || 'None provided');
-                    // Advanced placeholders
-                    template = template.replace(/{automation_prompts\.ai_ui}/g, 'Generate a React component...');
-                    template = template.replace(/{automation_prompts\.ai_check}/g, 'Generate PHP verification logic...');
-                    template = template.replace(/{schema_hints}/g, 'Define schema for inputs.');
-
-                    const copy = (text) => {
-                      if (navigator.clipboard) navigator.clipboard.writeText(text);
-                      else setAlertState({ message: sprintf(__('Manual Copy Required. Content: %s', 'vapt-builder'), text) });
-                      setAlertState({ message: __('Prompt copied to clipboard for testing!', 'vapt-builder'), type: 'success' });
-                    };
-                    copy(template);
-                  } catch (e) { setAlertState({ message: 'Error generating preview' }); }
-                }
-              }, __('Test Copy', 'vapt-Copilot')) : null,
-              el(Button, {
-                isDestructive: true,
-                icon: 'trash',
-                disabled: !designPromptConfig,
-                onClick: resetToDefault,
-                label: __('Reset', 'vapt-builder')
-              })
-            ]),
-
-            // Right: Actions
-            el('div', { style: { display: 'flex', gap: '10px' } }, [
-              el(Button, { isSecondary: true, onClick: onClose }, __('Close', 'vapt-builder')),
-              el(Button, { isPrimary: true, onClick: save, isBusy: isSaving }, __('Save Configuration', 'vapt-builder'))
-            ])
-          ])
-        ]),
-        // Render Modals
-        alertState && el(VAPT_AlertModal, {
-          isOpen: true,
-          message: alertState.message,
-          type: alertState.type,
-          onClose: () => setAlertState(null)
-        }),
-        confirmState && el(VAPT_ConfirmModal, {
-          isOpen: true,
-          message: confirmState.message,
-          isDestructive: confirmState.isDestructive,
-          onConfirm: confirmState.onConfirm,
-          onCancel: () => setConfirmState(null)
-        })
-      ]);
-    };
-
-    // Field Mapping Modal
-    const FieldMappingModal = ({ isOpen, onClose }) => {
-      const [localMapping, setLocalMapping] = useState(fieldMapping);
-      const [autoStatus, setAutoStatus] = useState(null);
-
-      const autoDetect = () => {
-        let newMapping = { ...localMapping };
-        let foundCount = 0;
-
-        // Heuristics (Priority Order)
-        const heuristics = {
-          test_method: ['test_method', 'testing_method', 'protocol', 'method'],
-          verification_steps: ['verification_steps', 'verification', 'testing', 'steps', 'manual_verification'],
-          verification_engine: ['verification_engine', 'automated_protection', 'automation', 'automated_test', 'verification_steps', 'remediation']
-        };
-
-        // 1. Test Method
-        for (const candidate of heuristics.test_method) {
-          if (allKeys.includes(candidate)) {
-            newMapping.test_method = candidate;
-            foundCount++;
-            break;
-          }
-        }
-
-        // 2. Verification Steps
-        for (const candidate of heuristics.verification_steps) {
-          if (allKeys.includes(candidate)) {
-            newMapping.verification_steps = candidate;
-            foundCount++;
-            break;
-          }
-        }
-
-        // 3. Verification Engine
-        for (const candidate of heuristics.verification_engine) {
-          if (allKeys.includes(candidate)) {
-            newMapping.verification_engine = candidate;
-            foundCount++;
-            break;
-          }
-        }
-
-        setLocalMapping(newMapping);
-        if (foundCount > 0) {
-          setAutoStatus({ message: sprintf(__('Auto-detected %d best matches!', 'vapt-builder'), foundCount), type: 'success' });
-        } else {
-          setAutoStatus({ message: __('No matching fields found in active file.', 'vapt-builder'), type: 'warning' });
-        }
-        setTimeout(() => setAutoStatus(null), 3000);
-      };
-
-      const save = () => {
-        setFieldMapping(localMapping);
-        onClose();
-      };
-
-      return el(Modal, {
-        title: __('Map Include Fields via JSON Source', 'vapt-builder'),
-        onRequestClose: onClose,
-        style: { maxWidth: '500px' }
-      }, [
-        el('p', { style: { fontSize: '13px', color: '#666' } }, __('Select which JSON fields should be automatically copied when you toggle these features ON. If the database field is empty, it will be populated from the mapped JSON key.', 'vapt-builder')),
-
-        autoStatus && el(Notice, {
-          status: autoStatus.type,
-          isDismissible: false,
-          style: { margin: '15px 0' }
-        }, autoStatus.message),
-
-        el('div', { style: { display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '15px' } }, [
-          el(SelectControl, {
-            label: __('Test Method Source', 'vapt-builder'),
-            help: __('Maps to the "Test Method" toggle.', 'vapt-builder'),
-            value: localMapping.test_method,
-            options: [{ label: __('(None)', 'vapt-builder'), value: '' }, ...allKeys.map(k => ({ label: k, value: k }))],
-            onChange: (val) => setLocalMapping({ ...localMapping, test_method: val })
-          }),
-          el(SelectControl, {
-            label: __('Verification Steps Source', 'vapt-builder'),
-            help: __('Maps to the "Verif. Steps" toggle (Interactive Checklist).', 'vapt-builder'),
-            value: localMapping.verification_steps,
-            options: [{ label: __('(None)', 'vapt-builder'), value: '' }, ...allKeys.map(k => ({ label: k, value: k }))],
-            onChange: (val) => setLocalMapping({ ...localMapping, verification_steps: val })
-          }),
-          el(SelectControl, {
-            label: __('Verification Engine Source', 'vapt-builder'),
-            help: __('Maps to the "Verif. Engine" toggle (Automated Tests).', 'vapt-builder'),
-            value: localMapping.verification_engine,
-            options: [{ label: __('(None)', 'vapt-builder'), value: '' }, ...allKeys.map(k => ({ label: k, value: k }))],
-            onChange: (val) => setLocalMapping({ ...localMapping, verification_engine: val })
-          })
-        ]),
-        el('div', { style: { marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
-          el(Button, {
-            isSecondary: true,
-            icon: 'search',
-            onClick: autoDetect,
-            title: __('Scan active file for standard VAPT fields', 'vapt-builder')
-          }, __('Auto-Detect', 'vapt-builder')),
-
-          el('div', { style: { display: 'flex', gap: '10px' } }, [
-            el(Button, { isSecondary: true, onClick: onClose }, __('Cancel', 'vapt-builder')),
-            el(Button, { isPrimary: true, onClick: save }, __('Save Mapping', 'vapt-builder'))
-          ])
-        ])
-      ]);
-    };
-
-    // Performance-Isolated Transition Modal
-    const TransitionNoteModal = ({ transitioning, onConfirm, onCancel }) => {
-      const [formValues, setFormValues] = useState({
-        note: transitioning.note || '',
-        devInstruct: transitioning.devInstruct || '',
-        wireframeUrl: transitioning.wireframeUrl || ''
-      });
-      const [modalSaveStatus, setModalSaveStatus] = useState(null);
-
-      return el(Modal, {
-        title: sprintf(__('Transition to %s', 'vapt-builder'), transitioning.nextStatus),
-        onRequestClose: onCancel,
-        className: 'vapt-transition-modal',
-        style: {
-          width: '600px',
-          maxWidth: '95%',
-          maxHeight: '800px',
-          overflow: 'hidden'
-        }
-      }, [
-        el('div', {
-          style: { height: '100%', display: 'flex', flexDirection: 'column' },
-          onPaste: (e) => {
-            if (transitioning.nextStatus !== 'Develop') return;
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let index in items) {
-              const item = items[index];
-              if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
-                const blob = item.getAsFile();
-                setModalSaveStatus({ message: __('Uploading pasted image...', 'vapt-builder'), type: 'info' });
-
-                const formData = new FormData();
-                formData.append('file', blob);
-                formData.append('title', 'Pasted Wireframe - ' + transitioning.key);
-
-                apiFetch({
-                  path: 'vapt/v1/upload-media',
-                  method: 'POST',
-                  body: formData
-                }).then(res => {
-                  setFormValues({ ...formValues, wireframeUrl: res.url });
-                  setModalSaveStatus({ message: __('Image Uploaded', 'vapt-builder'), type: 'success' });
-                }).catch(err => {
-                  setModalSaveStatus({ message: __('Paste failed', 'vapt-builder'), type: 'error' });
-                });
-              }
-            }
-          }
-        }, [
-          el('div', { style: { flexGrow: 1, paddingBottom: '10px' } }, [
-            el('p', { style: { fontWeight: '600', marginBottom: '10px' } }, sprintf(__('Moving "%s" to %s.', 'vapt-builder'), transitioning.key, transitioning.nextStatus)),
-
-            el('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' } }, [
-              el('label', { style: { fontWeight: '600', fontSize: '11px', textTransform: 'uppercase', color: '#64748b' } }, __('Change Note (Internal)', 'vapt-builder')),
-              el('div', { style: { display: 'flex', gap: '8px' } }, [
-                el(Button, { isSecondary: true, isSmall: true, onClick: onCancel }, __('Cancel', 'vapt-builder')),
-                el(Button, { isPrimary: true, isSmall: true, onClick: () => onConfirm(formValues) }, __('Confirm & Build', 'vapt-builder'))
-              ])
-            ]),
-
-            el(TextareaControl, {
-              value: formValues.note,
-              onChange: (val) => setFormValues({ ...formValues, note: val }),
-              rows: Math.max(2, (formValues.note || '').split('\n').length),
-              autoFocus: true,
-              __nextHasNoMarginBottom: true
-            }),
-
-            transitioning.nextStatus === 'Develop' && el('div', {
-              style: { marginTop: '10px', padding: '12px', background: '#f0f3f5', borderRadius: '4px', display: 'flex', flexDirection: 'column' }
-            }, [
-              el('h4', { style: { margin: '0 0 8px 0', fontSize: '14px' } }, __('Build Configuration', 'vapt-builder')),
-
-              // Reference Box (Read Only)
-              el('div', { style: { marginBottom: '10px' } }, [
-                el('div', {
-                  style: { padding: '8px', background: '#fff', border: '1px solid #ddd', borderRadius: '3px', fontSize: '11px', maxHeight: '120px', overflowY: 'auto', whiteSpace: 'pre-wrap' }
-                }, Array.isArray(transitioning.remediation)
-                  ? el('ul', { style: { margin: 0, paddingLeft: '20px', listStyleType: 'disc' } },
-                    transitioning.remediation.map((item, idx) => el('li', { key: idx, style: { marginBottom: '4px' } }, item))
-                  )
-                  : (transitioning.remediation || __('No remediation defined.', 'vapt-builder')))
-              ]),
-
-
-
-              // Consolidated VAPT Design Context (Why -> What -> How)
-              el('div', { style: { marginBottom: '10px' } }, [
-                el('label', { style: { display: 'block', fontWeight: 'bold', marginBottom: '3px', fontSize: '10px', textTransform: 'uppercase', color: '#007cba' } }, __('VAPT Design Context', 'vapt-builder')),
-                el('div', {
-                  style: { padding: '8px', background: '#fff', border: '1px solid #ddd', borderRadius: '3px', fontSize: '11px', maxHeight: '180px', overflowY: 'auto' }
-                }, [
-                  // 1. Protection Against (Why)
-                  ((transitioning.assurance_against && transitioning.assurance_against.length > 0) || transitioning.owasp) && [
-                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('1. [PROTECTION AGAINST]:', 'vapt-builder')),
-                    el('ul', { style: { margin: '0 0 8px 0', paddingLeft: '15px' } },
-                      (transitioning.assurance_against || []).concat(transitioning.owasp ? [`OWASP: ${transitioning.owasp}`] : []).map((item, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, item))
-                    )
-                  ],
-                  // 2. Success Goals (What)
-                  transitioning.assurance && transitioning.assurance.length > 0 && [
-                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('2. [SUCCESS GOALS]:', 'vapt-builder')),
-                    el('ul', { style: { margin: '0 0 8px 0', paddingLeft: '15px' } },
-                      transitioning.assurance.map((item, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, item))
-                    )
-                  ],
-                  // 3. Test Protocol (How)
-                  ((transitioning.tests && transitioning.tests.length > 0) || transitioning.test_method) && [
-                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('3. [TEST PROTOCOL / METHOD]:', 'vapt-builder')),
-                    el('ul', { style: { margin: '0 0 8px 0', paddingLeft: '15px' } },
-                      (transitioning.tests || []).concat(transitioning.test_method ? [transitioning.test_method] : []).map((item, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, item))
-                    )
-                  ],
-                  // 4. Verification Steps
-                  transitioning.verification_steps && transitioning.verification_steps.length > 0 && [
-                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('4. [VERIFICATION STEPS]:', 'vapt-builder')),
-                    el('ul', { style: { margin: '0 0 8px 0', paddingLeft: '15px' } },
-                      transitioning.verification_steps.map((item, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, item))
-                    )
-                  ],
-                  // 5. Evidence (Proof)
-                  transitioning.evidence && transitioning.evidence.length > 0 && [
-                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('5. [EVIDENCE]:', 'vapt-builder')),
-                    el('ul', { style: { margin: '0 0 8px 0', paddingLeft: '15px' } },
-                      transitioning.evidence.map((item, idx) => el('li', { key: idx, style: { marginBottom: '4px' } }, item))
-                    )
-                  ],
-                  // 6. Schema Hints (Implementation)
-                  transitioning.schema_hints && transitioning.schema_hints.fields && transitioning.schema_hints.fields.length > 0 && [
-                    el('div', { style: { fontWeight: 'bold', color: '#666', marginBottom: '2px', fontSize: '9px' } }, __('5. [SCHEMA HINTS]:', 'vapt-builder')),
-                    el('ul', { style: { margin: '0', paddingLeft: '15px' } },
-                      transitioning.schema_hints.fields.map((field, idx) => el('li', { key: idx, style: { marginBottom: '2px' } }, [
-                        el('strong', null, field.name),
-                        field.type ? ` (${field.type})` : ''
-                      ]))
-                    )
-                  ]
-                ].filter(Boolean))
-              ]),
-
-              el(wp.components.TextareaControl, {
-                label: __('Additional Instructions', 'vapt-builder'),
-                value: formValues.devInstruct,
-                onChange: (val) => setFormValues({ ...formValues, devInstruct: val }),
-                rows: 3
-              }),
-
-              el('div', { style: { marginTop: '5px' } }, [
-                el(TextControl, {
-                  label: __('Wireframe URL', 'vapt-builder'),
-                  value: formValues.wireframeUrl,
-                  onChange: (val) => setFormValues({ ...formValues, wireframeUrl: val }),
-                  help: __('Paste link or IMAGE directly!', 'vapt-builder')
-                }),
-                el('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } }, [
-                  el(Button, {
-                    isSecondary: true, isSmall: true,
-                    onClick: () => {
-                      const frame = wp.media({ title: __('Select Wireframe', 'vapt-builder'), multiple: false, library: { type: 'image' } });
-                      frame.on('select', () => {
-                        const attachment = frame.state().get('selection').first().toJSON();
-                        setFormValues({ ...formValues, wireframeUrl: attachment.url });
-                      });
-                      frame.open();
-                    }
-                  }, __('Upload Image', 'vapt-builder')),
-                  formValues.wireframeUrl && formValues.wireframeUrl.match(/\.(jpeg|jpg|gif|png)$/) &&
-                  el('img', { src: formValues.wireframeUrl, style: { height: '24px', borderRadius: '3px', border: '1px solid #ddd' }, alt: 'Thumbnail' })
-                ])
-              ])
-            ])
-          ]),
-
-          modalSaveStatus && el(Notice, {
-            status: modalSaveStatus.type || 'info',
-            onRemove: () => setModalSaveStatus(null),
-            style: { marginTop: '10px' }
-          }, modalSaveStatus.message)
-        ])
-      ]);
-    };
-
-    const LifecycleIndicator = ({ feature, onChange }) => {
-      // Normalize to Title Case for UI display if needed, but DB is now migrated.
-      const activeStep = feature.status;
-
-      const steps = [
-        { id: 'Draft', label: __('Draft', 'vapt-builder') },
-        { id: 'Develop', label: __('Develop', 'vapt-builder') },
-        { id: 'Test', label: __('Test', 'vapt-builder') },
-        { id: 'Release', label: __('Release', 'vapt-builder') }
-      ];
-
-      return el('div', { className: 'vapt-lifecycle-radios', style: { display: 'flex', gap: '10px', fontSize: '12px', alignItems: 'center' } }, [
-        ...steps.map((step) => {
-          const isChecked = step.id === activeStep;
-          return el('label', {
-            key: step.id,
-            style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? '#2271b1' : 'inherit', fontWeight: isChecked ? '600' : 'normal' }
-          }, [
-            el('input', {
-              type: 'radio',
-              name: `lifecycle_${feature.key || feature.id}_${Math.random()}`,
-              checked: isChecked,
-              onChange: () => onChange(step.id),
-              style: { margin: 0 }
-            }),
-            step.label
-          ]);
-        })
-      ]);
-    };
 
     return el(Fragment, null, [
       el(PanelBody, { title: __('Exhaustive Feature List', 'vapt-builder'), initialOpen: true }, [
@@ -3222,7 +2815,7 @@ Test Method: ${feature.test_method || 'None provided'}
           ...activeCols.map(col => {
             const label = col.charAt(0).toUpperCase() + col.slice(1).replace(/_/g, ' ');
             let width = 'auto';
-            if (col === 'title' || col === 'name') width = '200px';
+            if (col === 'title' || col === 'name') width = '300px';
             if (col === 'category') width = '120px';
             if (col === 'severity') width = '80px';
             if (col === 'id') width = '100px';
@@ -3259,7 +2852,7 @@ Test Method: ${feature.test_method || 'None provided'}
             ]);
           }),
           el('th', { style: { width: '300px' } }, __('Lifecycle Status', 'vapt-builder')),
-          el('th', { style: { width: '240px' } }, __('Include', 'vapt-builder')),
+          el('th', { style: { width: '144px' } }, __('Include', 'vapt-builder')),
         ])),
         el('tbody', null, processedFeatures.map((f) => el(Fragment, { key: f.key }, [
           el('tr', null, [
@@ -3288,111 +2881,70 @@ Test Method: ${feature.test_method || 'None provided'}
               }
               return el('td', { key: col }, content);
             }),
-            el('td', { style: { display: 'flex', gap: '10px', alignItems: 'center' } }, [
-              el(LifecycleIndicator, {
-                feature: f,
-                onChange: (newStatus) => {
-                  let defaultNote = '';
-                  const title = f.label || f.title;
-                  if (newStatus === 'Develop') {
-                    defaultNote = `Initiating implementation for ${title}. Configuring workbench and internal security drivers.`;
-                  } else if (newStatus === 'Test') {
-                    const risk = (f.assurance_against && f.assurance_against.length > 0) ? f.assurance_against[0] : __('identified risks', 'vapt-builder');
-                    defaultNote = `Development phase complete. Ready to verify protection against: ${risk}.`;
-                  } else if (newStatus === 'Release') {
-                    defaultNote = `Verification protocol passed for ${title}. Ready for baseline deployment.`;
-                  } else {
-                    defaultNote = `Reverting ${title} to Draft for further planning.`;
+            el('td', { style: { verticalAlign: 'middle' } }, [
+              el('div', { style: { display: 'flex', gap: '10px', alignItems: 'center' } }, [
+                el(LifecycleIndicator, {
+                  feature: f,
+                  onChange: (newStatus) => {
+                    let defaultNote = '';
+                    const title = f.label || f.title;
+                    if (newStatus === 'Develop') {
+                      defaultNote = `Initiating implementation for ${title}. Configuring workbench and internal security drivers.`;
+                    } else if (newStatus === 'Test') {
+                      const risk = (f.assurance_against && f.assurance_against.length > 0) ? f.assurance_against[0] : __('identified risks', 'vapt-builder');
+                      defaultNote = `Development phase complete. Ready to verify protection against: ${risk}.`;
+                    } else if (newStatus === 'Release') {
+                      defaultNote = `Verification protocol passed for ${title}. Ready for baseline deployment.`;
+                    } else {
+                      defaultNote = `Reverting ${title} to Draft for further planning.`;
+                    }
+
+                    setTransitioning({
+                      ...f,
+                      nextStatus: newStatus,
+                      note: defaultNote,
+                      remediation: f.remediation || '',
+                      assurance: f.assurance || [],
+                      assurance_against: f.assurance_against || [],
+                      owasp: f.owasp || '',
+                      test_method: f.test_method || '',
+                      verification_steps: f.verification_steps || [],
+                      tests: f.tests || [],
+                      evidence: f.evidence || [],
+                      schema_hints: f.schema_hints || {},
+                      devInstruct: ''
+                    });
                   }
-
-                  setTransitioning({
-                    ...f,
-                    nextStatus: newStatus,
-                    note: defaultNote,
-                    remediation: f.remediation || '',
-                    assurance: f.assurance || [],
-                    assurance_against: f.assurance_against || [],
-                    owasp: f.owasp || '',
-                    test_method: f.test_method || '',
-                    verification_steps: f.verification_steps || [],
-                    tests: f.tests || [],
-                    evidence: f.evidence || [],
-                    schema_hints: f.schema_hints || {},
-                    devInstruct: ''
-                  });
-                }
-              }),
-              el(Button, {
-                icon: 'backup',
-                isSmall: true,
-                isTertiary: true,
-                disabled: !f.has_history,
-                onClick: () => f.has_history && setHistoryFeature(f),
-                label: f.has_history ? __('View History', 'vapt-builder') : __('No History', 'vapt-builder'),
-                style: { marginLeft: '10px', opacity: f.has_history ? 1 : 0.4 }
-              })
+                }),
+                el(Button, {
+                  icon: 'backup',
+                  isSmall: true,
+                  isTertiary: true,
+                  disabled: !f.has_history,
+                  onClick: () => f.has_history && setHistoryFeature(f),
+                  label: f.has_history ? __('View History', 'vapt-builder') : __('No History', 'vapt-builder'),
+                  style: { marginLeft: '10px', opacity: f.has_history ? 1 : 0.4 }
+                })
+              ])
             ]),
-            el('td', { className: 'vapt-support-cell', style: { verticalAlign: 'middle' } }, el('div', { style: { display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' } }, [
-              // Pill Group for Include unit
+            el('td', { className: 'vapt-support-cell', style: { verticalAlign: 'middle' } }, [
+              el('div', { style: { display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' } }, [
+                // Premium Button for Workbench Design Hub
+                !['Draft', 'draft', 'available'].includes(f.status) && (() => {
+                  const schema = typeof f.generated_schema === 'string' ? JSON.parse(f.generated_schema || '{}') : (f.generated_schema || {});
+                  const isCustom = schema.controls && schema.controls.length > 0 && !schema._instructions;
 
-              el('div', {
-                onClick: () => handleSmartToggle(f, 'include_verification_engine'),
-                title: __('Toggle Verification Engine', 'vapt-builder'),
-                style: {
-                  cursor: 'pointer', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.05em',
-                  background: f.include_verification_engine ? '#d63638' : '#f0f0f1',
-                  color: f.include_verification_engine ? '#fff' : '#d63638',
-                  opacity: ['Draft', 'draft', 'available'].includes(f.status) ? 0.3 : 1,
-                  pointerEvents: ['Draft', 'draft', 'available'].includes(f.status) ? 'none' : 'auto',
-                  border: '1px solid', borderColor: f.include_verification_engine ? '#d63638' : '#dcdcde',
-                  whiteSpace: 'nowrap'
-                }
-              }, __('Verification Engine', 'vapt-builder')),
-
-              !['Draft', 'draft', 'available'].includes(f.status) && el('div', {
-                onClick: () => setDesignFeature(f),
-                title: __('Open Design Hub', 'vapt-builder'),
-                style: {
-                  cursor: 'pointer', padding: '2px 8px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.05em',
-                  background: '#f0f0f1',
-                  color: '#2271b1',
-                  border: '1px solid #2271b1'
-                }
-              }, __('Workbench Design Hub', 'vapt-Copilot'))
-            ]))
+                  return el(Button, {
+                    className: `vapt-premium-btn ${isCustom ? 'is-custom' : ''}`,
+                    onClick: () => setDesignFeature(f),
+                    title: isCustom ? __('Open Workbench Design Bench (Custom)', 'vapt-builder') : __('Open Workbench Design Bench (Default)', 'vapt-builder')
+                  }, __('Workbench Design Hub', 'vapt-builder'));
+                })()
+              ])
+            ])
           ])
         ])))
-      ]),
-
-      // History Modal (Sibling in PanelBody Array)
-      historyFeature && el(HistoryModal, {
-        feature: historyFeature,
-        updateFeature: updateFeature,
-        onClose: () => setHistoryFeature(null)
-      }),
-
-      transitioning && el(TransitionNoteModal, {
-        transitioning: transitioning,
-        onConfirm: confirmTransition,
-        onCancel: () => setTransitioning(null)
-      }),
-
-      designFeature && el(DesignModal, {
-        feature: designFeature,
-        onClose: () => !isPromptConfigModalOpen && setDesignFeature(null)
-      }),
-
-      isPromptConfigModalOpen && el(PromptConfigModal, {
-        isOpen: isPromptConfigModalOpen,
-        onClose: () => setIsPromptConfigModalOpen(false),
-        feature: designFeature // Pass current feature for testing
-      }),
-
-      isMappingModalOpen && el(FieldMappingModal, {
-        isOpen: isMappingModalOpen,
-        onClose: () => setIsMappingModalOpen(false)
-      }),
-
+      ])
     ]);
   };
 
@@ -3409,16 +2961,14 @@ Test Method: ${feature.test_method || 'None provided'}
     const [saveStatus, setSaveStatus] = useState(null); // { message: '', type: 'info'|'success'|'error' }
     const [designPromptConfig, setDesignPromptConfig] = useState(null);
     const [isPromptConfigModalOpen, setIsPromptConfigModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState(() => {
-      const validTabs = ['features', 'license', 'domains', 'build'];
-      const saved = localStorage.getItem('vapt_admin_active_tab');
-      return validTabs.includes(saved) ? saved : 'features';
-    });
-
-    // New: Global UI States for Modals
-    const [alertState, setAlertState] = useState(null);
+    const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
+    const [transitioning, setTransitioning] = useState(null);
+    const [activeTab, setActiveTab] = useState(() => localStorage.getItem('vapt_admin_active_tab') || 'features');
+    const [historyFeature, setHistoryFeature] = useState(null);
+    const [designFeature, setDesignFeature] = useState(null);
     const [confirmState, setConfirmState] = useState(null);
     const [selectedDomains, setSelectedDomains] = useState([]);
+    const [alertState, setAlertState] = useState(null);
 
     // Status Auto-clear helper
     useEffect(() => {
@@ -3511,6 +3061,37 @@ Test Method: ${feature.test_method || 'None provided'}
         const errMsg = err.message || (err.data && err.data.message) || err.error || __('Error saving!', 'vapt-builder');
         setSaveStatus({ message: errMsg, type: 'error' });
       });
+    };
+
+    const confirmTransition = (formValues) => {
+      if (!transitioning) return;
+      const { key, nextStatus } = transitioning;
+      const { note, devInstruct, wireframeUrl } = formValues;
+
+      const safeFeatures = Array.isArray(features) ? features : [];
+      const feature = safeFeatures.find(f => f.key === key);
+      let updates = { status: nextStatus, history_note: note };
+
+      // Save Wireframe if provided
+      if (wireframeUrl) {
+        updates.wireframe_url = wireframeUrl;
+      }
+
+      // Auto-Generate Interface when moving to 'Develop' (Phase 6 transition)
+      if (nextStatus === 'Develop' && typeof Generator !== 'undefined' && Generator && feature && feature.remediation) {
+        try {
+          const schema = Generator.generate(feature.remediation, devInstruct);
+          if (schema) {
+            updates.generated_schema = schema;
+            console.log('VAPT Builder: Auto-generated schema for ' + key, schema);
+          }
+        } catch (e) {
+          console.error('VAPT Builder: Generation error', e);
+        }
+      }
+
+      updateFeature(key, updates);
+      setTransitioning(null);
     };
 
     const addDomain = (domain, isWildcard = false, isEnabled = true, id = null) => {
@@ -3736,7 +3317,15 @@ Test Method: ${feature.test_method || 'None provided'}
             designPromptConfig,
             setDesignPromptConfig,
             isPromptConfigModalOpen,
-            setIsPromptConfigModalOpen
+            setIsPromptConfigModalOpen,
+            isMappingModalOpen,
+            setIsMappingModalOpen,
+            historyFeature,
+            setHistoryFeature,
+            designFeature,
+            setDesignFeature,
+            transitioning,
+            setTransitioning
           });
           case 'license': return el(LicenseManager, { domains, fetchData, isSuper, loading });
           case 'domains': return el(DomainFeatures, { domains, features, isDomainModalOpen, selectedDomain, setDomainModalOpen, setSelectedDomain, updateDomainFeatures, addDomain, deleteDomain, batchDeleteDomains, setConfirmState, selectedDomains, setSelectedDomains });
@@ -3746,6 +3335,39 @@ Test Method: ${feature.test_method || 'None provided'}
       }),
 
       // Global Modals
+      historyFeature && el(HistoryModal, {
+        feature: historyFeature,
+        updateFeature: updateFeature,
+        onClose: () => setHistoryFeature(null)
+      }),
+
+      transitioning && el(TransitionNoteModal, {
+        transitioning: transitioning,
+        onConfirm: confirmTransition,
+        onCancel: () => setTransitioning(null)
+      }),
+
+      designFeature && el(DesignModal, {
+        feature: designFeature,
+        updateFeature: updateFeature,
+        designPromptConfig: designPromptConfig,
+        setDesignPromptConfig: setDesignPromptConfig,
+        setIsPromptConfigModalOpen: setIsPromptConfigModalOpen,
+        selectedFile: selectedFile,
+        onClose: () => !isPromptConfigModalOpen && setDesignFeature(null)
+      }),
+
+      isPromptConfigModalOpen && el(PromptConfigModal, {
+        isOpen: isPromptConfigModalOpen,
+        onClose: () => setIsPromptConfigModalOpen(false),
+        feature: designFeature
+      }),
+
+      isMappingModalOpen && el(FieldMappingModal, {
+        isOpen: isMappingModalOpen,
+        onClose: () => setIsMappingModalOpen(false)
+      }),
+
       alertState && el(VAPT_AlertModal, {
         isOpen: true,
         message: alertState.message,
@@ -3753,7 +3375,7 @@ Test Method: ${feature.test_method || 'None provided'}
         onClose: () => setAlertState(null)
       }),
       confirmState && el(VAPT_ConfirmModal, {
-        isOpen: true,
+        isOpen: !!confirmState,
         message: confirmState.message,
         isDestructive: confirmState.isDestructive,
         onConfirm: confirmState.onConfirm,

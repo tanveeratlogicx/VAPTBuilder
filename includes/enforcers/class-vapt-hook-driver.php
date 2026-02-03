@@ -79,6 +79,9 @@ class VAPT_Hook_Driver
         case 'disable_xmlrpc_pingback':
           self::disable_xmlrpc_pingback($key);
           break;
+        case 'block_sensitive_files':
+          self::block_sensitive_files($key);
+          break;
       }
     }
   }
@@ -288,7 +291,10 @@ class VAPT_Hook_Driver
     add_filter('the_generator', '__return_empty_string');
 
     // 2. Add Enforcement Headers (Robust)
+    // 2. Add Enforcement Headers (Robust)
     add_filter('wp_headers', function ($headers) use ($key) {
+      if (defined('DOING_AJAX') && DOING_AJAX) return $headers;
+
       $headers['X-VAPT-Enforced'] = 'php-version-hide';
       $headers['X-VAPT-Feature'] = $key;
       $headers['Access-Control-Expose-Headers'] = 'X-VAPT-Enforced, X-VAPT-Feature';
@@ -297,6 +303,8 @@ class VAPT_Hook_Driver
 
     // 3. Fallback for headers (if not filtered)
     add_action('init', function () use ($key) {
+      if (defined('DOING_AJAX') && DOING_AJAX) return;
+
       if (!headers_sent()) {
         header('X-VAPT-Enforced: php-version-hide');
         header('X-VAPT-Feature: ' . $key);
@@ -311,6 +319,8 @@ class VAPT_Hook_Driver
   private static function block_debug_exposure($config, $key = 'unknown')
   {
     add_action('init', function () use ($key) {
+      if (defined('DOING_AJAX') && DOING_AJAX) return;
+
       if (!headers_sent()) {
         header('X-VAPT-Enforced: php-debug-exposure');
         header('X-VAPT-Feature: ' . $key);
@@ -336,6 +346,8 @@ class VAPT_Hook_Driver
   private static function add_security_headers($key = 'unknown')
   {
     add_filter('wp_headers', function ($headers) use ($key) {
+      if (defined('DOING_AJAX') && DOING_AJAX) return $headers; // VAPT: Skip for AJAX to prevent CORS/Heartbeat issues
+
       $headers['X-Frame-Options'] = 'SAMEORIGIN';
       $headers['X-Content-Type-Options'] = 'nosniff';
       $headers['X-XSS-Protection'] = '1; mode=block';
@@ -345,7 +357,7 @@ class VAPT_Hook_Driver
       return $headers;
     }, 999);
 
-    if (!headers_sent()) {
+    if (!headers_sent() && (!defined('DOING_AJAX') || !DOING_AJAX)) {
       header('X-Frame-Options: SAMEORIGIN');
       header('X-Content-Type-Options: nosniff');
       header('X-XSS-Protection: 1; mode=block');
@@ -387,6 +399,27 @@ class VAPT_Hook_Driver
         header('X-VAPT-Enforced: php-pingback');
         header('X-VAPT-Feature: ' . $key);
         header('Access-Control-Expose-Headers: X-VAPT-Enforced, X-VAPT-Feature');
+      }
+    });
+  }
+
+  /**
+   * Block Sensitive Files (readme.html, etc)
+   */
+  private static function block_sensitive_files($key = 'unknown')
+  {
+    add_action('plugins_loaded', function () use ($key) {
+      $uri = strtolower($_SERVER['REQUEST_URI'] ?? '');
+      $sensitive_files = ['/readme.html', '/license.txt', '/wp-config.php.bak', '/wp-config.php.swp', '/.env', '/xmlrpc.php', '/wp-links-opml.php'];
+
+      foreach ($sensitive_files as $file) {
+        if (strpos($uri, $file) !== false) {
+          status_header(403);
+          header('X-VAPT-Enforced: php-sensitive-file');
+          header('X-VAPT-Feature: ' . $key);
+          header('Access-Control-Expose-Headers: X-VAPT-Enforced, X-VAPT-Feature');
+          wp_die('VAPT: Access to this file is Blocked for Security.');
+        }
       }
     });
   }

@@ -173,15 +173,7 @@ class VAPT_REST
 
   public function check_permission()
   {
-    $current_user = wp_get_current_user();
-    $is_superadmin = ($current_user->user_login === VAPT_SUPERADMIN_USER || $current_user->user_email === VAPT_SUPERADMIN_EMAIL);
-
-    // Allow all admins on localhost to facilitate testing (access is still OTP-protected)
-    if ($is_superadmin || (is_vapt_localhost() && current_user_can('manage_options'))) {
-      return true;
-    }
-
-    return false;
+    return is_vapt_superadmin();
   }
 
   public function get_features($request)
@@ -286,7 +278,7 @@ class VAPT_REST
 
     // Security/Scope Check
     $scope = $request->get_param('scope');
-    $is_superadmin = current_user_can('manage_options');
+    $is_superadmin = is_vapt_superadmin();
 
     // Batch fetch history counts to avoid N+1 queries
     global $wpdb;
@@ -325,12 +317,16 @@ class VAPT_REST
       if ($norm_status === 'testing')     $norm_status = 'test';
       if ($norm_status === 'available')   $norm_status = 'draft';
       $feature['normalized_status'] = $norm_status;
+      $feature['status'] = ucfirst($norm_status); // Force Canonical Title Case
 
       $meta = VAPT_DB::get_feature_meta($key);
       if ($meta) {
         $feature['include_test_method'] = (bool) $meta['include_test_method'];
         $feature['include_verification'] = (bool) $meta['include_verification'];
         $feature['include_verification_engine'] = isset($meta['include_verification_engine']) ? (bool) $meta['include_verification_engine'] : false;
+        $feature['include_verification_guidance'] = isset($meta['include_verification_guidance']) ? (bool) $meta['include_verification_guidance'] : true;
+        $feature['include_manual_protocol'] = isset($meta['include_manual_protocol']) ? (bool) $meta['include_manual_protocol'] : true;
+        $feature['include_operational_notes'] = isset($meta['include_operational_notes']) ? (bool) $meta['include_operational_notes'] : true;
         $feature['is_enforced'] = (bool) $meta['is_enforced'];
         $feature['wireframe_url'] = $meta['wireframe_url'];
 
@@ -340,10 +336,15 @@ class VAPT_REST
 
         // Safely decode schema
         $schema_data = array();
-        if (!empty($meta['generated_schema'])) {
-          $decoded = json_decode($meta['generated_schema'], true);
+        $use_override_schema = in_array($norm_status, ['test', 'release']) && !empty($meta['override_schema']);
+        $source_schema_json = $use_override_schema ? $meta['override_schema'] : $meta['generated_schema'];
+
+        if (!empty($source_schema_json)) {
+          $decoded = json_decode($source_schema_json, true);
           if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             $schema_data = $decoded;
+            // Mark as overridden for UI awareness
+            if ($use_override_schema) $feature['is_overridden'] = true;
           } else {
             error_log(sprintf(
               'VAPT: Corrupted schema JSON for feature %s. JSON Error: %s',
@@ -430,7 +431,10 @@ class VAPT_REST
         }
 
         $feature['generated_schema'] = $schema_data;
-        $impl_data = $meta['implementation_data'] ? json_decode($meta['implementation_data'], true) : array();
+
+        $use_override_impl = in_array($norm_status, ['test', 'release']) && !empty($meta['override_implementation_data']);
+        $source_impl_json = $use_override_impl ? $meta['override_implementation_data'] : $meta['implementation_data'];
+        $impl_data = $source_impl_json ? json_decode($source_impl_json, true) : array();
 
         // 🧹 DATA CLEANUP
         $migrations = array(
@@ -588,6 +592,15 @@ class VAPT_REST
     $include_verification_engine = $request->get_param('include_verification_engine');
     if ($include_verification_engine !== null) $meta_updates['include_verification_engine'] = $include_verification_engine ? 1 : 0;
 
+    $include_verification_guidance = $request->get_param('include_verification_guidance');
+    if ($include_verification_guidance !== null) $meta_updates['include_verification_guidance'] = $include_verification_guidance ? 1 : 0;
+
+    $include_manual_protocol = $request->get_param('include_manual_protocol');
+    if ($include_manual_protocol !== null) $meta_updates['include_manual_protocol'] = $include_manual_protocol ? 1 : 0;
+
+    $include_operational_notes = $request->get_param('include_operational_notes');
+    if ($include_operational_notes !== null) $meta_updates['include_operational_notes'] = $include_operational_notes ? 1 : 0;
+
     if ($is_enforced !== null) $meta_updates['is_enforced'] = $is_enforced ? 1 : 0;
     if ($wireframe_url !== null) $meta_updates['wireframe_url'] = $wireframe_url;
 
@@ -599,6 +612,19 @@ class VAPT_REST
         $schema = (is_array($generated_schema) || is_object($generated_schema))
           ? json_decode(json_encode($generated_schema), true)
           : json_decode($generated_schema, true);
+
+        // 🛡️ LIFECYCLE ENFORCEMENT: Schema updates allowed only in Draft/Develop stages
+        // Update: 'Test' stage allows updates but saves to OVERRIDE meta (Local customization)
+        $current_feat = VAPT_DB::get_feature($key);
+        $current_status = $current_feat ? strtolower($current_feat['status']) : 'draft';
+
+        if (!in_array($current_status, ['draft', 'develop', 'test'])) {
+          return new WP_REST_Response(array(
+            'error' => 'Lifecycle Restriction',
+            'message' => 'Design/Schema changes are strictly locked in Release stage. Current status: ' . ucfirst($current_status),
+            'code' => 'lifecycle_locked'
+          ), 403);
+        }
 
         $is_legacy_format = isset($schema['type']) && in_array($schema['type'], ['wp_config', 'htaccess', 'manual', 'complex_input']);
 
@@ -612,14 +638,31 @@ class VAPT_REST
               'schema_received' => $schema
             ), 400);
           }
+
+          // 🛡️ INTELLIGENT ENFORCEMENT (v3.3.9)
+          $schema = self::analyze_enforcement_strategy($schema, $key);
         }
-        $meta_updates['generated_schema'] = json_encode($schema);
+
+        if ($current_status === 'test') {
+          $meta_updates['override_schema'] = json_encode($schema);
+        } else {
+          $meta_updates['generated_schema'] = json_encode($schema);
+        }
       }
     }
 
     if ($request->has_param('implementation_data')) {
+      $current_feat = $current_feat ?? VAPT_DB::get_feature($key);
+      $current_status = $current_feat ? strtolower($current_feat['status']) : 'draft';
+
       $implementation_data = $request->get_param('implementation_data');
-      $meta_updates['implementation_data'] = ($implementation_data === null) ? null : (is_array($implementation_data) ? json_encode($implementation_data) : $implementation_data);
+      $val = ($implementation_data === null) ? null : (is_array($implementation_data) ? json_encode($implementation_data) : $implementation_data);
+
+      if ($current_status === 'test') {
+        $meta_updates['override_implementation_data'] = $val;
+      } else {
+        $meta_updates['implementation_data'] = $val;
+      }
     }
 
     if (! empty($meta_updates)) {
@@ -1137,6 +1180,80 @@ class VAPT_REST
     } else {
       return new WP_Error('upload_error', $movefile['error'], array('status' => 500));
     }
+  }
+
+  /**
+   * 🛡️ INTELLIGENT ENFORCEMENT STRATEGY (v3.3.9)
+   * Analyzes the schema and automatically corrects driver selection 
+   * if it detects physical file targets being handled by PHP hooks.
+   */
+  private static function analyze_enforcement_strategy($schema, $feature_key)
+  {
+    if (!isset($schema['enforcement'])) return $schema;
+
+    $driver = $schema['enforcement']['driver'] ?? 'hook';
+    $mappings = $schema['enforcement']['mappings'] ?? array();
+
+    $physical_file_patterns = [
+      'readme.html',
+      'license.txt',
+      'xmlrpc.php',
+      'wp-config.php',
+      '.env',
+      'wp-links-opml.php',
+      'debug.log',
+      '.htaccess'
+    ];
+
+    $block_indicators = ['<Files', 'Require all', 'Deny from', 'Order allow,deny', 'Options -Indexes'];
+
+    $needs_htaccess = false;
+    foreach ($mappings as $key => $value) {
+      if (!is_string($value)) continue;
+
+      // Check for physical file mentions or Apache directives in mappings
+      foreach ($physical_file_patterns as $file) {
+        if (stripos($value, $file) !== false) {
+          $needs_htaccess = true;
+          break 2;
+        }
+      }
+
+      foreach ($block_indicators as $indicator) {
+        if (stripos($value, $indicator) !== false) {
+          $needs_htaccess = true;
+          break 2;
+        }
+      }
+    }
+
+    // Auto-Correct if driver is 'hook' but needs 'htaccess'
+    if ($needs_htaccess && $driver === 'hook') {
+      error_log("VAPT Intelligence: Auto-switching driver to 'htaccess' for feature $feature_key based on physical file target.");
+      $schema['enforcement']['driver'] = 'htaccess';
+      $schema['enforcement']['target'] = $schema['enforcement']['target'] ?? 'root';
+    }
+
+    // Auto-Correct Mapping Key Mismatch (feat_key vs feat_enabled)
+    if (isset($mappings['feat_key']) && isset($schema['controls'])) {
+      $has_feat_key = false;
+      $primary_toggle = null;
+
+      foreach ($schema['controls'] as $ctrl) {
+        if (isset($ctrl['key']) && $ctrl['key'] === 'feat_key') $has_feat_key = true;
+        if (isset($ctrl['type']) && $ctrl['type'] === 'toggle' && isset($ctrl['key'])) {
+          $primary_toggle = $ctrl['key'];
+        }
+      }
+
+      if (!$has_feat_key && $primary_toggle) {
+        error_log("VAPT Intelligence: Auto-correcting mapping key 'feat_key' to '$primary_toggle' for feature $feature_key.");
+        $schema['enforcement']['mappings'][$primary_toggle] = $mappings['feat_key'];
+        unset($schema['enforcement']['mappings']['feat_key']);
+      }
+    }
+
+    return $schema;
   }
 
   private static function validate_schema($schema)
