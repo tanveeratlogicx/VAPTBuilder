@@ -66,47 +66,29 @@
     font-size: 16px;
 }
 
-.vapt-severity-critical {
-    border-left: 4px solid #800000;
-}
-
-.vapt-severity-high {
-    border-left: 4px solid #ff0000;
-}
-
-.vapt-severity-medium {
-    border-left: 4px solid #ffa500;
-}
-
+.vapt-severity-critical,
+.vapt-severity-high,
+.vapt-severity-medium,
 .vapt-severity-low {
-    border-left: 4px solid #ffff00;
+    border-left: 4px solid #ccd0d4;
+    /* Neutral gray for all side borders */
 }
 
 .vapt-severity-text {
-    font-weight: 700;
     text-transform: uppercase;
     font-size: 11px;
+    color: inherit !important;
 }
 
-.vapt-severity-text.severity-critical {
-    color: #800000 !important;
-}
-
+.vapt-severity-text.severity-critical,
 .vapt-severity-text.severity-high {
-    color: #ff0000 !important;
+    font-weight: 700 !important;
 }
 
-.vapt-severity-text.severity-medium {
-    color: #ffa500 !important;
-}
-
-.vapt-severity-text.severity-low {
-    color: #cc9900 !important;
-    /* Darker yellow for readability on white */
-}
-
+.vapt-severity-text.severity-medium,
+.vapt-severity-text.severity-low,
 .vapt-severity-text.severity-informational {
-    color: #6c757d !important;
+    font-weight: 400 !important;
 }
 
 .vapt-modal {
@@ -220,27 +202,21 @@
 }
 
 .severity.critical,
-.severity-critical {
-    color: #800000 !important;
-    background: none !important;
-}
-
+.severity-critical,
 .severity.high,
 .severity-high {
-    color: #ff0000 !important;
+    font-weight: 700 !important;
     background: none !important;
+    color: inherit !important;
 }
 
 .severity.medium,
-.severity-medium {
-    color: #ffa500 !important;
-    background: none !important;
-}
-
+.severity-medium,
 .severity.low,
 .severity-low {
-    color: #cc9900 !important;
+    font-weight: 400 !important;
     background: none !important;
+    color: inherit !important;
 }
 
 .toggle-switch {
@@ -810,20 +786,12 @@
     border-top: 4px solid #46b450;
 }
 
-.vapt-summary-card.critical {
-    border-top: 4px solid #800000;
-}
-
-.vapt-summary-card.high {
-    border-top: 4px solid #ff0000;
-}
-
-.vapt-summary-card.medium {
-    border-top: 4px solid #ffa500;
-}
-
+.vapt-summary-card.critical,
+.vapt-summary-card.high,
+.vapt-summary-card.medium,
 .vapt-summary-card.low {
-    border-top: 4px solid #ffff00;
+    border-top: 4px solid #ccd0d4;
+    /* Neutral gray for all summary caps */
 }
 
 
