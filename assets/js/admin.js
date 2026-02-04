@@ -153,7 +153,12 @@ window.vaptScriptLoaded = true;
             status: 'Draft',
             reset_history: true,
             has_history: false,
-            history_note: 'History Reset by User'
+            history_note: 'History Reset by User',
+            generated_schema: null,
+            implementation_data: null,
+            wireframe_url: '',
+            include_verification_engine: 0,
+            include_verification_guidance: 0
           }).then(() => {
             setLoading(false);
             onClose();
@@ -868,10 +873,74 @@ Feature ID: ${feature.id || 'N/A'}
     ]);
   };
 
+  // Backward Transition Warning Modal
+  const BackwardTransitionModal = ({ isOpen, onConfirm, onCancel, type }) => {
+    if (!isOpen) return null;
+
+    let title = __('Warning', 'vapt-builder');
+    let message = '';
+    let confirmLabel = __('Confirm', 'vapt-builder');
+    let isProduction = false;
+
+    if (type === 'reset') {
+      title = __('Reset to Draft?', 'vapt-builder');
+      message = __('Warning: innovative "Clean Slate" protocol. Transitioning to Draft will **permanently delete** all implementation data, generated schemas, and history logs for this feature. This cannot be undone.', 'vapt-builder');
+      confirmLabel = __('Confirm Reset (Wipe Data)', 'vapt-builder');
+      checkboxLabel = __('I understand all history will be lost', 'vapt-builder');
+    } else if (type === 'production_regression') {
+      title = __('⚠️ Production Impact Warning', 'vapt-builder');
+      message = __('You are demoting a **Released** feature. This feature may be active on multiple production sites.\n\nReverting to Test implies a potential defect that could impact live environments.', 'vapt-builder');
+      confirmLabel = __('Confirm Production Regression', 'vapt-builder');
+      checkboxLabel = __('I acknowledge this may impact live sites', 'vapt-builder');
+      isProduction = true;
+    } else {
+      title = __('Confirm Regression', 'vapt-builder');
+      // Added customization warning as requested
+      message = __('Warning: You are moving this feature back to a previous stage within the cycle.\n\nPending verifications will be invalidated.\n**You may lose any customization applied to the Feature.**', 'vapt-builder');
+      confirmLabel = __('Confirm Regression', 'vapt-builder');
+      checkboxLabel = __('I acknowledge potential loss of customization', 'vapt-builder');
+    }
+
+    const [acknowledged, setAcknowledged] = useState(false);
+
+    return el(Modal, {
+      title: title,
+      onRequestClose: onCancel,
+      className: 'vapt-warning-modal',
+      style: { maxWidth: '500px' }
+    }, [
+      el('div', { style: { padding: '20px' } }, [
+        el('div', { style: { display: 'flex', gap: '15px', alignItems: 'flex-start' } }, [
+          el(Icon, { icon: 'warning', size: 36, style: { color: isProduction ? '#d63638' : '#d97706' } }),
+          el('div', null, [
+            el('p', { style: { marginTop: 0, fontSize: '13px', lineHeight: '1.5', whiteSpace: 'pre-line' }, dangerouslySetInnerHTML: { __html: message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') } }),
+            // Checkbox is now unconditional for all regressions
+            el('div', { style: { marginTop: '15px', display: 'flex', alignItems: 'flex-start' } }, [
+              el(CheckboxControl, {
+                label: checkboxLabel,
+                checked: acknowledged,
+                onChange: setAcknowledged,
+                style: { marginBottom: 0 }
+              })
+            ])
+          ])
+        ]),
+        el('div', { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '25px' } }, [
+          el(Button, { isSecondary: true, onClick: onCancel }, __('Cancel', 'vapt-builder')),
+          el(Button, {
+            isDestructive: true,
+            disabled: !acknowledged, // Mandatory for all types
+            onClick: onConfirm
+          }, confirmLabel)
+        ])
+      ])
+    ]);
+  };
+
   // Lifecycle Indicator Component
-  const LifecycleIndicator = ({ feature, onChange }) => {
-    // Normalize to Title Case for UI display if needed, but DB is now migrated.
+  const LifecycleIndicator = ({ feature, onChange, onDirectUpdate }) => {
     const activeStep = feature.status;
+    const [warningState, setWarningState] = useState(null); // { type, nextStatus }
 
     const steps = [
       { id: 'Draft', label: __('Draft', 'vapt-builder') },
@@ -880,22 +949,76 @@ Feature ID: ${feature.id || 'N/A'}
       { id: 'Release', label: __('Release', 'vapt-builder') }
     ];
 
-    return el('div', { className: 'vapt-lifecycle-radios', style: { display: 'flex', gap: '10px', fontSize: '12px', alignItems: 'center' } }, [
-      ...steps.map((step) => {
-        const isChecked = step.id === activeStep;
-        return el('label', {
-          key: step.id,
-          style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? '#2271b1' : 'inherit', fontWeight: isChecked ? '600' : 'normal' }
-        }, [
-          el('input', {
-            type: 'radio',
-            name: `lifecycle_${feature.key || feature.id}_${Math.random()}`,
-            checked: isChecked,
-            onChange: () => onChange(step.id),
-            style: { margin: 0 }
-          }),
-          step.label
-        ]);
+    const getStepValue = (status) => {
+      const map = { 'Draft': 0, 'Develop': 1, 'Test': 2, 'Release': 3 };
+      return map[status] || 0; // Default to 0 if unknown
+    };
+
+    const handleSelection = (nextStatus) => {
+      const currentVal = getStepValue(activeStep);
+      const nextVal = getStepValue(nextStatus);
+
+      if (nextVal < currentVal) {
+        // PCR: Backward Transition Warning
+        let type = 'regression';
+        if (nextStatus === 'Draft') type = 'reset';
+        else if (activeStep === 'Release' && nextStatus === 'Test') type = 'production_regression';
+
+        setWarningState({ type, nextStatus });
+      } else {
+        onChange(nextStatus);
+      }
+    };
+
+    return el(Fragment, null, [
+      el('div', { className: 'vapt-lifecycle-radios', style: { display: 'flex', gap: '10px', fontSize: '12px', alignItems: 'center' } }, [
+        ...steps.map((step) => {
+          const isChecked = step.id === activeStep;
+          return el('label', {
+            key: step.id,
+            style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? '#2271b1' : 'inherit', fontWeight: isChecked ? '600' : 'normal' }
+          }, [
+            el('input', {
+              type: 'radio',
+              name: `lifecycle_${feature.key || feature.id}_${Math.random()}`,
+              checked: isChecked,
+              onChange: () => handleSelection(step.id),
+              style: { margin: 0 }
+            }),
+            step.label
+          ]);
+        })
+      ]),
+      warningState && el(BackwardTransitionModal, {
+        isOpen: true,
+        type: warningState.type,
+        onCancel: () => setWarningState(null),
+        onConfirm: () => {
+          const status = warningState.nextStatus;
+          setWarningState(null);
+
+          if (onDirectUpdate) {
+            const isReset = status === 'Draft';
+            const updates = {
+              status: status,
+              history_note: isReset ? 'History Reset by User (Clean Slate)' : 'Regression Confirmed'
+            };
+
+            if (isReset) {
+              updates.reset_history = true;
+              updates.has_history = false;
+              updates.generated_schema = null;
+              updates.implementation_data = null;
+              updates.wireframe_url = '';
+              updates.include_verification_engine = 0;
+              updates.include_verification_guidance = 0;
+            }
+
+            onDirectUpdate(feature.key || feature.id, updates);
+          } else {
+            onChange(status); // Fallback if prop not provided
+          }
+        }
       })
     ]);
   };
@@ -2868,6 +2991,7 @@ Feature ID: ${feature.id || 'N/A'}
               el('div', { style: { display: 'flex', gap: '10px', alignItems: 'center' } }, [
                 el(LifecycleIndicator, {
                   feature: f,
+                  onDirectUpdate: (key, updates) => updateFeature(key, updates),
                   onChange: (newStatus) => {
                     // Validation: Prevent Draft -> Test or Draft -> Release
                     const currentStatus = f.status;
@@ -3076,6 +3200,18 @@ Feature ID: ${feature.id || 'N/A'}
       // Save Wireframe if provided
       if (wireframeUrl) {
         updates.wireframe_url = wireframeUrl;
+      }
+
+      // Special Case: Reset if moving back to Draft
+      if (nextStatus === 'Draft' || nextStatus === 'draft') {
+        updates.generated_schema = null;
+        updates.implementation_data = null;
+        updates.has_history = false;
+        updates.wireframe_url = ''; // Clear wireframe too
+        updates.include_verification_engine = 0;
+        updates.include_verification_guidance = 0;
+        // No need to set reset_history flag here because the backend handles the actual deletion based on status=Draft
+        // But we update optimistic state above (has_history=false)
       }
 
       // Auto-Generate Interface when moving to 'Develop' (Phase 6 transition)

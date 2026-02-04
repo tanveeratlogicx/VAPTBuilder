@@ -78,6 +78,23 @@ class VAPT_Workflow
       'created_at'  => current_time('mysql')
     ));
 
+    // Special Case: Reset if moving back to Draft
+    if (strtolower($new_status) === 'draft') {
+      // 1. Wipe History
+      $wpdb->delete($table_history, array('feature_key' => $feature_key));
+
+      // 2. Wipe Implementation Data (Meta)
+      // We keep the row but nullify the data fields
+      $table_meta = $wpdb->prefix . 'vapt_feature_meta';
+      $wpdb->update($table_meta, array(
+        'generated_schema' => null,
+        'implementation_data' => null,
+        'override_schema' => null,
+        'override_implementation_data' => null,
+        'is_enforced' => 0
+      ), array('feature_key' => $feature_key));
+    }
+
     return true;
   }
 

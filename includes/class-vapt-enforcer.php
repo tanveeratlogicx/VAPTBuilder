@@ -94,9 +94,19 @@ class VAPT_Enforcer
     $driver_name = $schema['enforcement']['driver'];
 
     // 2. Dispatch to the correct driver
+    // 2. Dispatch to the correct driver
     if ($driver_name === 'htaccess') {
-      // UNIVERSAL FIX: Rebuild entire .htaccess from all active features
-      self::rebuild_htaccess();
+      // UNIVERSAL FIX: Rebuild based on Server Type
+      $server = isset($_SERVER['SERVER_SOFTWARE']) ? strtolower($_SERVER['SERVER_SOFTWARE']) : '';
+
+      if (strpos($server, 'nginx') !== false) {
+        self::rebuild_nginx();
+      } elseif (strpos($server, 'iis') !== false || strpos($server, 'windows') !== false) {
+        self::rebuild_iis();
+      } else {
+        // Default to Apache/.htaccess
+        self::rebuild_htaccess();
+      }
     } else {
       // For hooks, we just rely on the runtime loader (next request will pick it up)
       // No explicit action needed other than clearing cache (done above).
@@ -104,24 +114,68 @@ class VAPT_Enforcer
   }
 
   /**
+   * Rebuilds Nginx Rules File
+   */
+  private static function rebuild_nginx()
+  {
+    require_once VAPT_PATH . 'includes/enforcers/class-vapt-nginx-driver.php';
+
+    $features = self::get_enforced_features();
+    $all_rules = [];
+
+    foreach ($features as $meta) {
+      $schema = self::resolve_schema($meta);
+      $impl = self::resolve_impl($meta);
+
+      if (($schema['enforcement']['driver'] ?? '') === 'htaccess') {
+        $rules = VAPT_Nginx_Driver::generate_rules($impl, $schema);
+        if ($rules) $all_rules = array_merge($all_rules, $rules);
+      }
+    }
+
+    VAPT_Nginx_Driver::write_batch($all_rules);
+  }
+
+  /**
+   * Rebuilds IIS Config
+   */
+  private static function rebuild_iis()
+  {
+    require_once VAPT_PATH . 'includes/enforcers/class-vapt-iis-driver.php';
+    // Logic placeholder - similar structure to above
+  }
+
+  // Helper to fetch enforced features (DRY)
+  private static function get_enforced_features()
+  {
+    global $wpdb;
+    $table = $wpdb->prefix . 'vapt_feature_meta';
+    return $wpdb->get_results("SELECT m.*, s.status FROM $table m LEFT JOIN {$wpdb->prefix}vapt_feature_status s ON m.feature_key = s.feature_key WHERE m.is_enforced = 1", ARRAY_A);
+  }
+
+  // Helpers for Schema/Impl Resolution
+  private static function resolve_schema($meta)
+  {
+    $status = $meta['status'] ?? 'draft';
+    $raw = (in_array($status, ['test', 'release']) && !empty($meta['override_schema'])) ? $meta['override_schema'] : $meta['generated_schema'];
+    return $raw ? json_decode($raw, true) : [];
+  }
+
+  private static function resolve_impl($meta)
+  {
+    $status = $meta['status'] ?? 'draft';
+    $raw = (in_array($status, ['test', 'release']) && !empty($meta['override_implementation_data'])) ? $meta['override_implementation_data'] : $meta['implementation_data'];
+    return $raw ? json_decode($raw, true) : [];
+  }
+
+  /**
    * Rebuilds the .htaccess file by aggregating rules from ALL enabled features.
    */
   private static function rebuild_htaccess()
   {
-    global $wpdb;
-    $table = $wpdb->prefix . 'vapt_feature_meta';
-
-    // Get ALL features that are marked as enforced
-    $enforced_features = $wpdb->get_results("
-        SELECT m.*, s.status 
-        FROM $table m
-        LEFT JOIN {$wpdb->prefix}vapt_feature_status s ON m.feature_key = s.feature_key
-        WHERE m.is_enforced = 1
-      ", ARRAY_A);
+    $enforced_features = self::get_enforced_features();
 
     if (empty($enforced_features)) {
-      // If nothing is enforced, we might need to clear the file?
-      // Let's pass empty array to write_batch to clear VAPT block.
       require_once VAPT_PATH . 'includes/enforcers/class-vapt-htaccess-driver.php';
       if (class_exists('VAPT_Htaccess_Driver')) {
         VAPT_Htaccess_Driver::write_batch(array(), 'root');
@@ -135,33 +189,19 @@ class VAPT_Enforcer
     $all_rules = array();
 
     foreach ($enforced_features as $meta) {
-      $status = isset($meta['status']) ? strtolower($meta['status']) : 'draft';
-
-      // Schema Loading
-      $use_override_schema = in_array($status, ['test', 'release']) && !empty($meta['override_schema']);
-      $raw_schema = $use_override_schema ? $meta['override_schema'] : $meta['generated_schema'];
-      $schema = !empty($raw_schema) ? json_decode($raw_schema, true) : array();
-
-      // Implementation Data Loading
-      $use_override_impl = in_array($status, ['test', 'release']) && !empty($meta['override_implementation_data']);
-      $raw_impl = $use_override_impl ? $meta['override_implementation_data'] : $meta['implementation_data'];
-      $impl_data = !empty($raw_impl) ? json_decode($raw_impl, true) : array();
-
-      // Check if this feature maps to htaccess
+      $schema = self::resolve_schema($meta);
+      $impl_data = self::resolve_impl($meta);
       $driver = isset($schema['enforcement']['driver']) ? $schema['enforcement']['driver'] : '';
 
       if ($driver === 'htaccess') {
-        // Generate rules for this feature
         $feature_rules = VAPT_Htaccess_Driver::generate_rules($impl_data, $schema);
         if (!empty($feature_rules)) {
-          // Add comment header for readability? Optional.
           $all_rules[] = "# Rule for: " . ($meta['feature_key']);
           $all_rules = array_merge($all_rules, $feature_rules);
         }
       }
     }
 
-    // Write everything in one go
     VAPT_Htaccess_Driver::write_batch($all_rules, 'root');
   }
 }

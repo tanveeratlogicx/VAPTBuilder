@@ -15,9 +15,32 @@ class VAPT_Hook_Driver
   private static $enforced_keys = [];
   private static $rate_limit_hook_registered = false;
   private static $marker_hook_registered = false;
+  private static $catalog_data = null;
+
+  // Dynamic Map: matches feature keys/tags to methods
+  private static $dynamic_map = [
+    'xmlrpc' => 'block_xmlrpc',
+    'directory_browsing' => 'disable_directory_browsing',
+    'listing' => 'disable_directory_browsing', // fallback
+    'version' => 'hide_wp_version',
+    'debug' => 'block_debug_exposure',
+    'headers' => 'add_security_headers',
+    'xss' => 'add_security_headers', // XSS headers
+    'clickjacking' => 'add_security_headers', // Frame options
+    'null_byte' => 'block_null_byte_injection',
+    'author' => 'block_author_enumeration',
+    'user_enum' => 'block_author_enumeration',
+    'pingback' => 'disable_xmlrpc_pingback',
+    'sensitive' => 'block_sensitive_files',
+    'files' => 'block_sensitive_files',
+    'limit' => 'limit_login_attempts',
+    'login' => 'limit_login_attempts',
+    'brute' => 'limit_login_attempts'
+  ];
 
   /**
    * Apply enforcement rules at runtime
+   * enhanced to work with VAPT-Complete-Risk-Catalog-99.json
    */
   public static function apply($impl_data, $schema, $key = '')
   {
@@ -30,67 +53,199 @@ class VAPT_Hook_Driver
       self::register_enforcement_marker();
     }
 
-    if (empty($schema['enforcement']['mappings'])) {
-      file_put_contents($log_file, $log . "Skipped: Missing mappings.\n", FILE_APPEND);
-      return;
-    }
-    $mappings = $schema['enforcement']['mappings'];
-
+    // 1. Resolve Data (Merge Defaults)
     $resolved_data = array();
     if (isset($schema['controls']) && is_array($schema['controls'])) {
       foreach ($schema['controls'] as $control) {
         if (isset($control['key'])) {
           $key_name = $control['key'];
+          // Priority: Impl Data -> Control Default -> Null
           $resolved_data[$key_name] = isset($impl_data[$key_name]) ? $impl_data[$key_name] : (isset($control['default']) ? $control['default'] : null);
         }
       }
     }
-    $resolved_data = array_merge($resolved_data, $impl_data);
+    // Merge any raw implementation data not in controls
+    if (!empty($impl_data)) {
+      $resolved_data = array_merge($resolved_data, $impl_data);
+    }
+
+    // 2. Failsafe: If no data, try to load from Catalog Source (VAPT-Complete-Risk-Catalog-99.json)
+    if (empty($resolved_data)) {
+      $catalog_item = self::get_catalog_data($key);
+      if ($catalog_item && isset($catalog_item['ui_configuration']['components'])) {
+        foreach ($catalog_item['ui_configuration']['components'] as $comp) {
+          if (isset($comp['default_value'])) {
+            // Assume the key is derived or standard
+            $resolved_data['enabled'] = $comp['default_value'];
+          }
+        }
+      }
+    }
 
     file_put_contents($log_file, $log . "Applying rules with Data: " . json_encode($resolved_data) . "\n", FILE_APPEND);
 
+    // 3. Determine Enforcement Mappings
+    $mappings = isset($schema['enforcement']['mappings']) ? $schema['enforcement']['mappings'] : [];
+
+    // Dynamic Fallback: If no mappings, try to infer from Key or Controls
+    if (empty($mappings)) {
+      // Try to guess based on Controls
+      if (!empty($resolved_data)) {
+        foreach ($resolved_data as $k => $v) {
+          if ($v == true || $v === '1' || (is_string($v) && strlen($v) > 0)) {
+            $method = self::resolve_dynamic_method($k, $key);
+            if ($method) {
+              $mappings[$k] = $method;
+            }
+          }
+        }
+      }
+
+      // If still empty, try to map the Feature Key itself
+      if (empty($mappings)) {
+        $method = self::resolve_dynamic_method('enabled', $key);
+        if ($method) {
+          // Fake a data point to trigger it
+          $resolved_data['enabled'] = true;
+          $mappings['enabled'] = $method;
+        }
+      }
+    }
+
+    if (empty($mappings)) {
+      file_put_contents($log_file, $log . "Skipped: No mappings found (Dynamic Inference Failed).\n", FILE_APPEND);
+      return;
+    }
+
+    // 4. Execute Methods
     $triggered_methods = array();
     foreach ($resolved_data as $field_key => $value) {
       if (!$value || empty($mappings[$field_key])) continue;
 
       $method = $mappings[$field_key];
+
+      // Robust Type Check: method_exists requires string
+      if (is_array($method)) {
+        if (isset($method['method'])) { // Support keyed object
+          $method = $method['method'];
+        } elseif (isset($method[0]) && is_string($method[0])) { // Support list
+          $method = $method[0];
+        } else {
+          file_put_contents($log_file, $log . "Skipped: Invalid mapping format for $field_key (Array/Object): " . json_encode($method) . "\n", FILE_APPEND);
+          continue;
+        }
+      }
+
+      if (!is_string($method)) continue;
+
       if (in_array($method, $triggered_methods)) continue;
       $triggered_methods[] = $method;
 
-      switch ($method) {
-        case 'block_xmlrpc':
-          self::block_xmlrpc($key);
-          break;
-        case 'enable_security_headers':
-          self::add_security_headers($key);
-          break;
-        case 'disable_directory_browsing':
-          self::disable_directory_browsing($key);
-          break;
-        case 'limit_login_attempts':
-          if ($key === 'xml-rpc-api-security') break;
-          self::limit_login_attempts($value, $resolved_data, $key);
-          break;
-        case 'block_null_byte_injection':
-          self::block_null_byte_injection($key);
-          break;
-        case 'hide_wp_version':
-          self::hide_wp_version($key);
-          break;
-        case 'block_debug_exposure':
-          self::block_debug_exposure($value, $key);
-          break;
-        case 'block_author_enumeration':
-          self::block_author_enumeration($key);
-          break;
-        case 'disable_xmlrpc_pingback':
-          self::disable_xmlrpc_pingback($key);
-          break;
-        case 'block_sensitive_files':
-          self::block_sensitive_files($key);
-          break;
+      if (!method_exists(__CLASS__, $method)) {
+        file_put_contents($log_file, $log . "Error: Method $method does not exist.\n", FILE_APPEND);
+        continue;
+      }
+
+      try {
+        switch ($method) {
+          case 'block_xmlrpc':
+            self::block_xmlrpc($key);
+            break;
+          case 'enable_security_headers':
+            self::add_security_headers($key);
+            break;
+          case 'disable_directory_browsing':
+            self::disable_directory_browsing($key);
+            break;
+          case 'limit_login_attempts':
+            if ($key === 'xml-rpc-api-security') break;
+            self::limit_login_attempts($value, $resolved_data, $key);
+            break;
+          case 'block_null_byte_injection':
+            self::block_null_byte_injection($key);
+            break;
+          case 'hide_wp_version':
+            self::hide_wp_version($key);
+            break;
+          case 'block_debug_exposure':
+            self::block_debug_exposure($value, $key);
+            break;
+          case 'block_author_enumeration':
+            self::block_author_enumeration($key);
+            break;
+          case 'disable_xmlrpc_pingback':
+            self::disable_xmlrpc_pingback($key);
+            break;
+          case 'block_sensitive_files':
+            self::block_sensitive_files($key);
+            break;
+          default:
+            // Allow calling private methods if they exist and are safe? 
+            // For security, only allow the switch list unless we use reflection or __callStruct
+            // But for now, stick to the switch for explicitly supported methods.
+            file_put_contents($log_file, $log . "Warning: Method $method not in switch case.\n", FILE_APPEND);
+            break;
+        }
+      } catch (Exception $e) {
+        file_put_contents($log_file, $log . "Exception in $method: " . $e->getMessage() . "\n", FILE_APPEND);
       }
     }
+  }
+
+  /**
+   * dynamic method resolution based on keywords
+   */
+  private static function resolve_dynamic_method($field_key, $feature_key)
+  {
+    $fingerprint = strtolower($field_key . '_' . $feature_key);
+
+    foreach (self::$dynamic_map as $keyword => $method) {
+      if (strpos($fingerprint, $keyword) !== false) {
+        return $method;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Load Catalog Data from JSON Failsafe (Dynamic Source)
+   */
+  private static function get_catalog_data($key)
+  {
+    if (self::$catalog_data === null) {
+      // Dynamic Active File Resolution
+      $active_file = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : get_option('vapt_active_feature_file', 'Feature-List-99.json');
+      $path = VAPT_PATH . 'data/' . sanitize_file_name($active_file);
+
+      if (file_exists($path)) {
+        $json = json_decode(file_get_contents($path), true);
+        if ($json) {
+          // handle various schema formats
+          if (isset($json['risk_catalog'])) {
+            self::$catalog_data = $json['risk_catalog'];
+          } elseif (isset($json['features'])) {
+            self::$catalog_data = $json['features'];
+          } elseif (isset($json['wordpress_vapt'])) {
+            self::$catalog_data = $json['wordpress_vapt'];
+          } else {
+            self::$catalog_data = $json; // Fallback
+          }
+        }
+      }
+    }
+
+    if (self::$catalog_data && is_array(self::$catalog_data)) {
+      foreach (self::$catalog_data as $item) {
+        // Match by Feature Key (if present) or ID or Title similarity
+        if ((isset($item['risk_id']) && $item['risk_id'] === $key) ||
+          (isset($item['title']) && sanitize_title($item['title']) === $key) ||
+          strpos($key, sanitize_title(isset($item['title']) ? $item['title'] : '')) !== false
+        ) {
+          return $item;
+        }
+      }
+    }
+    return null;
   }
 
   /**
