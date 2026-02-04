@@ -214,7 +214,7 @@ class VAPT_Hook_Driver
   {
     if (self::$catalog_data === null) {
       // Dynamic Active File Resolution
-      $active_file = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : get_option('vapt_active_feature_file', 'Feature-List-99.json');
+      $active_file = defined('VAPT_ACTIVE_DATA_FILE') ? constant('VAPT_ACTIVE_DATA_FILE') : get_option('vapt_active_feature_file', 'Feature-List-99.json');
       $path = VAPT_PATH . 'data/' . sanitize_file_name($active_file);
 
       if (file_exists($path)) {
@@ -257,7 +257,7 @@ class VAPT_Hook_Driver
     self::$marker_hook_registered = true;
 
     add_filter('wp_headers', function ($headers) {
-      if (defined('DOING_AJAX') && DOING_AJAX) return $headers;
+      if (function_exists('wp_doing_ajax') && wp_doing_ajax()) return $headers;
 
       $headers['X-VAPT-Enforced'] = 'php-headers';
       $existing = isset($headers['X-VAPT-Feature']) ? $headers['X-VAPT-Feature'] : '';
@@ -274,7 +274,7 @@ class VAPT_Hook_Driver
       return $headers;
     }, 999);
 
-    if (!headers_sent() && (!defined('DOING_AJAX') || !DOING_AJAX)) {
+    if (!headers_sent() && (!function_exists('wp_doing_ajax') || !wp_doing_ajax())) {
       header('X-VAPT-Enforced: php-headers');
       header('X-VAPT-Feature: ' . implode(',', self::$enforced_keys));
       header('Access-Control-Expose-Headers: X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, X-VAPT-Enforced, X-VAPT-Feature');
@@ -488,7 +488,7 @@ class VAPT_Hook_Driver
     // 2. Add Enforcement Headers (Robust)
     // 2. Add Enforcement Headers (Robust)
     add_filter('wp_headers', function ($headers) use ($key) {
-      if (defined('DOING_AJAX') && DOING_AJAX) return $headers;
+      if (function_exists('wp_doing_ajax') && wp_doing_ajax()) return $headers;
 
       $headers['X-VAPT-Enforced'] = 'php-version-hide';
       $headers['X-VAPT-Feature'] = $key;
@@ -498,7 +498,7 @@ class VAPT_Hook_Driver
 
     // 3. Fallback for headers (if not filtered)
     add_action('init', function () use ($key) {
-      if (defined('DOING_AJAX') && DOING_AJAX) return;
+      if (function_exists('wp_doing_ajax') && wp_doing_ajax()) return;
 
       if (!headers_sent()) {
         header('X-VAPT-Enforced: php-version-hide');
@@ -514,7 +514,7 @@ class VAPT_Hook_Driver
   private static function block_debug_exposure($config, $key = 'unknown')
   {
     add_action('init', function () use ($key) {
-      if (defined('DOING_AJAX') && DOING_AJAX) return;
+      if (function_exists('wp_doing_ajax') && wp_doing_ajax()) return;
 
       if (!headers_sent()) {
         header('X-VAPT-Enforced: php-debug-exposure');
@@ -541,7 +541,7 @@ class VAPT_Hook_Driver
   private static function add_security_headers($key = 'unknown')
   {
     add_filter('wp_headers', function ($headers) use ($key) {
-      if (defined('DOING_AJAX') && DOING_AJAX) return $headers; // VAPT: Skip for AJAX to prevent CORS/Heartbeat issues
+      if (function_exists('wp_doing_ajax') && wp_doing_ajax()) return $headers; // VAPT: Skip for AJAX to prevent CORS/Heartbeat issues
 
       $headers['X-Frame-Options'] = 'SAMEORIGIN';
       $headers['X-Content-Type-Options'] = 'nosniff';
@@ -552,7 +552,7 @@ class VAPT_Hook_Driver
       return $headers;
     }, 999);
 
-    if (!headers_sent() && (!defined('DOING_AJAX') || !DOING_AJAX)) {
+    if (!headers_sent() && (!function_exists('wp_doing_ajax') || !wp_doing_ajax())) {
       header('X-Frame-Options: SAMEORIGIN');
       header('X-Content-Type-Options: nosniff');
       header('X-XSS-Protection: 1; mode=block');
