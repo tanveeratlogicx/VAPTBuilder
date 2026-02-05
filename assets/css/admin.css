@@ -926,3 +926,265 @@
 #adminmenu .wp-submenu a[href*="page=vapt-builder"] {
     white-space: nowrap !important;
 }
+
+/* Design Implementation Modal Layout (v3.3.44) */
+.vapt-design-modal {
+    width: 1000px;
+    max-width: 98%;
+    min-height: 737px;
+}
+
+#vapt-design-modal-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    height: 800px;
+    overflow: hidden !important;
+    /* Force no scroll on outer */
+}
+
+#vapt-design-modal-left-col {
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
+
+#vapt-design-modal-right-col {
+    display: flex;
+    flex-direction: column;
+    background: #f9fafb;
+    /* Lighter gray */
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+#vapt-design-modal-schema-editor {
+    flex: 1;
+    min-height: 300px;
+    margin-bottom: 10px;
+}
+
+#vapt-design-modal-preview-stack {
+    padding: 10px;
+}
+
+/* Ensure controls inside respect bounds */
+.vapt-design-modal-inner-layout input,
+.vapt-design-modal-inner-layout textarea,
+.vapt-design-modal-inner-layout select {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Global status notifications (Toasts) */
+.vapt-toast-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    font-weight: 600;
+    transition: opacity 0.3s ease-in-out;
+    color: #fff;
+}
+
+.vapt-toast-notification.is-error {
+    background: #d63638;
+}
+
+.vapt-toast-notification.is-success {
+    background: #2271b1;
+}
+
+/* Modal Inner Notification */
+.vapt-modal-banner {
+    position: absolute;
+    top: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vapt-modal-banner.is-error {
+    background: #fde8e8;
+    color: #9b1c1c;
+}
+
+.vapt-modal-banner.is-success {
+    background: #def7ec;
+    color: #03543f;
+}
+
+/* Utility Layout Classes */
+.vapt-flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vapt-flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.vapt-flex-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.vapt-flex-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vapt-grid-2-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+/* Dashboard Toolbar */
+.vapt-toolbar-block {
+    display: flex;
+    gap: 12px;
+    background: #f6f7f7;
+    padding: 10px 15px;
+    border-radius: 4px;
+    border: 1px solid #dcdcde;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+/* Branded Icon Button */
+.vapt-toolbar-btn-icon {
+    cursor: pointer;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 3px;
+    width: 30px;
+    height: 30px;
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+/* Table Enhancements */
+.vapt-th-sortable {
+    position: relative;
+    padding-left: 30px;
+    padding-right: 10px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.vapt-th-sortable.is-active {
+    background: #f0f6fb;
+}
+
+.vapt-sort-indicator {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Design Modal Internals (v3.3.45 Cleanup) */
+.vapt-design-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vapt-design-modal-preview-header {
+    padding: 10px 15px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #fff;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.vapt-design-modal-preview-body {
+    padding: 15px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.vapt-label-uppercase {
+    font-size: 11px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    color: #101517;
+}
+
+.vapt-text-hint {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.vapt-preview-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #4b5563;
+}
+
+.vapt-card-box {
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.vapt-card-title {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.vapt-empty-state {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}
+
+.vapt-textarea-code {
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    resize: none;
+    width: 100%;
+    border: 1px solid #757575;
+    border-radius: 4px;
+    padding: 8px;
+    box-sizing: border-box;
+    transition: background 0.2s;
+}

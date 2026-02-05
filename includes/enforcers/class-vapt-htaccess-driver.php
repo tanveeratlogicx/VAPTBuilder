@@ -167,9 +167,14 @@ class VAPT_Htaccess_Driver
 
     // Write
     if ($new_content !== $content || !file_exists($htaccess_path)) {
+      // Safety Backup
+      if (file_exists($htaccess_path)) {
+        @copy($htaccess_path, $htaccess_path . '.bak');
+      }
+
       $result = @file_put_contents($htaccess_path, trim($new_content) . "\n");
       if ($result !== false) {
-        $log .= "Write SUCCESS: " . strlen($new_content) . " bytes written to $htaccess_path.\n";
+        $log .= "Write SUCCESS: " . strlen($new_content) . " bytes written to $htaccess_path. Backup created.\n";
         delete_transient('vapt_active_enforcements');
       } else {
         $log .= "Write FAILURE: Could not write to $htaccess_path. Check file permissions.\n";

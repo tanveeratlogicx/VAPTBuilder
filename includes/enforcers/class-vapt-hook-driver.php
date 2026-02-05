@@ -282,12 +282,88 @@ class VAPT_Hook_Driver
   }
 
   /**
-   * Register a rate limit configuration for a specific feature
+   * Detect Request Context (Engine Core)
+   * Returns: ['is_login', 'is_admin', 'is_api', 'is_frontend']
+   */
+  public static function detect_context()
+  {
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    $script = $_SERVER['SCRIPT_NAME'] ?? '';
+
+    $is_login =
+      strpos($uri, 'wp-login.php') !== false ||
+      strpos($script, 'wp-login.php') !== false ||
+      strpos($uri, 'xmlrpc.php') !== false ||
+      (defined('XMLRPC_REQUEST') && XMLRPC_REQUEST) ||
+      (isset($_GET['vapt_test_context']) && $_GET['vapt_test_context'] === 'login');
+
+    $is_admin = is_admin() && !$is_login;
+    $is_api = strpos($uri, 'wp-json') !== false;
+    $is_frontend = !$is_login && !$is_admin && !$is_api;
+
+    return [
+      'is_login' => $is_login,
+      'is_admin' => $is_admin,
+      'is_api' => $is_api,
+      'is_frontend' => $is_frontend
+    ];
+  }
+
+  /**
+   * Get Active Stats for a Feature (Observability)
+   */
+  public static function get_feature_stats($feature_key)
+  {
+    $lock_dir = sys_get_temp_dir() . '/vapt-locks';
+    $files = glob("$lock_dir/vapt_{$feature_key}_*.lock");
+    $active_ips = 0;
+    $total_attempts = 0;
+
+    if ($files) {
+      foreach ($files as $file) {
+        $active_ips++;
+        $content = @file_get_contents($file);
+        if ($content) $total_attempts += (int)$content;
+      }
+    }
+
+    $duration = 60;
+    if (isset(self::$feature_configs[$feature_key]['duration'])) {
+      $duration = self::$feature_configs[$feature_key]['duration'];
+    }
+
+    return [
+      'active_ips' => $active_ips,
+      'total_attempts' => $total_attempts,
+      'window' => $duration
+    ];
+  }
+
+  /**
+   * Reset Stats for a Feature
+   */
+  public static function reset_feature_stats($feature_key)
+  {
+    $lock_dir = sys_get_temp_dir() . '/vapt-locks';
+    $files = glob("$lock_dir/vapt_{$feature_key}_*.lock");
+    $count = 0;
+    if ($files) {
+      foreach ($files as $file) {
+        @unlink($file);
+        $count++;
+      }
+    }
+    return $count;
+  }
+
+  /**
+   * Register a rate limit configuration (Context-Aware & Observable)
    */
   private static function limit_login_attempts($config, $all_data = array(), $feature_key = 'unknown')
   {
     $limit = null;
 
+    // Resolve Limit Value
     $candidates = [
       $all_data['rate_limit'] ?? null,
       $all_data['limit'] ?? null,
@@ -308,26 +384,21 @@ class VAPT_Hook_Driver
       $limit = (int) $config;
     }
 
-    if ($limit === null) {
-      foreach ($all_data as $k => $v) {
-        if (is_numeric($v) && (int)$v > 1) {
-          $limit = (int)$v;
-          break;
-        }
-      }
-    }
+    if ($limit === null) return;
 
-    if ($limit === null) {
-      file_put_contents(VAPT_PATH . 'vapt-debug.txt', "[SKIPPED] Feature: $feature_key - No valid limit found in data.\n", FILE_APPEND);
-      return;
+    // Determine Scope
+    $scope = 'global'; // default
+    if (isset($all_data['scope'])) {
+      $scope = $all_data['scope'];
+    } elseif (strpos($feature_key, 'login') !== false || strpos($feature_key, 'brute') !== false) {
+      $scope = 'login';
     }
-
-    $log_info = "[RESOLVED] Feature: $feature_key, Limit: $limit, Config: $config\n";
-    file_put_contents(VAPT_PATH . 'vapt-debug.txt', $log_info, FILE_APPEND);
 
     self::$feature_configs[$feature_key] = [
       'limit' => $limit,
-      'key' => $feature_key
+      'key' => $feature_key,
+      'scope' => $scope,
+      'duration' => isset($all_data['duration']) ? (int)$all_data['duration'] : 60
     ];
 
     if (self::$rate_limit_hook_registered) {
@@ -337,18 +408,22 @@ class VAPT_Hook_Driver
 
     add_action('init', function () {
       if (strpos($_SERVER['REQUEST_URI'], 'reset-limit') !== false || isset($_GET['vapt_action'])) return;
+      if (current_user_can('manage_options') && !isset($_GET['vapt_test_spike'])) return;
 
-      if (current_user_can('manage_options') && !isset($_GET['vapt_test_spike'])) {
-        return;
-      }
-
+      $context = self::detect_context();
       $ip = $_SERVER['REMOTE_ADDR'];
+      $ip_hash = md5($ip); // Privacy + Safe Filename
       $lock_dir = sys_get_temp_dir() . '/vapt-locks';
       if (!file_exists($lock_dir) && !@mkdir($lock_dir, 0755, true)) return;
 
       foreach (self::$feature_configs as $feature_key => $cfg) {
+        // Enforce Scope Logic
+        if ($cfg['scope'] === 'login' && !$context['is_login']) continue;
+
         $limit = $cfg['limit'];
-        $lock_file = $lock_dir . '/vapt_limit_' . md5($ip . $feature_key) . '.lock';
+        $duration = $cfg['duration'];
+        // New Observable Lock Pattern: vapt_{feature}_{iphash}.lock
+        $lock_file = $lock_dir . "/vapt_{$feature_key}_{$ip_hash}.lock";
 
         $fp = @fopen($lock_file, 'c+');
         if (!$fp) continue;
@@ -362,23 +437,21 @@ class VAPT_Hook_Driver
               $current = (int) fread($fp, filesize($lock_file));
             }
 
-            if (file_exists($lock_file) && (time() - filemtime($lock_file) > 60)) {
+            // Expiry Check
+            if (file_exists($lock_file) && (time() - filemtime($lock_file) > $duration)) {
               $current = 0;
             }
 
             if (!headers_sent()) {
               header('X-VAPT-Limit-' . $feature_key . ': ' . $limit, false);
               header('X-VAPT-Count-' . $feature_key . ': ' . $current, false);
-
-              header('X-VAPT-Limit: ' . $limit);
-              header('X-VAPT-Count: ' . $current);
             }
 
             if ($current >= $limit) {
               if (!headers_sent()) {
                 header('X-VAPT-Enforced: php-rate-limit');
                 header('X-VAPT-Feature: ' . $feature_key);
-                header('Retry-After: 60');
+                header('Retry-After: ' . $duration);
               }
               flock($fp, LOCK_UN);
               fclose($fp);

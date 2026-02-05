@@ -28,7 +28,8 @@
   const PROBE_REGISTRY = {
     // 1. Header Probe: Verifies HTTP response headers
     check_headers: async (siteUrl, control, featureData, featureKey) => {
-      const resp = await fetch(siteUrl + '?vapt_header_check=' + Date.now(), { method: 'GET', cache: 'no-store' });
+      const contextParam = (featureKey && (featureKey.includes('login') || featureKey.includes('brute'))) ? '&vapt_test_context=login' : '';
+      const resp = await fetch(siteUrl + '?vapt_header_check=' + Date.now() + contextParam, { method: 'GET', cache: 'no-store' });
       const headers = {};
       resp.headers.forEach((v, k) => { headers[k] = v; });
       console.log("[VAPT] Full Response Headers:", headers);
@@ -50,9 +51,15 @@
     },
 
     // 2. Batch Probe: Verifies Rate Limiting (Sends 125% of RPM)
-    spam_requests: async (siteUrl, control, featureData) => {
+    spam_requests: async (siteUrl, control, featureData, featureKey) => {
       try {
         let rpm = parseInt(featureData['rpm'] || featureData['rate_limit'], 10);
+
+        // Dynamic Context Detection (v3.3.40)
+        let contextParam = '';
+        if (featureKey && (featureKey.includes('login') || featureKey.includes('brute'))) {
+          contextParam = '&vapt_test_context=login';
+        }
 
         if (isNaN(rpm)) {
           const limitKey = Object.keys(featureData).find(k => k.includes('limit') || k.includes('max') || k.includes('rpm'));
@@ -82,7 +89,7 @@
         const probes = [];
         for (let i = 0; i < load; i++) {
           probes.push(
-            fetch(siteUrl + '?vapt_test_spike=' + i, { cache: 'no-store' })
+            fetch(siteUrl + '?vapt_test_spike=' + i + contextParam, { cache: 'no-store' })
               .then(r => ({ status: r.status, headers: r.headers }))
               .catch(err => {
                 console.warn(`[VAPT] Request ${i} failed:`, err);
@@ -165,7 +172,13 @@
         return { success: true, message: `Plugin is actively blocking XML-RPC (${vaptEnforced}).` };
       }
 
-      return { success: false, message: `XML-RPC is blocked (HTTP ${resp.status}), but NOT by this plugin. VAPT enforcement header missing.` };
+      const isVulnerable = resp.status === 200;
+      return {
+        success: false,
+        message: isVulnerable
+          ? `SECURITY FAILURE: XML-RPC is OPEN and VULNERABLE (HTTP 200). Plugin enforcement is not working.`
+          : `XML-RPC is blocked (HTTP ${resp.status}), but NOT by this plugin. VAPT enforcement header missing.`
+      };
     },
 
     // 4. Directory Probe: Verifies Indexing Block
@@ -231,9 +244,15 @@
       const expectedHeaders = config.expected_headers;
 
       let url = siteUrl + path;
-      if (method === 'GET' && Object.keys(params).length > 0) {
-        const qs = new URLSearchParams(params).toString();
-        url += (url.includes('?') ? '&' : '?') + qs;
+      const contextParam = (featureKey && (featureKey.includes('login') || featureKey.includes('brute'))) ? 'vapt_test_context=login' : '';
+
+      if (method === 'GET') {
+        const urlParams = new URLSearchParams(params);
+        if (contextParam) urlParams.append('vapt_test_context', 'login');
+        const qs = urlParams.toString();
+        if (qs) url = url + (url.includes('?') ? '&' : '?') + qs;
+      } else if (contextParam) {
+        url = url + (url.includes('?') ? '&' : '?') + contextParam;
       }
 
       const fetchOptions = {
@@ -444,7 +463,91 @@
     ]);
   };
 
-  const GeneratedInterface = ({ feature, onUpdate, isGuidePanel = false }) => {
+  /**
+   * Rate Limit Observability Monitor
+   */
+  const RateLimitMonitor = ({ featureKey }) => {
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [resetting, setResetting] = useState(false);
+
+    const fetchStats = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${window.vaptSettings.root}vapt/v1/features/${featureKey}/stats`, {
+          headers: { 'X-WP-Nonce': window.vaptSettings.nonce }
+        });
+        const data = await response.json();
+        setStats(data);
+      } catch (e) {
+        console.error('[VAPT] Failed to fetch stats:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const resetStats = async () => {
+      if (!confirm(__('Are you sure you want to reset all active rate limit blocks for this feature?', 'vapt-builder'))) return;
+      setResetting(true);
+      try {
+        await fetch(`${window.vaptSettings.root}vapt/v1/features/${featureKey}/reset`, {
+          method: 'POST',
+          headers: { 'X-WP-Nonce': window.vaptSettings.nonce }
+        });
+        await fetchStats();
+      } catch (e) {
+        console.error('[VAPT] Failed to reset stats:', e);
+      } finally {
+        setResetting(false);
+      }
+    };
+
+    useEffect(() => {
+      fetchStats();
+      const interval = setInterval(fetchStats, 10000); // Poll every 10s
+      return () => clearInterval(interval);
+    }, [featureKey]);
+
+    if (!stats) return null;
+
+    return el('div', {
+      className: 'vapt-rate-limit-monitor',
+      style: {
+        padding: '12px',
+        background: '#f1f5f9',
+        border: '1px solid #cbd5e1',
+        borderRadius: '6px',
+        marginBottom: '20px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }
+    }, [
+      el('div', { style: { display: 'flex', gap: '20px' } }, [
+        el('div', null, [
+          el('div', { style: { fontSize: '10px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700' } }, __('Active Blocks (IPs)', 'vapt-builder')),
+          el('div', { style: { fontSize: '18px', fontWeight: '800', color: stats.active_ips > 0 ? '#ef4444' : '#10b981' } }, stats.active_ips)
+        ]),
+        el('div', null, [
+          el('div', { style: { fontSize: '10px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700' } }, sprintf(__('Total Attempts (Last %ss)', 'vapt-builder'), stats.window || 60)),
+          el('div', { style: { fontSize: '18px', fontWeight: '800', color: '#334155' } }, stats.total_attempts)
+        ])
+      ]),
+      el('div', null, [
+        el(Button, {
+          isSecondary: true,
+          isSmall: true,
+          isDestructive: true,
+          onClick: resetStats,
+          isBusy: resetting,
+          disabled: resetting || stats.active_ips === 0,
+          style: { height: '32px' }
+        }, __('Reset Counter', 'vapt-builder'))
+      ])
+    ]);
+  };
+
+  const GeneratedInterface = ({ feature, onUpdate, isGuidePanel = false, hideMonitor = false }) => {
     const schema = feature.generated_schema ? (typeof feature.generated_schema === 'string' ? JSON.parse(feature.generated_schema) : feature.generated_schema) : {};
     const currentData = feature.implementation_data ? (typeof feature.implementation_data === 'string' ? JSON.parse(feature.implementation_data) : feature.implementation_data) : {};
     const [localAlert, setLocalAlert] = useState(null);
@@ -454,6 +557,11 @@
         __('No functional controls defined for this implementation.', 'vapt-builder')
       );
     }
+
+    // Identify if this is a Rate Limiting feature
+    const isRateLimit = feature.key?.includes('limit') || feature.key?.includes('brute') ||
+      (schema.enforcement?.mappings && Object.values(schema.enforcement.mappings).includes('limit_login_attempts'));
+
 
     const handleChange = (key, value) => {
       const updated = { ...currentData, [key]: value };
@@ -526,7 +634,7 @@
               value: value,
               rows: rows || (type === 'code' ? 4 : 3),
               onChange: (val) => handleChange(key, val),
-              placeholder: value ? '' : 'No operational notes available.',
+              placeholder: value ? '' : __('No data available.', 'vapt-builder'),
               __nextHasNoMarginBottom: true,
               style: type === 'code' ? { fontFamily: 'monospace', fontSize: '11px', background: '#f8fafc' } : { fontSize: '12px' }
             })
@@ -618,12 +726,31 @@
       const isVerification = verificationTypes.includes(c.type);
       const isGuide = guideTypes.includes(c.type);
 
-      // Hide empty Operational Notes for non-superadmins
-      if (c.key === 'operational_notes') {
-        const isSuper = window.vaptSettings?.isSuper || false;
+      // 🧹 Visibility Logic (Schema-Driven)
+      if (c.visibility && c.visibility.condition === 'has_content') {
         const val = currentData[c.key];
         const hasContent = val && val.toString().trim().length > 0;
-        if (!isSuper && !hasContent) return false;
+        if (!hasContent && c.visibility.fallback === 'hide') return false;
+      }
+
+      // 🧹 Legacy / Key-Based Suppression (v3.3.40 fallback)
+      if (['textarea', 'code', 'input', 'html', 'info'].includes(c.type)) {
+        const val = currentData[c.key];
+        const hasContent = val && val.toString().trim().length > 0;
+
+        // Legacy: Always hide these specific keys if empty
+        const legacyKeys = ['operational_notes', 'manual_protocol', 'implementation_notes'];
+        if (!hasContent && (legacyKeys.includes(c.key) || c.key?.includes('note') || c.key?.includes('protocol'))) {
+          return false;
+        }
+      }
+
+      // Hide empty Guide items
+      if (isGuide) {
+        if (['test_checklist', 'evidence_list'].includes(c.type)) {
+          const items = c.items || c.tests || c.checklist || c.evidence || [];
+          if (items.length === 0) return false;
+        }
       }
 
       if (isGuidePanel) {
@@ -647,7 +774,7 @@
       }
     });
 
-    // Orphan Logic (v3.3.1) - Remove headers/sections that have no following content
+    // Orphan Logic (v3.3.10) - Remove headers/sections if they contain zero functional children
     const mainControls = mainControlsRaw.filter((c, i) => {
       if (['header', 'section'].includes(c.type)) {
         const nextContent = mainControlsRaw.slice(i + 1).find(nc => !['header', 'section', 'divider', 'group'].includes(nc.type));
@@ -676,11 +803,24 @@
       return '✅';
     };
 
+    // If all controls are hidden, return null to avoid rendering empty wrappers
+    if (mainControls.length === 0 && riskControls.length === 0 && badgeControls.length === 0 && otherVerificationControls.length === 0) {
+      // Still show monitor if explicitly asked and present
+      if (isRateLimit && !hideMonitor) {
+        return el('div', { className: 'vapt-generated-interface' }, el(RateLimitMonitor, { featureKey: feature.key || feature.id }));
+      }
+      return null;
+    }
+
     return el('div', { className: 'vapt-generated-interface', style: { display: 'flex', flexDirection: 'column', gap: '20px' } }, [
 
-      el('div', { className: 'vapt-functional-panel', style: { background: '#fff', borderRadius: '8px', padding: '0' } }, [
+      // Live Rate Limit Monitor
+      mainControls.length > 0 && el('div', { className: 'vapt-functional-panel', style: { background: '#fff', borderRadius: '8px', padding: '0' } }, [
         el('div', { style: { display: 'flex', flexDirection: 'column', gap: '15px' } }, mainControls.map(renderControl)),
       ]),
+
+      // Live Rate Limit Monitor (Moved below controls v3.3.45)
+      isRateLimit && !hideMonitor && el(RateLimitMonitor, { featureKey: feature.key || feature.id }),
 
       (feature.include_verification_guidance == 1 || feature.include_verification_guidance === true || feature.include_verification_guidance === undefined) && (riskControls.length > 0 || otherVerificationControls.length > 0) && el('div', {
         className: 'vapt-threat-panel',

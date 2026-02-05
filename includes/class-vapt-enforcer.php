@@ -107,6 +107,8 @@ class VAPT_Enforcer
         // Default to Apache/.htaccess
         self::rebuild_htaccess();
       }
+    } elseif ($driver_name === 'config' || $driver_name === 'wp-config') {
+      self::rebuild_config();
     } else {
       // For hooks, we just rely on the runtime loader (next request will pick it up)
       // No explicit action needed other than clearing cache (done above).
@@ -203,5 +205,46 @@ class VAPT_Enforcer
     }
 
     VAPT_Htaccess_Driver::write_batch($all_rules, 'root');
+  }
+
+  /**
+   * Rebuilds all wp-config.php rules across active features
+   */
+  public static function rebuild_config()
+  {
+    require_once VAPT_PATH . 'includes/enforcers/class-vapt-config-driver.php';
+
+    $enforced_features = self::get_enforced_features();
+    $all_rules = array();
+
+    if (!empty($enforced_features)) {
+      foreach ($enforced_features as $meta) {
+        $schema = self::resolve_schema($meta);
+        $impl_data = self::resolve_impl($meta);
+        $driver = $schema['enforcement']['driver'] ?? '';
+
+        if ($driver === 'config' || $driver === 'wp-config') {
+          $feature_rules = VAPT_Config_Driver::generate_rules($impl_data, $schema);
+          if (!empty($feature_rules)) {
+            $all_rules[] = "// Rule for: " . ($meta['feature_key']);
+            $all_rules = array_merge($all_rules, $feature_rules);
+          }
+        }
+      }
+    }
+
+    return VAPT_Config_Driver::write_batch($all_rules);
+  }
+
+  /**
+   * Rebuilds all enforcements across all active drivers
+   */
+  public static function rebuild_all()
+  {
+    self::rebuild_htaccess();
+    self::rebuild_config();
+    self::rebuild_nginx();
+    self::rebuild_iis();
+    delete_transient('vapt_active_enforcements');
   }
 }

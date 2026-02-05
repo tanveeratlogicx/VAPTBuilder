@@ -168,20 +168,23 @@ window.vaptScriptLoaded = true;
     };
 
     return el(Modal, {
+      id: 'vapt-history-modal',
       title: sprintf(__('History: %s', 'vapt-builder'), feature.name || feature.label),
       onRequestClose: onClose,
       className: 'vapt-history-modal'
     }, [
-      el('div', { style: { display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' } },
+      el('div', { id: 'vapt-history-modal-actions', className: 'vapt-flex-between', style: { marginBottom: '10px' } }, [
+        el('div', null), // Spacer
         el(Button, {
+          id: 'vapt-btn-reset-history',
           isDestructive: true,
           isSmall: true,
           icon: 'trash',
           onClick: resetHistory,
           disabled: loading || history.length === 0
         }, __('Reset History & Status', 'vapt-builder'))
-      ),
-      loading ? el(Spinner) : el('div', { style: { minWidth: '500px' } }, [
+      ]),
+      loading ? el(Spinner) : el('div', { id: 'vapt-history-modal-table-wrap' }, [
         history.length === 0 ? el('p', null, __('No history recorded yet.', 'vapt-builder')) :
           el('table', { className: 'wp-list-table widefat fixed striped' }, [
             el('thead', null, el('tr', null, [
@@ -499,6 +502,7 @@ INSTRUCTIONS & CRITICAL RULES:
    - **Functional**: 'toggle', 'input', 'select', 'textarea', 'code', 'test_action', 'button', 'password'. (MUST HAVE 'key' & 'default').
    - **Presentational**: 'info', 'alert', 'section', 'group', 'divider', 'html', 'header', 'label'. (NO 'key' required).
    - **Rich UI**: 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'. (NO 'key' required).
+    - **Optional**: 'visibility': { 'condition': 'has_content', 'fallback': 'hide' } - Use this to suppress empty informational blocks.
 4. **JSON Skeleton**:
 \`\`\`json
 {
@@ -528,7 +532,7 @@ INSTRUCTIONS & CRITICAL RULES:
    - For 'htaccess', ALWAYS include 'target': 'root' in the enforcement block.
 6. **Visibility Overrides**:
    - INCLUDE 'test_checklist' and 'evidence_list' for verification.
-   - ${includeNotes ? "INCLUDE a 'textarea' with key 'operational_notes' for implementation notes." : "EXCLUDE operational notes textarea."}
+    - ${includeNotes ? "INCLUDE a 'textarea' with key 'operational_notes' for Implementation Notes. Use visibility: { \"condition\": \"has_content\", \"fallback\": \"hide\" } to ensure it remains hidden if empty." : "EXCLUDE operational notes textarea."}
 7. **No Orphan Headers**: Do NOT include 'header' or 'section' controls if they are not followed by functional controls.
 8. **Automated Verification (CRITICAL)**:
    - Use 'test_action' for verification buttons.
@@ -569,7 +573,7 @@ Feature ID: ${feature.id || 'N/A'}
     };
 
     return el(Modal, {
-      title: el('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } }, [
+      title: el('div', { className: 'vapt-design-modal-header' }, [
         el('span', null, sprintf(__('Design Implementation: %s', 'vapt-builder'), feature.label)),
         el(Button, {
           isDestructive: true,
@@ -581,26 +585,21 @@ Feature ID: ${feature.id || 'N/A'}
       ]),
       onRequestClose: onClose,
       className: 'vapt-design-modal',
-      style: { width: '1000px', maxWidth: '98%' }
+      id: 'vapt-design-modal-root'
     }, [
       saveStatus && el('div', {
-        style: {
-          position: 'absolute', top: '20px', right: '50%', transform: 'translateX(50%)',
-          background: saveStatus.type === 'error' ? '#fde8e8' : '#def7ec',
-          color: saveStatus.type === 'error' ? '#9b1c1c' : '#03543f',
-          padding: '10px 20px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          zIndex: 100, fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px'
-        }
+        id: 'vapt-design-modal-banner',
+        className: `vapt-modal-banner is-${saveStatus.type === 'error' ? 'error' : 'success'}`
       }, [
         el(Icon, { icon: saveStatus.type === 'error' ? 'warning' : 'yes', size: 20 }),
         saveStatus.message
       ]),
 
-      el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', height: 'calc(100vh - 160px)', maxHeight: '800px', overflow: 'hidden' } }, [
-        el('div', { style: { display: 'flex', flexDirection: 'column', height: '100%', paddingRight: '10px' } }, [
+      el('div', { id: 'vapt-design-modal-layout', className: 'vapt-design-modal-inner-layout' }, [
+        el('div', { id: 'vapt-design-modal-left-col' }, [
 
-          el('div', { style: { display: 'flex', gap: '10px', marginBottom: '15px' } }, [
-            el(Button, { style: { flex: 1, justifyContent: 'center' }, isSecondary: true, onClick: copyContext, icon: 'clipboard' }, __('Copy Design Prompt', 'vapt-builder')),
+          el('div', { id: 'vapt-design-modal-actions', className: 'vapt-flex-row' }, [
+            el(Button, { id: 'vapt-btn-copy-prompt', className: 'vapt-btn-flex-center', isSecondary: true, onClick: copyContext, icon: 'clipboard' }, __('Copy Design Prompt', 'vapt-builder')),
             el(Button, {
               isDestructive: true,
               icon: 'trash',
@@ -619,7 +618,7 @@ Feature ID: ${feature.id || 'N/A'}
             }, __('Reset', 'vapt-builder'))
           ]),
 
-          el('div', { style: { marginBottom: '10px', display: 'flex', flexDirection: 'column', gap: '5px' } }, [
+          el('div', { id: 'vapt-design-modal-toggles', className: 'vapt-flex-col' }, [
             el(ToggleControl, {
               label: __('Include Manual Verification Protocol', 'vapt-builder'),
               checked: includeProtocol,
@@ -633,42 +632,42 @@ Feature ID: ${feature.id || 'N/A'}
           ]),
 
           el('div', {
-            style: { flex: 1, display: 'flex', flexDirection: 'column', minHeight: '300px', marginBottom: '10px' },
+            id: 'vapt-design-modal-schema-editor',
+            className: 'vapt-flex-col',
             onMouseEnter: () => setIsHoveringSchema(true),
             onMouseLeave: () => setIsHoveringSchema(false)
           }, [
-            el('label', { style: { fontSize: '11px', fontWeight: '500', marginBottom: '4px', textTransform: 'uppercase', color: '#101517' } }, __('Interface JSON Schema', 'vapt-builder')),
-            el('div', { style: { fontSize: '11px', color: '#666', marginBottom: '8px' } }, __('Hover and Ctrl+V to replace content.', 'vapt-builder')),
+            el('label', { id: 'vapt-schema-editor-label', className: 'vapt-label-uppercase' }, __('Interface JSON Schema', 'vapt-builder')),
+            el('div', { id: 'vapt-schema-editor-hint', className: 'vapt-text-hint' }, __('Hover and Ctrl+V to replace content.', 'vapt-builder')),
             el('textarea', {
+              id: 'vapt-schema-textarea',
+              className: 'vapt-textarea-code',
               value: schemaText,
               onChange: (e) => onJsonChange(e.target.value),
               style: {
-                fontFamily: 'monospace', fontSize: '12px', background: isHoveringSchema ? '#f0fdf4' : '#fcfcfc',
-                lineHeight: '1.4', flex: 1, resize: 'none', width: '100%', border: '1px solid #757575',
-                borderRadius: '4px', padding: '8px', boxSizing: 'border-box', transition: 'background 0.2s'
+                background: isHoveringSchema ? '#f0fdf4' : '#fcfcfc'
               }
             })
           ]),
         ]),
 
-        el('div', { style: { background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' } }, [
-          el('div', { style: { padding: '10px 15px', borderBottom: '1px solid #e5e7eb', background: '#fff', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', flexShrink: 0 } }, [
-            el('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
+        el('div', { id: 'vapt-design-modal-right-col' }, [
+          el('div', { className: 'vapt-design-modal-preview-header' }, [
+            el('div', { className: 'vapt-flex-row', style: { gap: '8px' } }, [
               el(Icon, { icon: 'visibility', size: 16 }),
-              el('strong', { style: { fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#4b5563' } }, __('Live Implementation Preview'))
+              el('strong', { className: 'vapt-preview-title' }, __('Live Implementation Preview'))
             ]),
-            el('div', { style: { display: 'flex', gap: '10px' } }, [
+            el('div', { className: 'vapt-flex-row' }, [
               el(Button, { isSecondary: true, isSmall: true, onClick: onClose }, __('Cancel', 'vapt-builder')),
               el(Button, { isPrimary: true, isSmall: true, onClick: handleSave, isBusy: isSaving }, __('Save & Deploy', 'vapt-builder'))
             ])
           ]),
-          el('div', { style: { padding: '15px', flex: '1 1 auto', overflowY: 'auto', minHeight: 0 } }, [
+          el('div', { className: 'vapt-design-modal-preview-body' }, [
             (() => {
               const schema = parsedSchema || { controls: [] };
-              const boxStyle = { padding: '15px', background: '#fff', borderRadius: '8px', border: '1px solid #eee', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' };
-              return el('div', { style: { display: 'flex', flexDirection: 'column', gap: '20px' } }, [
-                el('div', { style: boxStyle }, [
-                  el('h4', { style: { margin: '0 0 10px 0', fontSize: '13px', fontWeight: 700, color: '#111827' } }, __('Functional Implementation')),
+              return el('div', { id: 'vapt-design-modal-preview-stack', className: 'vapt-flex-col' }, [
+                el('div', { className: 'vapt-card-box' }, [
+                  el('h4', { className: 'vapt-card-title' }, __('Functional Implementation')),
                   GeneratedInterface
                     ? el(GeneratedInterface, {
                       feature: { ...feature, generated_schema: schema, implementation_data: localImplData },
@@ -971,14 +970,17 @@ Feature ID: ${feature.id || 'N/A'}
     };
 
     return el(Fragment, null, [
-      el('div', { className: 'vapt-lifecycle-radios', style: { display: 'flex', gap: '10px', fontSize: '12px', alignItems: 'center' } }, [
+      el('div', { id: `vapt-lifecycle-controls-${feature.key}`, className: 'vapt-flex-row', style: { fontSize: '12px' } }, [
         ...steps.map((step) => {
           const isChecked = step.id === activeStep;
           return el('label', {
+            id: `vapt-lifecycle-label-${feature.key}-${step.id}`,
             key: step.id,
-            style: { display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: isChecked ? '#2271b1' : 'inherit', fontWeight: isChecked ? '600' : 'normal' }
+            style: { cursor: 'pointer', color: isChecked ? '#2271b1' : 'inherit', fontWeight: isChecked ? '600' : 'normal' },
+            className: 'vapt-flex-row'
           }, [
             el('input', {
+              id: `vapt-lifecycle-radio-${feature.key}-${step.id}`,
               type: 'radio',
               name: `lifecycle_${feature.key || feature.id}_${Math.random()}`,
               checked: isChecked,
@@ -1389,9 +1391,10 @@ Feature ID: ${feature.id || 'N/A'}
             }
           }, [
             el('div', { style: { padding: '0 20px 10px', fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Feature Categories')),
-            el('div', { style: { display: 'flex', flexDirection: 'column' } }, [
+            el('div', { id: 'vapt-domain-features-sidebar-categories', style: { display: 'flex', flexDirection: 'column' } }, [
               // All Categories Link
               el('a', {
+                id: 'vapt-category-link-all',
                 href: '#',
                 onClick: (e) => { e.preventDefault(); setActiveCategory('all'); },
                 className: 'vapt-sidebar-link' + (activeCategory === 'all' ? ' is-active' : ''),
@@ -1496,6 +1499,7 @@ Feature ID: ${feature.id || 'N/A'}
                     el('p', { style: { margin: 0, fontSize: '13px', color: '#64748b', lineHeight: '1.5' } }, f.description)
                   ]),
                   el('div', {
+                    id: `vapt-domain-feature-footer-${f.key}`,
                     style: {
                       marginTop: 'auto',
                       paddingTop: '15px',
@@ -1505,7 +1509,7 @@ Feature ID: ${feature.id || 'N/A'}
                       justifyContent: 'space-between'
                     }
                   }, [
-                    el('span', { style: { fontSize: '12px', fontWeight: 600, color: '#475569' } }, (Array.isArray(selectedDomain.features) ? selectedDomain.features : []).includes(f.key) ? __('Active', 'vapt-builder') : __('Disabled', 'vapt-builder')),
+                    el('span', { id: `vapt-domain-feature-status-text-${f.key}`, style: { fontSize: '12px', fontWeight: 600, color: '#475569' } }, (Array.isArray(selectedDomain.features) ? selectedDomain.features : []).includes(f.key) ? __('Active', 'vapt-builder') : __('Disabled', 'vapt-builder')),
                     el(ToggleControl, {
                       checked: (Array.isArray(selectedDomain.features) ? selectedDomain.features : []).includes(f.key),
                       onChange: (val) => {
@@ -1530,11 +1534,13 @@ Feature ID: ${feature.id || 'N/A'}
       ]),
       // View Features Modal
       viewFeaturesModalOpen && viewFeaturesModalDomain && el(Modal, {
+        id: 'vapt-view-features-modal',
         title: sprintf(__('Enabled Features for %s', 'vapt-builder'), viewFeaturesModalDomain.domain),
         onRequestClose: () => setViewFeaturesModalOpen(false),
         style: { maxWidth: '1200px', width: '90%' }
       }, [
         el('div', {
+          id: 'vapt-view-features-grid-wrap',
           style: {
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
@@ -2547,41 +2553,21 @@ Feature ID: ${feature.id || 'N/A'}
 
 
 
-    return el(Fragment, null, [
-      el(PanelBody, { title: __('Exhaustive Feature List', 'vapt-builder'), initialOpen: true }, [
+    return el('div', { id: 'vapt-feature-list-tab', className: 'vapt-feature-list-tab-wrap' }, [
+      el(PanelBody, { id: 'vapt-feature-list-panel', title: __('Exhaustive Feature List', 'vapt-builder'), initialOpen: true }, [
         // Top Controls & Unified Header
-        el('div', { key: 'controls', style: { marginBottom: '10px' } }, [
+        el('div', { id: 'vapt-feature-list-header-controls', key: 'controls', style: { marginBottom: '10px' } }, [
           // Unified Header Block (Source, Columns, Manage, Upload)
           el('div', {
-            style: {
-              display: 'flex',
-              gap: '12px',
-              background: '#f6f7f7',
-              padding: '10px 15px',
-              borderRadius: '4px',
-              border: '1px solid #dcdcde',
-              marginBottom: '10px',
-              alignItems: 'center'
-            }
+            id: 'vapt-feature-list-toolbar',
+            className: 'vapt-toolbar-block'
           }, [
             // Branded Icon with Configure Columns Dropdown
             el(Dropdown, {
               renderToggle: ({ isOpen, onToggle }) => el('div', {
+                id: 'vapt-btn-configure-columns',
                 onClick: onToggle,
-                style: {
-                  cursor: 'pointer',
-                  background: '#2271b1',
-                  color: '#fff',
-                  borderRadius: '3px',
-                  width: '30px',
-                  height: '30px',
-                  minHeight: '30px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                  boxSizing: 'border-box'
-                },
+                className: 'vapt-toolbar-btn-icon',
                 'aria-expanded': isOpen,
                 title: __('Configure Table Columns', 'vapt-builder')
               }, el(Icon, { icon: 'layout', size: 18 })),
@@ -2915,7 +2901,7 @@ Feature ID: ${feature.id || 'N/A'}
         ]),
       ]), // End Header PanelBody
 
-      loading ? el(Spinner, { key: 'loader' }) : el('table', { key: 'table', className: 'wp-list-table widefat fixed striped vapt-feature-table' }, [
+      loading ? el(Spinner, { key: 'loader' }) : el('table', { id: 'vapt-main-feature-table', key: 'table', className: 'wp-list-table widefat fixed striped vapt-feature-table' }, [
         el('thead', null, el('tr', null, [
           ...activeCols.map(col => {
             const label = col.charAt(0).toUpperCase() + col.slice(1).replace(/_/g, ' ');
@@ -2929,22 +2915,16 @@ Feature ID: ${feature.id || 'N/A'}
             const isActive = sortBy === col || (col === 'title' && sortBy === 'name');
 
             return el('th', {
+              id: `vapt-th-${col}`,
               key: col,
               onClick: isSortable ? () => toggleSort(col === 'title' ? 'name' : col) : null,
-              style: {
-                width,
-                whiteSpace: 'nowrap',
-                cursor: isSortable ? 'pointer' : 'default',
-                background: isActive ? '#f0f6fb' : 'inherit',
-                position: 'relative',
-                paddingRight: isSortable ? '10px' : '10px',
-                paddingLeft: isSortable ? '30px' : '10px'
-              },
-              className: isSortable ? 'vapt-sortable-header' : ''
+              className: `vapt-th-sortable ${isActive ? 'is-active' : ''} ${isSortable ? 'sortable' : ''}`,
+              style: { width }
             }, [
               isSortable && el('span', {
+                id: `vapt-sort-indicator-${col}`,
+                className: 'vapt-sort-indicator',
                 style: {
-                  position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)',
                   opacity: isActive ? 1 : 0.3,
                   color: isActive ? '#2271b1' : '#72777c'
                 }
@@ -3061,7 +3041,11 @@ Feature ID: ${feature.id || 'N/A'}
 
                   return el(Button, {
                     className: `vapt-premium-btn ${isCustom ? 'is-custom' : ''} ${stageClass}`,
-                    onClick: () => setDesignFeature(f),
+                    onClick: (e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setDesignFeature(f);
+                    },
                     title: isCustom ? __('Open Workbench Design Bench (Custom)', 'vapt-builder') : __('Open Workbench Design Bench (Default)', 'vapt-builder')
                   }, __('Workbench Design Hub', 'vapt-builder'));
                 })()
@@ -3395,35 +3379,25 @@ Feature ID: ${feature.id || 'N/A'}
     ];
 
     if (error) {
-      return el('div', { className: 'vapt-admin-wrap' }, [
+      return el('div', { id: 'vapt-admin-dashboard--error', className: 'vapt-admin-wrap' }, [
         el('h1', null, __('VAPT Builder Dashboard', 'vapt-builder')),
         el(Notice, { status: 'error', isDismissible: false }, error),
         el(Button, { isSecondary: true, onClick: () => fetchData() }, __('Retry', 'vapt-builder'))
       ]);
     }
 
-    return el('div', { className: 'vapt-admin-wrap' }, [
+    return el('div', { id: 'vapt-admin-dashboard--main', className: 'vapt-admin-wrap' }, [
       el('h1', null, [
         __('VAPT Builder Dashboard', 'vapt-builder'),
         el('span', { style: { fontSize: '0.5em', marginLeft: '10px', color: '#666', fontWeight: 'normal' } }, `v${settings.pluginVersion}`)
       ]),
       saveStatus && el('div', {
-        style: {
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          background: saveStatus.type === 'error' ? '#d63638' : '#2271b1',
-          color: '#fff',
-          padding: '10px 20px',
-          borderRadius: '4px',
-          boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-          zIndex: 100,
-          fontWeight: '600',
-          transition: 'opacity 0.3s ease-in-out'
-        }
+        id: 'vapt-global-status-toast',
+        className: `vapt-toast-notification is-${saveStatus.type === 'error' ? 'error' : 'success'}`
       }, saveStatus.message),
 
       el(TabPanel, {
+        id: 'vapt-admin-main-tabs',
         className: 'vapt-main-tabs',
         activeClass: 'is-active',
         initialTabName: activeTab,

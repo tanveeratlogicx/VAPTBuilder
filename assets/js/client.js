@@ -166,7 +166,15 @@
 
       // 2. Automated Controls (Right Column)
       const automControls = schema.controls ? schema.controls.filter(c => c.type === 'test_action') : [];
-      const noteControls = schema.controls ? schema.controls.filter(c => c.label?.toLowerCase().includes('notes')) : [];
+      const noteControls = (schema.controls || []).filter(c => {
+        const isNote = c.label?.toLowerCase().includes('notes') || c.key?.includes('notes');
+        if (!isNote) return false;
+
+        // Content Check
+        const implData = f.implementation_data ? (typeof f.implementation_data === 'string' ? JSON.parse(f.implementation_data) : f.implementation_data) : {};
+        const val = implData[c.key];
+        return val && val.toString().trim().length > 0;
+      });
 
       return el(Card, { key: f.key, id: `feature-${f.key}`, style: { borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: 'none' } }, [
         el(CardHeader, { style: { borderBottom: '1px solid #f3f4f6', padding: '12px 24px' } }, [
@@ -183,8 +191,9 @@
                 el('span', { style: { fontSize: '12px', fontWeight: 600, color: '#334155', marginRight: '12px', whiteSpace: 'nowrap' } }, __('Enforce Rule')),
                 (() => {
                   const isHtaccess = schema.enforcement && schema.enforcement.driver === 'htaccess';
+                  const isEnforced = isHtaccess ? true : !!f.is_enforced;
                   const toggle = el(ToggleControl, {
-                    checked: !!f.is_enforced,
+                    checked: isEnforced,
                     onChange: (val) => updateFeature(f.key, { is_enforced: val }),
                     disabled: isHtaccess,
                     __nextHasNoMarginBottom: true,
@@ -192,7 +201,7 @@
                   });
 
                   return isHtaccess
-                    ? el(Tooltip, { text: __('Effective immediately via .htaccess (Server Level)', 'vapt-builder') }, el('div', { style: { display: 'inline-block' } }, toggle))
+                    ? el(Tooltip, { text: __('Enforcement is permanently active via .htaccess (Server Level)', 'vapt-builder') }, el('div', { style: { display: 'inline-block' } }, toggle))
                     : toggle;
                 })()
               ])
@@ -237,7 +246,8 @@
                 el('div', { style: { flex: 1 } }, [
                   automControls.length > 0 ? el(GeneratedInterface, {
                     feature: { ...f, generated_schema: { ...schema, controls: automControls } },
-                    onUpdate: (data) => updateFeature(f.key, { implementation_data: data })
+                    onUpdate: (data) => updateFeature(f.key, { implementation_data: data }),
+                    hideMonitor: true
                   }) : el('p', { style: { fontSize: '12px', color: '#64748b', fontStyle: 'italic', margin: 0 } }, __('No automated tests defined.', 'vapt-builder'))
                 ])
               ])
@@ -252,7 +262,8 @@
             ]),
             el(GeneratedInterface, {
               feature: { ...f, generated_schema: { ...schema, controls: noteControls } },
-              onUpdate: (data) => updateFeature(f.key, { implementation_data: data })
+              onUpdate: (data) => updateFeature(f.key, { implementation_data: data }),
+              hideMonitor: true
             })
           ])
         ]),

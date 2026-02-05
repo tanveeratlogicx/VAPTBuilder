@@ -19540,17 +19540,11 @@
       "ui_configuration": {
         "components": [
           {
-            "component_id": "UI-wordpress-file-editor-access-001",
+            "component_id": "disallow_file_edit",
             "type": "toggle",
-            "label": "Enable WordPress File Editor Access Protection",
-            "description": "Activates protection against wordpress file editor access",
-            "default_value": true,
-            "options": [],
-            "validation": {
-              "required": false
-            },
-            "on_change": "toggleWordPressFileEditorAccess",
-            "dependencies": []
+            "label": "Disallow File Editor",
+            "description": "Disables the built-in WordPress theme and plugin editor.",
+            "default_value": true
           }
         ],
         "layout": {
@@ -19563,14 +19557,16 @@
           {
             "action_id": "ACTION-081-001",
             "type": "enable",
-            "label": "Enable Protection",
-            "confirmation_required": true,
-            "confirmation_message": "This will enable protection. Continue?",
-            "processing_message": "Enabling protection...",
-            "success_message": "Protection enabled successfully",
-            "error_handler": "handleProtectionError"
+            "label": "Enforce Rule",
+            "confirmation_required": true
           }
         ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "disallow_file_edit": "DISALLOW_FILE_EDIT"
+        }
       },
       "reporting": {
         "status_indicators": [
@@ -20012,37 +20008,60 @@
       "ui_configuration": {
         "components": [
           {
-            "component_id": "UI-wp-cron.php-security-001",
+            "component_id": "disable_wp_cron",
             "type": "toggle",
-            "label": "Enable wp-cron.php Security Protection",
-            "description": "Activates protection against wp-cron.php security",
-            "default_value": true,
-            "options": [],
-            "validation": {
-              "required": false
-            },
-            "on_change": "togglewp-cron.phpSecurity",
-            "dependencies": []
+            "label": "Disable WP-Cron Endpoint",
+            "description": "Disables the default WordPress wp-cron.php execution on every page load.",
+            "default_value": true
+          },
+          {
+            "component_id": "impl_method",
+            "type": "select",
+            "label": "Implementation Method",
+            "description": "Choose how to enforce this rule.",
+            "default_value": "wp-config",
+            "options": [
+              { "label": "WP-Config Constant (Recommended)", "value": "wp-config" },
+              { "label": "Htaccess Block", "value": "htaccess" }
+            ]
+          },
+          {
+            "component_id": "enable_server_cron_alt",
+            "type": "toggle",
+            "label": "Enable Server Cron Alternative",
+            "description": "Sets ALTERNATE_WP_CRON to ensure tasks run via server-side trigger.",
+            "default_value": true
+          },
+          {
+            "component_id": "server_cron_freq",
+            "type": "text",
+            "label": "Server Cron Frequency",
+            "description": "Recommended crontab schedule.",
+            "placeholder": "*/15 * * * *",
+            "default_value": "*/15 * * * *"
           }
         ],
         "layout": {
           "section": "General",
           "order": 83,
           "collapsible": true,
-          "default_expanded": false
+          "default_expanded": true
         },
         "actions": [
           {
             "action_id": "ACTION-083-001",
             "type": "enable",
-            "label": "Enable Protection",
-            "confirmation_required": false,
-            "confirmation_message": "This will enable protection. Continue?",
-            "processing_message": "Enabling protection...",
-            "success_message": "Protection enabled successfully",
-            "error_handler": "handleProtectionError"
+            "label": "Enforce Rule",
+            "confirmation_required": false
           }
         ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "disable_wp_cron": "DISABLE_WP_CRON",
+          "enable_server_cron_alt": "ALTERNATE_WP_CRON"
+        }
       },
       "reporting": {
         "status_indicators": [

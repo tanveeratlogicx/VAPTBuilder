@@ -67,6 +67,18 @@ class VAPT_REST
       'permission_callback' => array($this, 'check_permission'),
     ));
 
+    register_rest_route('vapt/v1', '/features/(?P<key>[a-zA-Z0-9_-]+)/stats', array(
+      'methods'  => 'GET',
+      'callback' => array($this, 'get_feature_stats'),
+      'permission_callback' => array($this, 'check_permission'),
+    ));
+
+    register_rest_route('vapt/v1', '/features/(?P<key>[a-zA-Z0-9_-]+)/reset', array(
+      'methods'  => 'POST',
+      'callback' => array($this, 'reset_feature_stats'),
+      'permission_callback' => array($this, 'check_permission'),
+    ));
+
     register_rest_route('vapt/v1', '/assignees', array(
       'methods'  => 'GET',
       'callback' => array($this, 'get_assignees'),
@@ -738,6 +750,28 @@ class VAPT_REST
     $history = VAPT_Workflow::get_history($key);
 
     return new WP_REST_Response($history, 200);
+  }
+
+  public function get_feature_stats($request)
+  {
+    $key = $request['key'];
+    require_once(VAPT_PATH . 'includes/enforcers/class-vapt-hook-driver.php');
+    if (method_exists('VAPT_Hook_Driver', 'get_feature_stats')) {
+      $stats = VAPT_Hook_Driver::get_feature_stats($key);
+      return new WP_REST_Response($stats, 200);
+    }
+    return new WP_REST_Response(['error' => 'Method not supported'], 500);
+  }
+
+  public function reset_feature_stats($request)
+  {
+    $key = $request['key'];
+    require_once(VAPT_PATH . 'includes/enforcers/class-vapt-hook-driver.php');
+    if (method_exists('VAPT_Hook_Driver', 'reset_feature_stats')) {
+      $count = VAPT_Hook_Driver::reset_feature_stats($key);
+      return new WP_REST_Response(['success' => true, 'deleted_locks' => $count], 200);
+    }
+    return new WP_REST_Response(['error' => 'Method not supported'], 500);
   }
 
   public function upload_json($request)
