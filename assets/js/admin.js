@@ -1134,7 +1134,7 @@ Feature ID: ${feature.id || 'N/A'}
       }, [
         el('div', { style: { flex: 1 } }, [
           el(TextControl, {
-            label: __('Domain Name', 'vapt-Copilot'),
+            label: __('Domain Name', 'vapt-builder'),
             value: newDomain,
             onChange: (val) => setNewDomain(val),
             placeholder: 'example.com',
@@ -1143,11 +1143,11 @@ Feature ID: ${feature.id || 'N/A'}
         ]),
         el('div', { style: { minWidth: '150px' } }, [
           el(SelectControl, {
-            label: __('Type', 'vapt-Copilot'),
+            label: __('Type', 'vapt-builder'),
             value: isWildcardNew ? 'wildcard' : 'standard',
             options: [
-              { label: __('Standard', 'vapt-Copilot'), value: 'standard' },
-              { label: __('Wildcard (*.domain)', 'vapt-Copilot'), value: 'wildcard' }
+              { label: __('Standard', 'vapt-builder'), value: 'standard' },
+              { label: __('Wildcard (*.domain)', 'vapt-builder'), value: 'wildcard' }
             ],
             onChange: (val) => setIsWildcardNew(val === 'wildcard'),
             __nextHasNoMarginBottom: true
@@ -1158,7 +1158,7 @@ Feature ID: ${feature.id || 'N/A'}
           onClick: () => {
             const domain = (newDomain || '').trim();
             if (!domain) return;
-            console.log('Adding domain:', domain, 'isWildcard:', isWildcardNew);
+            // console.log('Adding domain:', domain, 'isWildcard:', isWildcardNew);
             addDomain(domain, isWildcardNew);
             setNewDomain('');
             setIsWildcardNew(false);
@@ -1181,6 +1181,7 @@ Feature ID: ${feature.id || 'N/A'}
           style: { alignSelf: 'flex-end', height: '32px', marginLeft: 'auto' }
         }, __('Delete Selected', 'vapt-builder'))
       ]),
+
       el('table', { key: 'table', className: 'wp-list-table widefat fixed striped' }, [
         el('thead', null, el('tr', null, [
           el('th', { style: { width: '40px' } }, el('div', { style: { display: 'flex', alignItems: 'center', gap: '4px' } }, [
@@ -1207,7 +1208,9 @@ Feature ID: ${feature.id || 'N/A'}
             __('Type', 'vapt-builder'),
             el(SortIndicator, { column: 'is_wildcard' })
           ]),
+          el('th', { style: { width: '120px' } }, __('License', 'vapt-builder')),
           el('th', null, __('Features Enabled', 'vapt-builder')),
+          el('th', { style: { width: '120px' } }, __('Expiry Date', 'vapt-builder')),
           el('th', { style: { width: '220px' } }, __('Actions', 'vapt-builder'))
         ])),
         el('tbody', null, sortedDomains.map((d) => el('tr', { key: d.id }, [
@@ -1239,10 +1242,23 @@ Feature ID: ${feature.id || 'N/A'}
                 addDomain(d.domain, nextWildcard, !(d.is_enabled === '0' || d.is_enabled === false || d.is_enabled === 0), d.id);
               },
               style: { textDecoration: 'none', color: (d.is_wildcard === '1' || d.is_wildcard === true || d.is_wildcard === 1) ? '#2271b1' : '#64748b', fontWeight: 600 },
-              title: __('Click to toggle domain type', 'vapt-Copilot')
-            }, (d.is_wildcard === '1' || d.is_wildcard === true || d.is_wildcard === 1) ? __('Wildcard', 'vapt-Copilot') : __('Standard', 'vapt-Copilot')),
+              title: __('Click to toggle domain type', 'vapt-builder')
+            }, (d.is_wildcard === '1' || d.is_wildcard === true || d.is_wildcard === 1) ? __('Wildcard', 'vapt-builder') : __('Standard', 'vapt-builder')),
             el(Dashicon, { icon: 'update', size: 14, style: { opacity: 0.5 } })
           ])),
+          el('td', null, el('span', {
+            style: {
+              display: 'inline-block',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              fontSize: '11px',
+              fontWeight: 600,
+              textTransform: 'capitalize',
+              background: d.license_type === 'developer' ? '#f3e8ff' : (d.license_type === 'pro' ? '#fff1f2' : '#f1f5f9'),
+              color: d.license_type === 'developer' ? '#6b21a8' : (d.license_type === 'pro' ? '#be123c' : '#475569'),
+              border: '1px solid transparent'
+            }
+          }, d.license_type || 'Standard')),
           el('td', null, (Array.isArray(d.features) && d.features.length > 0) ? el(Button, {
             isLink: true,
             onClick: (e) => {
@@ -1251,6 +1267,11 @@ Feature ID: ${feature.id || 'N/A'}
               setViewFeaturesModalOpen(true);
             }
           }, `${d.features.length} ${__('Features', 'vapt-builder')}`) : `${(Array.isArray(d.features) ? d.features.length : 0)} ${__('Features', 'vapt-builder')}`),
+          el('td', null, el('span', { style: { fontSize: '12px', color: (d.license_type !== 'developer' && d.manual_expiry_date && new Date(d.manual_expiry_date) < new Date()) ? '#dc2626' : 'inherit' } },
+            d.license_type === 'developer'
+              ? __('Never', 'vapt-builder')
+              : (d.manual_expiry_date ? new Date(d.manual_expiry_date).toLocaleDateString() : '-')
+          )),
           el('td', null, el('div', { style: { display: 'flex', gap: '8px' } }, [
             el(Button, {
               isSecondary: true,
@@ -1917,7 +1938,10 @@ Feature ID: ${feature.id || 'N/A'}
     // Derived current domain object
     const currentDomain = useMemo(() => {
       const doms = Array.isArray(domains) ? domains : [];
-      return doms.find(d => d.id === parseInt(selectedDomainId)) || (doms.length > 0 ? doms[0] : null);
+      // Use loose equality to handle string/number ID mismatches
+      const found = doms.find(d => d.id == selectedDomainId);
+      // console.log('LicenseManager Selection Debug:', { selectedDomainId, found, allDomains: doms });
+      return found || (doms.length > 0 ? doms[0] : null);
     }, [domains, selectedDomainId]);
 
     // Local Form State
@@ -2105,44 +2129,55 @@ Feature ID: ${feature.id || 'N/A'}
     };
 
     return el(PanelBody, { title: __('License & Subscription Management', 'vapt-builder'), initialOpen: true }, [
-      // Domain Selector (Only if multiple)
-      (Array.isArray(domains) && domains.length > 1) && el('div', { style: { marginBottom: '20px' } }, [
-        el(SelectControl, {
-          label: __('Select Domain to Manage', 'vapt-builder'),
-          value: selectedDomainId,
-          options: domains.map(d => ({ label: d.domain, value: d.id })),
-          onChange: setSelectedDomainId
-        })
-      ]),
 
       el('div', { className: 'vapt-license-grid' }, [
         // LEFT: Status Card
         el('div', { className: 'vapt-license-card' }, [
-          el('h3', null, __('License Status', 'vapt-builder')),
-
-          el('div', { className: 'vapt-info-row' }, [
-            el('label', null, __('Current Type', 'vapt-builder')),
+          el('div', { className: 'vapt-card-header-row', style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' } }, [
+            el('h3', { style: { margin: 0 } }, __('License Status', 'vapt-builder')),
+            // License Type moved to Header
             el('span', { className: `vapt-license-badge ${currentDomain.license_type || 'standard'}` },
               (currentDomain.license_type || 'Standard').toUpperCase()
             )
           ]),
 
-          // First Activated (2nd Position)
-          el('div', { className: 'vapt-info-row vapt-stat-highlight' }, [
-            el('label', null, __('First Activated', 'vapt-builder')),
-            el('span', null, currentDomain.first_activated_at ? formatDate(currentDomain.first_activated_at) : __('Not Activated', 'vapt-builder'))
+          // Domain Name (Text Display - User requested TextControl)
+          el('div', { className: 'vapt-info-row', style: { marginBottom: '15px' } }, [
+            el(TextControl, {
+              label: __('Domain Name', 'vapt-builder'),
+              value: currentDomain.domain,
+              readOnly: true,
+              style: { background: '#f8fafc', color: '#64748b' }
+            })
           ]),
 
-          el('div', { className: 'vapt-info-row' }, [
-            el('label', null, __('Expiry Date', 'vapt-builder')),
-            el('span', { style: { color: (currentDomain.manual_expiry_date && new Date(currentDomain.manual_expiry_date) < new Date()) ? '#d63638' : 'inherit' } },
-              formatDate(currentDomain.manual_expiry_date)
-            )
+          // Combined Activation & Expiry (Row) - Using TextControls for alignment
+          el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' } }, [
+            el(TextControl, {
+              label: __('First Activated', 'vapt-builder'),
+              value: currentDomain.first_activated_at ? formatDate(currentDomain.first_activated_at) : __('Not Activated', 'vapt-builder'),
+              readOnly: true,
+              style: { background: '#f8fafc', color: '#64748b' }
+            }),
+            el(TextControl, {
+              label: __('Expiry Date', 'vapt-builder'),
+              value: currentDomain.license_type === 'developer'
+                ? __('Never Expires', 'vapt-builder')
+                : (currentDomain.manual_expiry_date ? formatDate(currentDomain.manual_expiry_date) : ''),
+              readOnly: true,
+              style: {
+                background: '#f8fafc',
+                color: (currentDomain.license_type !== 'developer' && currentDomain.manual_expiry_date && new Date(currentDomain.manual_expiry_date) < new Date()) ? '#dc2626' : '#64748b'
+              }
+            })
           ]),
 
-          el('div', { className: 'vapt-info-row vapt-stat-highlight' }, [
-            el('label', null, __('Terms Renewed', 'vapt-builder')),
-            el('span', null, `${currentDomain.renewals_count || 0} Times`)
+          // Terms Renewed - Horizontal Layout (Label Left, Value Right)
+          el('div', { className: 'components-base-control', style: { marginBottom: '15px' } }, [
+            el('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', border: '1px solid #949494', borderRadius: '4px', padding: '0 12px', height: '40px' } }, [
+              el('span', { style: { color: '#1e1e1e', fontSize: '13px', fontWeight: 500 } }, __('Terms Renewed', 'vapt-builder')),
+              el('span', { style: { color: '#64748b', fontSize: '13px' } }, `${currentDomain.renewals_count || 0} Times`)
+            ])
           ]),
 
           el('div', { className: 'vapt-desc-text' },
@@ -2168,42 +2203,89 @@ Feature ID: ${feature.id || 'N/A'}
 
         // RIGHT: Update Form
         el('div', { className: 'vapt-license-card' }, [
-          el('h3', null, __('Update License', 'vapt-builder')),
+          el('h3', null, __('Add License', 'vapt-builder')),
 
-          el(SelectControl, {
-            label: __('License Type', 'vapt-builder'),
-            value: formState.license_type,
-            disabled: isSaving,
-            options: [
-              { label: 'Standard (30 Days)', value: 'standard' },
-              { label: 'Pro (One Year)', value: 'pro' },
-              { label: 'Developer (Perpetual)', value: 'developer' }
-            ],
-            onChange: (val) => {
-              // Dynamic Expiry Calculation
-              const baseDate = new Date(); // Start from today for new calculation basis
-              let durationDays = 30;
-              if (val === 'pro') durationDays = 365;
-              if (val === 'developer') durationDays = 36500; // ~100 years
+          // Domain Selector / Manager (Unified Layout)
+          el('div', { style: { display: 'flex', alignItems: 'flex-end', gap: '10px', marginBottom: '15px' } }, [
+            // Domain Name: Select (if >1) OR Read-Only Text (if <=1)
+            el('div', { style: { flex: 2 } }, (Array.isArray(domains) && domains.length > 1)
+              ? el(SelectControl, {
+                label: __('Domain Name (Select to Manage)', 'vapt-builder'),
+                value: selectedDomainId,
+                options: domains.map(d => ({ label: d.domain, value: d.id })),
+                onChange: (val) => {
+                  setSelectedDomainId(val);
+                  fetchData(undefined, true);
+                },
+                disabled: isSaving,
+                style: { marginBottom: 0 }
+              })
+              : el(TextControl, {
+                label: __('Domain Name', 'vapt-builder'),
+                value: currentDomain.domain,
+                readOnly: true,
+                style: { marginBottom: 0, background: '#f8fafc', color: '#64748b' }
+              })
+            ),
 
-              baseDate.setDate(baseDate.getDate() + durationDays);
-              const newExpiry = baseDate.toISOString().split('T')[0];
+            // Domain Type (Rear-Only) - Replaces SelectControl
+            el('div', { style: { flex: 1, minWidth: '120px' } }, el(TextControl, {
+              label: __('Domain Type', 'vapt-builder'),
+              value: (currentDomain.is_wildcard === true || currentDomain.is_wildcard == 1 || currentDomain.is_wildcard === '1') ? 'Wildcard' : 'Standard',
+              readOnly: true,
+              style: { marginBottom: 0, background: '#f8fafc', color: '#64748b' }
+            }))
+          ]),
 
-              setFormState({
-                ...formState,
-                license_type: val,
-                manual_expiry_date: newExpiry
-              });
-            }
-          }),
+          // Combined License Type & Expiry (Grid)
+          el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' } }, [
+            el(SelectControl, {
+              label: __('License Type', 'vapt-builder'),
+              value: formState.license_type,
+              disabled: isSaving,
+              options: [
+                { label: 'Standard (30 Days)', value: 'standard' },
+                { label: 'Pro (One Year)', value: 'pro' },
+                { label: 'Developer (Perpetual)', value: 'developer' }
+              ],
+              onChange: (val) => {
+                // Dynamic Expiry Calculation
+                const baseDate = new Date(); // Start from today for new calculation basis
+                let durationDays = 30;
+                if (val === 'pro') durationDays = 365;
+                if (val === 'developer') {
+                  // For developer, set a far future date internally but we won't show it as a field
+                  durationDays = 36500;
+                }
 
-          el(TextControl, {
-            label: __('New Expiry Date', 'vapt-builder'),
-            type: 'date',
-            value: formState.manual_expiry_date,
-            disabled: isSaving,
-            onChange: (val) => setFormState({ ...formState, manual_expiry_date: val })
-          }),
+                baseDate.setDate(baseDate.getDate() + durationDays);
+                const newExpiry = baseDate.toISOString().split('T')[0];
+
+                setFormState({
+                  ...formState,
+                  license_type: val,
+                  manual_expiry_date: newExpiry
+                });
+              }
+            }),
+
+            // Show Expiry Input ONLY if NOT Developer
+            formState.license_type !== 'developer'
+              ? el(TextControl, {
+                label: __('New Expiry Date', 'vapt-builder'),
+                type: 'date',
+                value: formState.manual_expiry_date,
+                disabled: isSaving,
+                onChange: (val) => setFormState({ ...formState, manual_expiry_date: val })
+              })
+              : el(TextControl, {
+                label: __('Expiry Status', 'vapt-builder'),
+                value: 'Perpetual License',
+                readOnly: true,
+                disabled: true,
+                style: { background: '#f1f5f9', color: '#475569', fontStyle: 'italic' }
+              })
+          ]),
 
           el(ToggleControl, {
             label: __('Auto Renew', 'vapt-builder'),
@@ -3087,11 +3169,9 @@ Feature ID: ${feature.id || 'N/A'}
       }
     }, [saveStatus]);
 
-    const fetchData = (file = selectedFile) => {
+    const fetchData = (file = selectedFile, silent = false) => {
       console.log('VAPT Builder: Fetching data for file:', file);
-      setLoading(true);
-
-      setLoading(true);
+      if (!silent) setLoading(true);
       setSchema({ item_fields: [] }); // Clear previous schema while loading
 
       // Use individual catches to prevent one failure from blocking all

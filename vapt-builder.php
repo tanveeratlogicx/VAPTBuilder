@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version:           3.3.46
+ * Version:           3.4.0
  * Author:            Hermas International FZ LLE
  * Author URI:        #
  * License:           GPL-2.0+
@@ -16,7 +16,7 @@ if (! defined('ABSPATH')) {
 }
 
 // Plugin Constants (Builder-specific)
-define('VAPT_VERSION', '3.3.46');
+define('VAPT_VERSION', '3.4.0');
 define('VAPT_PATH', plugin_dir_path(__FILE__));
 define('VAPT_URL', plugin_dir_url(__FILE__));
 
