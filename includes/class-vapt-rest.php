@@ -879,6 +879,8 @@ class VAPT_REST
     $manual_expiry_date = $request->get_param('manual_expiry_date');
     $auto_renew = $request->get_param('auto_renew') !== null ? ($request->get_param('auto_renew') ? 1 : 0) : null;
     $action = $request->get_param('action');
+    $license_scope = $request->get_param('license_scope');
+    $installation_limit = $request->get_param('installation_limit');
 
     $id = $request->get_param('id');
     if ($id) {
@@ -910,6 +912,8 @@ class VAPT_REST
     }
     if ($license_id === null && $current) $license_id = $current['license_id'];
     if ($manual_expiry_date === null && $current) $manual_expiry_date = $current['manual_expiry_date'];
+    if ($license_scope === null && $current) $license_scope = $current['license_scope'] ?: 'single';
+    if ($installation_limit === null && $current) $installation_limit = $current['installation_limit'] ?: 1;
 
     if ($manual_expiry_date) {
       $manual_expiry_date = date('Y-m-d 00:00:00', strtotime($manual_expiry_date));
@@ -984,7 +988,7 @@ class VAPT_REST
       }
     }
 
-    $result_id = VAPT_DB::update_domain($domain, $is_wildcard ? 1 : 0, $is_enabled ? 1 : 0, $id, $license_id, $license_type, $manual_expiry_date, $auto_renew, $renewals_count, $history);
+    $result_id = VAPT_DB::update_domain($domain, $is_wildcard ? 1 : 0, $is_enabled ? 1 : 0, $id, $license_id, $license_type, $manual_expiry_date, $auto_renew, $renewals_count, $history, $license_scope, $installation_limit);
 
     if ($result_id === false) {
       return new WP_REST_Response(array('error' => 'Database update failed'), 500);
@@ -1052,6 +1056,8 @@ class VAPT_REST
     // Merge other parameters
     $data['include_config'] = $request->get_param('include_config');
     $data['include_data'] = $request->get_param('include_data');
+    $data['license_scope'] = $request->get_param('license_scope');
+    $data['installation_limit'] = $request->get_param('installation_limit');
 
     // Delegate to Build Class
     require_once VAPT_PATH . 'includes/class-vapt-build.php';
@@ -1068,12 +1074,15 @@ class VAPT_REST
     $domain = $request->get_param('domain');
     $version = $request->get_param('version');
     $features = $request->get_param('features');
+    $license_scope = $request->get_param('license_scope') ?: 'single';
+    $installation_limit = $request->get_param('installation_limit') ?: 1;
 
     if (!$domain || !$version) {
       return new WP_REST_Response(array('error' => 'Missing domain or version'), 400);
     }
 
-    $config_content = VAPT_Build::generate_config_content($domain, $version, $features);
+    require_once VAPT_PATH . 'includes/class-vapt-build.php';
+    $config_content = VAPT_Build::generate_config_content($domain, $version, $features, null, $license_scope, $installation_limit);
     $filename = "vapt-{$domain}-config-{$version}.php";
     $filepath = VAPT_PATH . $filename;
 

@@ -12,7 +12,7 @@ window.vaptScriptLoaded = true;
     TabPanel, Panel, PanelBody, PanelRow, Button, Dashicon,
     ToggleControl, SelectControl, Modal, TextControl, Spinner,
     Notice, Placeholder, Dropdown, CheckboxControl, BaseControl, Icon,
-    TextareaControl, Card, CardHeader, CardBody
+    TextareaControl, Card, CardHeader, CardBody, Tooltip
   } = wp.components || {};
   const apiFetch = wp.apiFetch;
   const { __, sprintf } = wp.i18n || {};
@@ -1631,7 +1631,7 @@ Feature ID: ${feature.id || 'N/A'}
     ]);
   };
 
-  const BuildGenerator = ({ domains, features, setAlertState }) => {
+  const BuildGenerator = ({ domains, features, activeFile, setAlertState }) => {
     const [buildDomain, setBuildDomain] = useState('');
     const [buildVersion, setBuildVersion] = useState('2.5.0');
     const [includeConfig, setIncludeConfig] = useState(true);
@@ -1647,6 +1647,8 @@ Feature ID: ${feature.id || 'N/A'}
     const [generating, setGenerating] = useState(false);
     const [downloadUrl, setDownloadUrl] = useState(null);
     const [importedAt, setImportedAt] = useState(null);
+    const [licenseScope, setLicenseScope] = useState('single');
+    const [installationLimit, setInstallationLimit] = useState(1);
 
     // Auto-Generation Effect
     useEffect(() => {
@@ -1695,6 +1697,8 @@ Feature ID: ${feature.id || 'N/A'}
           generate_type: type,
           include_config: includeConfig,
           include_data: includeData,
+          license_scope: licenseScope,
+          installation_limit: installationLimit,
           white_label: {
             name: whiteLabel.name.trim(),
             description: whiteLabel.description.trim(),
@@ -1733,7 +1737,9 @@ Feature ID: ${feature.id || 'N/A'}
         data: {
           domain: buildDomain.trim(),
           version: buildVersion.trim(),
-          features: buildFeatures
+          features: buildFeatures,
+          license_scope: licenseScope,
+          installation_limit: installationLimit
         }
       }).then(res => {
         if (res.success) {
@@ -1808,20 +1814,30 @@ Feature ID: ${feature.id || 'N/A'}
                   })
                 )
               ]),
-              el(ToggleControl, {
-                label: __('Include Config', 'vapt-builder'),
-                checked: includeConfig,
-                onChange: (val) => setIncludeConfig(val),
-                help: null,
-                style: { marginBottom: 0 }
-              }),
-              el(ToggleControl, {
-                label: __('Include Active Data', 'vapt-builder'),
-                checked: includeData,
-                onChange: (val) => setIncludeData(val),
-                help: null,
-                style: { marginBottom: 0 }
-              })
+              el('div', { style: { display: 'flex', alignItems: 'center', gap: '5px' } }, [
+                el(ToggleControl, {
+                  label: __('Include Config', 'vapt-builder'),
+                  checked: includeConfig,
+                  onChange: (val) => setIncludeConfig(val),
+                  help: null,
+                  style: { marginBottom: 0 }
+                }),
+                el(Tooltip, { text: __('Include current feature configurations & security rules.', 'vapt-builder') },
+                  el('span', { className: 'dashicons dashicons-editor-help', style: { fontSize: '14px', color: '#94a3b8', cursor: 'help', marginTop: '-4px' } })
+                )
+              ]),
+              el('div', { style: { display: 'flex', alignItems: 'center', gap: '5px' } }, [
+                el(ToggleControl, {
+                  label: __('Include Active Data', 'vapt-builder'),
+                  checked: includeData,
+                  onChange: (val) => setIncludeData(val),
+                  help: null,
+                  style: { marginBottom: 0 }
+                }),
+                el(Tooltip, { text: sprintf(__('Include Risk Catalog and definitions from active file: %s (Found %d items).', 'vapt-builder'), activeFile || 'Default', features ? features.length : 0) },
+                  el('span', { className: 'dashicons dashicons-editor-help', style: { fontSize: '14px', color: '#94a3b8', cursor: 'help', marginTop: '-4px' } })
+                )
+              ])
             ]),
 
             // Horizontal Fields in 2-Col Grid
@@ -1849,6 +1865,32 @@ Feature ID: ${feature.id || 'N/A'}
                 el(FieldRow, { label: __('Version', 'vapt-builder') },
                   el(TextControl, { value: buildVersion, onChange: (val) => setBuildVersion(val), style: { marginBottom: 0 } })
                 ),
+              ]),
+              // Col 3 (License Scope)
+              el('div', null, [
+                el(FieldRow, { label: __('License Scope', 'vapt-builder') },
+                  el(SelectControl, {
+                    value: licenseScope,
+                    options: [
+                      { label: __('Single Domain', 'vapt-builder'), value: 'single' },
+                      { label: __('Multi-Site', 'vapt-builder'), value: 'multisite' }
+                    ],
+                    onChange: (val) => setLicenseScope(val),
+                    style: { marginBottom: 0 }
+                  })
+                ),
+              ]),
+              // Col 4 (Inst. Limit - appear next to License Scope)
+              el('div', null, [
+                licenseScope === 'multisite' && el(FieldRow, { label: __('Inst. Limit', 'vapt-builder') },
+                  el(TextControl, {
+                    type: 'number',
+                    value: installationLimit,
+                    min: 1,
+                    onChange: (val) => setInstallationLimit(parseInt(val) || 1),
+                    style: { marginBottom: 0 }
+                  })
+                )
               ])
             ]),
 
@@ -1948,7 +1990,9 @@ Feature ID: ${feature.id || 'N/A'}
     const [formState, setFormState] = useState({
       license_type: 'standard',
       manual_expiry_date: '',
-      auto_renew: false
+      auto_renew: false,
+      license_scope: 'single',
+      installation_limit: 1
     });
 
     // Sorting and Filtering state for the table
@@ -1962,7 +2006,10 @@ Feature ID: ${feature.id || 'N/A'}
       // Application of search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        doms = doms.filter(d => (d.domain || '').toLowerCase().includes(query));
+        doms = doms.filter(d =>
+          (d.domain || '').toLowerCase().includes(query) ||
+          (d.license_id || '').toLowerCase().includes(query)
+        );
       }
 
       // Sorting logic
@@ -1999,14 +2046,21 @@ Feature ID: ${feature.id || 'N/A'}
         const newExpiry = currentDomain.manual_expiry_date ? currentDomain.manual_expiry_date.split(' ')[0] : '';
         const newAuto = !!parseInt(currentDomain.auto_renew);
 
+        const newScope = currentDomain.license_scope || 'single';
+        const newLimit = parseInt(currentDomain.installation_limit) || 1;
+
         // Only update if actually different to prevent flickering
         if (formState.license_type !== newType ||
           formState.manual_expiry_date !== newExpiry ||
-          formState.auto_renew !== newAuto) {
+          formState.auto_renew !== newAuto ||
+          formState.license_scope !== newScope ||
+          formState.installation_limit !== newLimit) {
           setFormState({
             license_type: newType,
             manual_expiry_date: newExpiry,
-            auto_renew: newAuto
+            auto_renew: newAuto,
+            license_scope: newScope,
+            installation_limit: newLimit
           });
         }
       }
@@ -2015,7 +2069,9 @@ Feature ID: ${feature.id || 'N/A'}
     const isDirty = currentDomain ? (
       formState.license_type !== (currentDomain.license_type || 'standard') ||
       formState.manual_expiry_date !== (currentDomain.manual_expiry_date ? currentDomain.manual_expiry_date.split(' ')[0] : '') ||
-      formState.auto_renew !== !!parseInt(currentDomain.auto_renew)
+      formState.auto_renew !== !!parseInt(currentDomain.auto_renew) ||
+      formState.license_scope !== (currentDomain.license_scope || 'single') ||
+      formState.installation_limit !== (parseInt(currentDomain.installation_limit) || 1)
     ) : false;
 
     if (!currentDomain) {
@@ -2083,11 +2139,13 @@ Feature ID: ${feature.id || 'N/A'}
       });
 
       let payload = {
-        domain: currentDomain.domain,
+        id: currentDomain.id,
         license_type: formState.license_type,
-        auto_renew: formState.auto_renew ? 1 : 0,
         manual_expiry_date: formState.manual_expiry_date,
-        renewals_count: currentDomain.renewals_count || 0 // Explicitly send current count
+        auto_renew: formState.auto_renew ? 1 : 0,
+        license_scope: formState.license_scope,
+        installation_limit: formState.installation_limit,
+        action: isManualRenew ? 'manual_renew' : 'update'
       };
 
       // Manual Renew Logic
@@ -2336,6 +2394,29 @@ Feature ID: ${feature.id || 'N/A'}
             help: __('Automatically extend expiry if active.', 'vapt-builder')
           }),
 
+          el('div', { style: { display: 'flex', gap: '20px', marginBottom: '20px', background: '#f8fafc', padding: '15px', borderRadius: '6px' } }, [
+            el('div', { style: { flex: 1 } },
+              el(SelectControl, {
+                label: __('License Scope', 'vapt-builder'),
+                value: formState.license_scope,
+                options: [
+                  { label: __('Single Domain', 'vapt-builder'), value: 'single' },
+                  { label: __('Multi-Site', 'vapt-builder'), value: 'multisite' }
+                ],
+                onChange: (val) => setFormState({ ...formState, license_scope: val })
+              })
+            ),
+            formState.license_scope === 'multisite' && el('div', { style: { flex: 1 } },
+              el(TextControl, {
+                label: __('Installation Limit', 'vapt-builder'),
+                type: 'number',
+                min: 1,
+                value: formState.installation_limit,
+                onChange: (val) => setFormState({ ...formState, installation_limit: parseInt(val) || 1 })
+              })
+            )
+          ]),
+
           el('div', { style: { display: 'flex', gap: '10px', marginTop: '20px', alignItems: 'center', flexWrap: 'wrap' } }, [
             el(Button, {
               isPrimary: true,
@@ -2380,7 +2461,22 @@ Feature ID: ${feature.id || 'N/A'}
         ]),
         el('table', { className: 'wp-list-table widefat fixed striped' }, [
           el('thead', null, el('tr', null, [
-            el('th', null, __('License ID', 'vapt-builder')),
+            el('th', {
+              className: `manage-column sortable ${sortBy === 'license_id' ? 'sorted ' + sortOrder : ''}`,
+              onClick: () => toggleSort('license_id'),
+              style: { cursor: 'pointer' }
+            }, [
+              el('span', null, __('License ID', 'vapt-builder')),
+              el('span', { className: 'sorting-indicator' })
+            ]),
+            el('th', {
+              className: `manage-column sortable ${sortBy === 'installation_limit' ? 'sorted ' + sortOrder : ''}`,
+              onClick: () => toggleSort('installation_limit'),
+              style: { cursor: 'pointer', width: '80px' }
+            }, [
+              el('span', null, __('Limit', 'vapt-builder')),
+              el('span', { className: 'sorting-indicator' })
+            ]),
             el('th', {
               className: `manage-column column-primary sortable ${sortBy === 'domain' ? 'sorted ' + sortOrder : ''}`,
               onClick: () => toggleSort('domain'),
@@ -2419,6 +2515,12 @@ Feature ID: ${feature.id || 'N/A'}
           el('tbody', null, sortedDomains.length === 0 ? el('tr', null, el('td', { colSpan: 7 }, __('No domains found.', 'vapt-builder'))) :
             sortedDomains.map((dom) => el('tr', { key: dom.id, className: dom.id == selectedDomainId ? 'is-selected' : '' }, [
               el('td', null, el('code', { style: { fontSize: '11px' } }, dom.license_id || '-')),
+              el('td', null, dom.license_id ? el('div', { style: { display: 'flex', alignItems: 'center', gap: '6px' } }, [
+                el('span', { style: { background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' } }, dom.installation_limit || 1),
+                el(Tooltip, { text: dom.license_scope === 'multisite' ? __('Multi-Site', 'vapt-builder') : __('Single Domain', 'vapt-builder') },
+                  el('span', { className: 'dashicons dashicons-editor-help', style: { fontSize: '14px', color: '#94a3b8', cursor: 'help' } })
+                )
+              ]) : '-'),
               el('td', { className: 'column-primary' }, [
                 el('strong', null, dom.domain),
                 (dom.is_wildcard == 1) && el('span', { style: { marginLeft: '8px', fontSize: '10px', background: '#f0f0f1', padding: '2px 6px', borderRadius: '10px' } }, __('Wildcard', 'vapt-builder')),
@@ -3631,7 +3733,7 @@ Feature ID: ${feature.id || 'N/A'}
           });
           case 'license': return el(LicenseManager, { domains, fetchData, isSuper, loading });
           case 'domains': return el(DomainFeatures, { domains, features, isDomainModalOpen, selectedDomain, setDomainModalOpen, setSelectedDomain, updateDomainFeatures, addDomain, deleteDomain, batchDeleteDomains, setConfirmState, selectedDomains, setSelectedDomains });
-          case 'build': return el(BuildGenerator, { domains, features, setAlertState });
+          case 'build': return el(BuildGenerator, { domains, features, activeFile: selectedFile, setAlertState });
           default: return null;
         }
       }),

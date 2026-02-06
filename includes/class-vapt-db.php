@@ -133,7 +133,7 @@ class VAPT_DB
   /**
    * Add or update domain
    */
-  public static function update_domain($domain, $is_wildcard = 0, $is_enabled = 1, $id = null, $license_id = '', $license_type = 'standard', $manual_expiry_date = null, $auto_renew = 0, $renewals_count = 0, $renewal_history = null)
+  public static function update_domain($domain, $is_wildcard = 0, $is_enabled = 1, $id = null, $license_id = '', $license_type = 'standard', $manual_expiry_date = null, $auto_renew = 0, $renewals_count = 0, $renewal_history = null, $license_scope = 'single', $installation_limit = 1)
   {
     global $wpdb;
     $table = $wpdb->prefix . 'vapt_domains';
@@ -149,6 +149,16 @@ class VAPT_DB
     $renewal_col = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s", 'renewal_history'));
     if (empty($renewal_col)) {
       $wpdb->query("ALTER TABLE $table ADD COLUMN renewal_history TEXT DEFAULT NULL AFTER renewals_count");
+    }
+
+    $scope_col = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s", 'license_scope'));
+    if (empty($scope_col)) {
+      $wpdb->query("ALTER TABLE $table ADD COLUMN license_scope VARCHAR(50) DEFAULT 'single'");
+    }
+
+    $limit_col = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM $table LIKE %s", 'installation_limit'));
+    if (empty($limit_col)) {
+      $wpdb->query("ALTER TABLE $table ADD COLUMN installation_limit INT DEFAULT 1");
     }
 
     $domain = trim($domain);
@@ -179,9 +189,11 @@ class VAPT_DB
       'auto_renew'         => $auto_renew,
       'renewals_count'     => $renewals_count,
       'renewal_history'    => is_array($renewal_history) ? json_encode($renewal_history) : $renewal_history,
+      'license_scope'      => $license_scope,
+      'installation_limit' => intval($installation_limit),
     );
 
-    $formats = array('%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%d', '%s');
+    $formats = array('%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%d');
 
     if ($existing) {
       error_log('VAPT: DB Found Existing Record (ID: ' . $existing->id . '). Updating...');

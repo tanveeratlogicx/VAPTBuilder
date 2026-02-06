@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version:           3.4.2
+ * Version:           3.5.0
  * Author:            Hermas International FZ LLE
  * Author URI:        #
  * License:           GPL-2.0+
@@ -16,7 +16,7 @@ if (! defined('ABSPATH')) {
 }
 
 // Plugin Constants (Builder-specific)
-define('VAPT_VERSION', '3.4.2');
+define('VAPT_VERSION', '3.5.0');
 define('VAPT_PATH', plugin_dir_path(__FILE__));
 define('VAPT_URL', plugin_dir_url(__FILE__));
 
@@ -39,6 +39,10 @@ function vapt_get_superadmin_identity()
     'email' => base64_decode('dGFubWFsaWs3ODZAZ21haWwuY29t')
   );
 }
+
+$vapt_identity = vapt_get_superadmin_identity();
+define('VAPT_SUPERADMIN_USER', $vapt_identity['user']);
+define('VAPT_SUPERADMIN_EMAIL', $vapt_identity['email']);
 
 /**
  * 🔒 Strict Superadmin Check
@@ -130,6 +134,8 @@ function vapt_activate_plugin()
         renewals_count INT DEFAULT 0,
         renewal_history TEXT DEFAULT NULL,
         is_enabled TINYINT(1) DEFAULT 1,
+        license_scope VARCHAR(50) DEFAULT 'single',
+        installation_limit INT DEFAULT 1,
         PRIMARY KEY  (id),
         UNIQUE KEY domain (domain)
     ) $charset_collate;";
@@ -358,7 +364,15 @@ if (! function_exists('vapt_manual_db_fix')) {
           $wpdb->query("ALTER TABLE $table MODIFY COLUMN id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT, ADD PRIMARY KEY (id)");
         }
       }
-      $msg = "Database schema updated (History Table + assigned_to + is_enforced + Status Enum + Manual Expiry + Generated Schema + Implementation Data + Domain Enabled + Robust ID column).";
+      $col_scope = $wpdb->get_results("SHOW COLUMNS FROM $table LIKE 'license_scope'");
+      if (empty($col_scope)) {
+        $wpdb->query("ALTER TABLE $table ADD COLUMN license_scope VARCHAR(50) DEFAULT 'single'");
+      }
+      $col_limit = $wpdb->get_results("SHOW COLUMNS FROM $table LIKE 'installation_limit'");
+      if (empty($col_limit)) {
+        $wpdb->query("ALTER TABLE $table ADD COLUMN installation_limit INT DEFAULT 1");
+      }
+      $msg = "Database schema updated (History Table + assigned_to + is_enforced + Status Enum + Manual Expiry + Generated Schema + Implementation Data + Domain Enabled + Robust ID column + License Scope + Inst. Limit).";
       wp_die("<h1>VAPT Builder Database Updated</h1><p>Schema refresh run. $msg</p><p>Please go back to the dashboard.</p>");
     }
   }

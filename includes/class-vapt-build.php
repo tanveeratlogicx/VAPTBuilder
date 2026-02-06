@@ -51,7 +51,10 @@ class VAPT_Build
       $active_data_file_name = get_option('vapt_active_feature_file', 'Feature-List-99.json');
     }
 
-    $config_content = self::generate_config_content($domain, $version, $features, $active_data_file_name);
+    $license_scope = isset($data['license_scope']) ? $data['license_scope'] : 'single';
+    $domain_limit = isset($data['installation_limit']) ? intval($data['installation_limit']) : 1;
+
+    $config_content = self::generate_config_content($domain, $version, $features, $active_data_file_name, $license_scope, $domain_limit);
 
     // If Config Only -> Save and ZIP just that
     if ($generate_type === 'config_only') {
@@ -92,15 +95,17 @@ class VAPT_Build
     return $base_storage_url . '/' . $domain . '/' . $version . '/' . $zip_filename;
   }
 
-  public static function generate_config_content($domain, $version, $features, $active_data_file = null)
+  public static function generate_config_content($domain, $version, $features, $active_data_file = null, $license_scope = 'single', $domain_limit = 1)
   {
     $config = "<?php\n";
     $config .= "/**\n * VAPT Builder Configuration for $domain\n * Build Version: $version\n */\n\n";
     $config .= "if ( ! defined( 'ABSPATH' ) ) { exit; }\n\n";
 
-    $config .= "// Domain Locking\n";
+    $config .= "// Domain Locking & Licensing\n";
     $config .= "define( 'VAPT_DOMAIN_LOCKED', '" . esc_sql($domain) . "' );\n";
     $config .= "define( 'VAPT_BUILD_VERSION', '" . esc_sql($version) . "' );\n";
+    $config .= "define( 'VAPT_LICENSE_SCOPE', '" . esc_sql($license_scope) . "' );\n";
+    $config .= "define( 'VAPT_DOMAIN_LIMIT', " . intval($domain_limit) . " );\n";
 
     if ($active_data_file) {
       $config .= "define( 'VAPT_ACTIVE_DATA_FILE', '" . esc_sql($active_data_file) . "' );\n";
@@ -179,13 +184,34 @@ class VAPT_Build
     $guard_code .= "    require_once plugin_dir_path( __FILE__ ) . 'config-{$domain}.php';\n";
     $guard_code .= "}\n\n";
 
-    $guard_code .= "// Domain Integrity Check\n";
-    $guard_code .= "if ( defined('VAPT_DOMAIN_LOCKED') && \$_SERVER['HTTP_HOST'] !== VAPT_DOMAIN_LOCKED ) {\n";
+    $guard_code .= "// Domain Integrity & Multi-Site Guard\n";
+    $guard_code .= "if ( defined('VAPT_LICENSE_SCOPE') ) {\n";
+    $guard_code .= "    \$current_host = \$_SERVER['HTTP_HOST'];\n";
+    $guard_code .= "    if ( VAPT_LICENSE_SCOPE === 'single' ) {\n";
+    $guard_code .= "        if ( \$current_host !== VAPT_DOMAIN_LOCKED ) {\n";
+    $guard_code .= "            vapt_handle_unauthorized_domain( \$current_host, VAPT_DOMAIN_LOCKED );\n";
+    $guard_code .= "        }\n";
+    $guard_code .= "    } else if ( VAPT_LICENSE_SCOPE === 'multisite' ) {\n";
+    $guard_code .= "        \$allowed_limit = defined('VAPT_DOMAIN_LIMIT') ? intval(VAPT_DOMAIN_LIMIT) : 0;\n";
+    $guard_code .= "        if ( \$allowed_limit > 0 ) {\n";
+    $guard_code .= "            \$activated_domains = get_option('vapt_activated_domains', array());\n";
+    $guard_code .= "            if ( !in_array(\$current_host, \$activated_domains) ) {\n";
+    $guard_code .= "                if ( count(\$activated_domains) >= \$allowed_limit ) {\n";
+    $guard_code .= "                    vapt_handle_unauthorized_domain( \$current_host, 'Multi-Site Limit Exceeded' );\n";
+    $guard_code .= "                } else {\n";
+    $guard_code .= "                    \$activated_domains[] = \$current_host;\n";
+    $guard_code .= "                    update_option('vapt_activated_domains', \$activated_domains);\n";
+    $guard_code .= "                }\n";
+    $guard_code .= "            }\n";
+    $guard_code .= "        }\n";
+    $guard_code .= "    }\n";
+    $guard_code .= "}\n\n";
+
+    $guard_code .= "function vapt_handle_unauthorized_domain( \$host, \$target ) {\n";
     $guard_code .= "    \$admin_email = '" . sanitize_email(VAPT_SUPERADMIN_EMAIL) . "';\n";
     $guard_code .= "    \$subject = 'Security Alert: Unauthorized VAPT Builder Usage';\n";
-    $guard_code .= "    \$message = 'The VAPT Builder plugin was detected on an unauthorized domain: ' . \$_SERVER['HTTP_HOST'] . ' (Locked to: ' . VAPT_DOMAIN_LOCKED . ')';\n";
+    $guard_code .= "    \$message = 'The VAPT Builder plugin was detected on an unauthorized domain: ' . \$host . ' (Locked to: ' . \$target . ')';\n";
     $guard_code .= "    wp_mail(\$admin_email, \$subject, \$message);\n\n";
-
     $guard_code .= "    if ( !function_exists('is_admin') || !is_admin() ) {\n";
     $guard_code .= "        wp_die('<h1>Security Alert</h1><p>This security plugin is not licensed for this domain.</p>', 'VAPT Licensing');\n";
     $guard_code .= "    }\n";
