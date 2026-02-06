@@ -1188,3 +1188,48 @@
     box-sizing: border-box;
     transition: background 0.2s;
 }
+
+/* Domain License Directory Table Styling */
+.vapt-license-table-wrap {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.vapt-license-table-wrap h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #23282d;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.vapt-license-table-wrap .wp-list-table {
+    border: 1px solid #dcdcde;
+    box-shadow: none;
+}
+
+.vapt-license-table-wrap tr.is-selected {
+    background-color: #f0f6fc !important;
+}
+
+.vapt-license-table-wrap tr.is-selected td.column-primary {
+    box-shadow: inset 3px 0 0 0 #2271b1;
+}
+
+.vapt-license-table-wrap .sorting-indicator::before {
+    content: "\f142";
+    font-family: dashicons;
+}
+
+.vapt-license-table-wrap th.sorted.asc .sorting-indicator::before {
+    content: "\f142";
+}
+
+.vapt-license-table-wrap th.sorted.desc .sorting-indicator::before {
+    content: "\f140";
+}

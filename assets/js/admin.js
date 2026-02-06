@@ -1951,6 +1951,43 @@ Feature ID: ${feature.id || 'N/A'}
       auto_renew: false
     });
 
+    // Sorting and Filtering state for the table
+    const [sortBy, setSortBy] = useState('domain');
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const sortedDomains = useMemo(() => {
+      let doms = Array.isArray(domains) ? [...domains] : [];
+
+      // Application of search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        doms = doms.filter(d => (d.domain || '').toLowerCase().includes(query));
+      }
+
+      // Sorting logic
+      doms.sort((a, b) => {
+        let valA = a[sortBy] || '';
+        let valB = b[sortBy] || '';
+
+        // Handle date sorting
+        if (sortBy === 'first_activated_at' || sortBy === 'manual_expiry_date') {
+          valA = valA ? new Date(valA).getTime() : 0;
+          valB = valB ? new Date(valB).getTime() : 0;
+        }
+
+        if (typeof valA === 'string') {
+          valA = valA.toLowerCase();
+          valB = valB.toLowerCase();
+        }
+
+        if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+        if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+      });
+      return doms;
+    }, [domains, sortBy, sortOrder, searchQuery]);
+
     const [isSaving, setIsSaving] = useState(false);
     const [localStatus, setLocalStatus] = useState(null);
     const [confirmState, setConfirmState] = useState({ isOpen: false, type: null });
@@ -2125,23 +2162,39 @@ Feature ID: ${feature.id || 'N/A'}
     // Helper to format date
     const formatDate = (dateStr) => {
       if (!dateStr || dateStr.startsWith('0000')) return __('Never / Invalid', 'vapt-builder');
-      return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      try {
+        return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+      } catch (e) {
+        return dateStr;
+      }
+    };
+
+    const toggleSort = (key) => {
+      if (sortBy === key) {
+        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      } else {
+        setSortBy(key);
+        setSortOrder('asc');
+      }
+    };
+
+    const handleEdit = (domain) => {
+      setSelectedDomainId(domain.id);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     return el(PanelBody, { title: __('License & Subscription Management', 'vapt-builder'), initialOpen: true }, [
-
+      // TOP: Two-Column Form Grid
       el('div', { className: 'vapt-license-grid' }, [
         // LEFT: Status Card
         el('div', { className: 'vapt-license-card' }, [
           el('div', { className: 'vapt-card-header-row', style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' } }, [
             el('h3', { style: { margin: 0 } }, __('License Status', 'vapt-builder')),
-            // License Type moved to Header
             el('span', { className: `vapt-license-badge ${currentDomain.license_type || 'standard'}` },
               (currentDomain.license_type || 'Standard').toUpperCase()
             )
           ]),
 
-          // Domain Name (Text Display - User requested TextControl)
           el('div', { className: 'vapt-info-row', style: { marginBottom: '15px' } }, [
             el(TextControl, {
               label: __('Domain Name', 'vapt-builder'),
@@ -2151,7 +2204,6 @@ Feature ID: ${feature.id || 'N/A'}
             })
           ]),
 
-          // Combined Activation & Expiry (Row) - Using TextControls for alignment
           el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' } }, [
             el(TextControl, {
               label: __('First Activated', 'vapt-builder'),
@@ -2172,7 +2224,6 @@ Feature ID: ${feature.id || 'N/A'}
             })
           ]),
 
-          // Terms Renewed - Horizontal Layout (Label Left, Value Right)
           el('div', { className: 'components-base-control', style: { marginBottom: '15px' } }, [
             el('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', border: '1px solid #949494', borderRadius: '4px', padding: '0 12px', height: '40px' } }, [
               el('span', { style: { color: '#1e1e1e', fontSize: '13px', fontWeight: 500 } }, __('Terms Renewed', 'vapt-builder')),
@@ -2188,7 +2239,6 @@ Feature ID: ${feature.id || 'N/A'}
                 : __('Standard License: 30-day renewal cycle.', 'vapt-builder'))
           ),
 
-          // Status feedback
           localStatus && el('div', {
             style: {
               marginTop: '15px',
@@ -2205,9 +2255,7 @@ Feature ID: ${feature.id || 'N/A'}
         el('div', { className: 'vapt-license-card' }, [
           el('h3', null, __('Add License', 'vapt-builder')),
 
-          // Domain Selector / Manager (Unified Layout)
           el('div', { style: { display: 'flex', alignItems: 'flex-end', gap: '10px', marginBottom: '15px' } }, [
-            // Domain Name: Select (if >1) OR Read-Only Text (if <=1)
             el('div', { style: { flex: 2 } }, (Array.isArray(domains) && domains.length > 1)
               ? el(SelectControl, {
                 label: __('Domain Name (Select to Manage)', 'vapt-builder'),
@@ -2228,7 +2276,6 @@ Feature ID: ${feature.id || 'N/A'}
               })
             ),
 
-            // Domain Type (Rear-Only) - Replaces SelectControl
             el('div', { style: { flex: 1, minWidth: '120px' } }, el(TextControl, {
               label: __('Domain Type', 'vapt-builder'),
               value: (currentDomain.is_wildcard === true || currentDomain.is_wildcard == 1 || currentDomain.is_wildcard === '1') ? 'Wildcard' : 'Standard',
@@ -2237,7 +2284,6 @@ Feature ID: ${feature.id || 'N/A'}
             }))
           ]),
 
-          // Combined License Type & Expiry (Grid)
           el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' } }, [
             el(SelectControl, {
               label: __('License Type', 'vapt-builder'),
@@ -2249,14 +2295,10 @@ Feature ID: ${feature.id || 'N/A'}
                 { label: 'Developer (Perpetual)', value: 'developer' }
               ],
               onChange: (val) => {
-                // Dynamic Expiry Calculation
-                const baseDate = new Date(); // Start from today for new calculation basis
+                const baseDate = new Date();
                 let durationDays = 30;
                 if (val === 'pro') durationDays = 365;
-                if (val === 'developer') {
-                  // For developer, set a far future date internally but we won't show it as a field
-                  durationDays = 36500;
-                }
+                if (val === 'developer') durationDays = 36500;
 
                 baseDate.setDate(baseDate.getDate() + durationDays);
                 const newExpiry = baseDate.toISOString().split('T')[0];
@@ -2269,7 +2311,6 @@ Feature ID: ${feature.id || 'N/A'}
               }
             }),
 
-            // Show Expiry Input ONLY if NOT Developer
             formState.license_type !== 'developer'
               ? el(TextControl, {
                 label: __('New Expiry Date', 'vapt-builder'),
@@ -2310,7 +2351,6 @@ Feature ID: ${feature.id || 'N/A'}
               onClick: () => handleUpdate(true)
             }, __('Manual Renew', 'vapt-builder')),
 
-            // Correction Controls
             (currentDomain.renewals_count > 0) && el('div', { className: 'vapt-correction-controls' }, [
               el(Button, {
                 className: 'is-link',
@@ -2321,11 +2361,82 @@ Feature ID: ${feature.id || 'N/A'}
                 onClick: () => handleRollback('reset')
               }, __('Reset Renewals', 'vapt-builder'))
             ])
-          ]),
+          ])
+        ])
+      ]), // End Grid
+
+      // BOTTOM: Domains List Table (Full Width)
+      el('div', { className: 'vapt-license-table-wrap', style: { marginTop: '30px', width: '100%', borderTop: '1px solid #ddd', paddingTop: '30px' } }, [
+        el('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' } }, [
+          el('h3', { style: { margin: 0 } }, __('Domain License Directory', 'vapt-builder')),
+          el('div', { style: { width: '300px' } }, [
+            el(TextControl, {
+              placeholder: __('Search domains...', 'vapt-builder'),
+              value: searchQuery,
+              onChange: (val) => setSearchQuery(val),
+              style: { marginBottom: 0 }
+            })
+          ])
+        ]),
+        el('table', { className: 'wp-list-table widefat fixed striped' }, [
+          el('thead', null, el('tr', null, [
+            el('th', null, __('License ID', 'vapt-builder')),
+            el('th', {
+              className: `manage-column column-primary sortable ${sortBy === 'domain' ? 'sorted ' + sortOrder : ''}`,
+              onClick: () => toggleSort('domain'),
+              style: { cursor: 'pointer' }
+            }, [
+              el('span', null, __('Domain', 'vapt-builder')),
+              el('span', { className: 'sorting-indicator' })
+            ]),
+            el('th', {
+              className: `manage-column sortable ${sortBy === 'license_type' ? 'sorted ' + sortOrder : ''}`,
+              onClick: () => toggleSort('license_type'),
+              style: { cursor: 'pointer' }
+            }, [
+              el('span', null, __('License', 'vapt-builder')),
+              el('span', { className: 'sorting-indicator' })
+            ]),
+            el('th', {
+              className: `manage-column sortable ${sortBy === 'first_activated_at' ? 'sorted ' + sortOrder : ''}`,
+              onClick: () => toggleSort('first_activated_at'),
+              style: { cursor: 'pointer' }
+            }, [
+              el('span', null, __('Activated At', 'vapt-builder')),
+              el('span', { className: 'sorting-indicator' })
+            ]),
+            el('th', {
+              className: `manage-column sortable ${sortBy === 'manual_expiry_date' ? 'sorted ' + sortOrder : ''}`,
+              onClick: () => toggleSort('manual_expiry_date'),
+              style: { cursor: 'pointer' }
+            }, [
+              el('span', null, __('Expiry', 'vapt-builder')),
+              el('span', { className: 'sorting-indicator' })
+            ]),
+            el('th', { style: { width: '80px' } }, __('Renewals', 'vapt-builder')),
+            el('th', { style: { width: '80px', textAlign: 'right' } }, __('Actions', 'vapt-builder')),
+          ])),
+          el('tbody', null, sortedDomains.length === 0 ? el('tr', null, el('td', { colSpan: 7 }, __('No domains found.', 'vapt-builder'))) :
+            sortedDomains.map((dom) => el('tr', { key: dom.id, className: dom.id == selectedDomainId ? 'is-selected' : '' }, [
+              el('td', null, el('code', { style: { fontSize: '11px' } }, dom.license_id || '-')),
+              el('td', { className: 'column-primary' }, [
+                el('strong', null, dom.domain),
+                (dom.is_wildcard == 1) && el('span', { style: { marginLeft: '8px', fontSize: '10px', background: '#f0f0f1', padding: '2px 6px', borderRadius: '10px' } }, __('Wildcard', 'vapt-builder')),
+                el('button', { type: 'button', className: 'toggle-row' }, el('span', { className: 'screen-reader-text' }, __('Show more details', 'vapt-builder')))
+              ]),
+              el('td', null, el('span', { className: `vapt-license-badge ${dom.license_type || 'standard'}` }, (dom.license_type || 'Standard').toUpperCase())),
+              el('td', null, dom.first_activated_at ? formatDate(dom.first_activated_at) : '-'),
+              el('td', null, dom.license_type === 'developer' ? __('Never', 'vapt-builder') : (dom.manual_expiry_date ? formatDate(dom.manual_expiry_date) : '-')),
+              el('td', null, `${dom.renewals_count || 0}`),
+              el('td', { style: { textAlign: 'right' } }, [
+                el(Button, { isSecondary: true, isSmall: true, onClick: () => handleEdit(dom) }, __('Edit', 'vapt-builder'))
+              ])
+            ]))
+          )
         ])
       ]),
 
-      // Confirmation Modal for Rollbacks
+      // Confirmation Modal
       el(VAPT_ConfirmModal, {
         isOpen: confirmState.isOpen,
         message: confirmState.type === 'undo'
