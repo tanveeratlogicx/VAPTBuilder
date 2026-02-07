@@ -108,6 +108,7 @@ class VAPT_DB
       'implementation_data'  => null,
       'override_schema'      => null,
       'override_implementation_data' => null,
+      'dev_instruct'         => null,
     );
 
     $existing = self::get_feature_meta($key);
@@ -116,7 +117,7 @@ class VAPT_DB
     return $wpdb->replace(
       $table,
       $final_data,
-      array('%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s')
+      array('%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s')
     );
   }
 

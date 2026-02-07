@@ -440,6 +440,7 @@ window.vaptScriptLoaded = true;
               "risks": "{{risks}}",
               "assurance_against": "{{assurance_against}}"
             },
+            "safety_guidelines": "{{dev_guidelines}}",
             "raw_feature_context": "{{raw_json}}",
             "previous_implementation": "{{previous_schema}}"
           }
@@ -478,6 +479,7 @@ window.vaptScriptLoaded = true;
       delete rawContext.implementation_data;
       contextJson = replaceAll(contextJson, 'raw_json', JSON.stringify(rawContext, null, 2));
       contextJson = replaceAll(contextJson, 'previous_schema', feature.generated_schema || 'None');
+      contextJson = replaceAll(contextJson, 'dev_guidelines', feature.dev_instruct || 'No specific guidelines provided.');
 
       // Dynamic Substitution from automation_prompts
       const prompts = feature.automation_prompts || {};
@@ -595,7 +597,11 @@ Feature ID: ${feature.id || 'N/A'}
         saveStatus.message
       ]),
 
-      el('div', { id: 'vapt-design-modal-layout', className: 'vapt-design-modal-inner-layout' }, [
+      el('form', { 
+        id: 'vapt-design-modal-form', 
+        onSubmit: (e) => e.preventDefault(), 
+        className: 'vapt-design-modal-inner-layout' 
+      }, [
         el('div', { id: 'vapt-design-modal-left-col' }, [
 
           el('div', { id: 'vapt-design-modal-actions', className: 'vapt-flex-row' }, [
@@ -649,6 +655,44 @@ Feature ID: ${feature.id || 'N/A'}
               }
             })
           ]),
+
+          (() => {
+            let displayInstruct = feature.dev_instruct || feature.devInstruct || '';
+
+            // FALLBACK: If dev_instruct is missing, try to extract from the generated schema string
+            if (!displayInstruct && feature.generated_schema) {
+              try {
+                const schema = typeof feature.generated_schema === 'string' ? JSON.parse(feature.generated_schema) : feature.generated_schema;
+                if (schema && schema.instruction) {
+                  displayInstruct = schema.instruction;
+                }
+              } catch (e) {
+                console.warn('VAPT: Failed to extract fallback instructions from schema', e);
+              }
+            }
+
+            // Always show if we have something or a placeholder
+            if (!displayInstruct) {
+              displayInstruct = __('No specific development guidance available for this feature transition.', 'vapt-builder');
+            }
+
+            return el('div', { id: 'vapt-design-modal-guidance', className: 'vapt-flex-col', style: { marginBottom: '15px' } }, [
+              el('label', { className: 'vapt-label-uppercase', style: { color: '#2271b1' } }, __('AI Development Guidance')),
+              el('div', {
+                className: 'vapt-guidance-box',
+                style: {
+                  background: '#f0f6fb',
+                  borderLeft: '4px solid #2271b1',
+                  padding: '12px',
+                  fontSize: '12px',
+                  maxHeight: '180px',
+                  overflowY: 'auto',
+                  whiteSpace: 'pre-wrap',
+                  fontFamily: 'inherit'
+                }
+              }, displayInstruct)
+            ]);
+          })(),
         ]),
 
         el('div', { id: 'vapt-design-modal-right-col' }, [
@@ -759,6 +803,8 @@ Feature ID: ${feature.id || 'N/A'}
             label: __('Source for "Test Method"', 'vapt-builder'),
             value: fieldMapping.test_method,
             options: [{ label: __('--- Select Source Field ---', 'vapt-builder'), value: '' }, ...allKeys.map(k => ({ label: k, value: k }))],
+
+
             onChange: (val) => setFieldMapping({ ...fieldMapping, test_method: val })
           }),
           el(SelectControl, {
@@ -786,7 +832,7 @@ Feature ID: ${feature.id || 'N/A'}
   const TransitionNoteModal = ({ transitioning, onConfirm, onCancel }) => {
     const [formValues, setFormValues] = useState({
       note: transitioning.note || '',
-      devInstruct: transitioning.devInstruct || '',
+      dev_instruct: transitioning.dev_instruct || '',
       wireframeUrl: transitioning.wireframeUrl || ''
     });
     const [modalSaveStatus, setModalSaveStatus] = useState(null);
@@ -845,13 +891,13 @@ Feature ID: ${feature.id || 'N/A'}
             el(TextareaControl, {
               label: __('Development Instructions (AI Guidance)', 'vapt-builder'),
               help: __('Instructions for the workbench designer (e.g. "Add a rate limiting slider").', 'vapt-builder'),
-              value: formValues.devInstruct,
-              onChange: (val) => setFormValues({ ...formValues, devInstruct: val }),
+              value: formValues.dev_instruct,
+              onChange: (val) => setFormValues({ ...formValues, dev_instruct: val }),
             }),
             el(TextControl, {
               label: __('Wireframe / Design URL', 'vapt-builder'),
               value: formValues.wireframeUrl,
-              onChange: (val) => setValues({ ...formValues, wireframeUrl: val }),
+              onChange: (val) => setFormValues({ ...formValues, wireframeUrl: val }),
               help: __('Paste image from clipboard directly into this modal.', 'vapt-builder')
             }),
             modalSaveStatus && el(Notice, {
@@ -3473,7 +3519,7 @@ Feature ID: ${feature.id || 'N/A'}
                       tests: f.tests || [],
                       evidence: f.evidence || [],
                       schema_hints: f.schema_hints || {},
-                      devInstruct: newStatus === 'Develop' ? generateDevInstructions(f) : ''
+                      dev_instruct: newStatus === 'Develop' ? generateDevInstructions(f) : ''
                     });
                   }
                 }),
@@ -3637,11 +3683,11 @@ Feature ID: ${feature.id || 'N/A'}
     const confirmTransition = (formValues) => {
       if (!transitioning) return;
       const { key, nextStatus } = transitioning;
-      const { note, devInstruct, wireframeUrl } = formValues;
+      const { note, dev_instruct, wireframeUrl } = formValues;
 
       const safeFeatures = Array.isArray(features) ? features : [];
       const feature = safeFeatures.find(f => f.key === key);
-      let updates = { status: nextStatus, history_note: note };
+      let updates = { status: nextStatus, history_note: note, dev_instruct: dev_instruct };
 
       // Save Wireframe if provided
       if (wireframeUrl) {
@@ -3654,6 +3700,7 @@ Feature ID: ${feature.id || 'N/A'}
         updates.implementation_data = null;
         updates.has_history = false;
         updates.wireframe_url = ''; // Clear wireframe too
+        updates.dev_instruct = '';
         updates.include_verification_engine = 0;
         updates.include_verification_guidance = 0;
         // No need to set reset_history flag here because the backend handles the actual deletion based on status=Draft
@@ -3663,7 +3710,7 @@ Feature ID: ${feature.id || 'N/A'}
       // Auto-Generate Interface when moving to 'Develop' (Phase 6 transition)
       if (nextStatus === 'Develop' && typeof Generator !== 'undefined' && Generator && feature && feature.remediation) {
         try {
-          const schema = Generator.generate(feature.remediation, devInstruct);
+          const schema = Generator.generate(feature.remediation, dev_instruct);
           if (schema) {
             updates.generated_schema = schema;
             console.log('VAPT Builder: Auto-generated schema for ' + key, schema);

@@ -3,20 +3,29 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version:           3.6.1
- * Author:            Hermas International FZ LLE
- * Author URI:        #
- * License:           GPL-2.0+
+ * Version:           3.6.8
+ * Author:            Automated Penetration Testing Builder
+ * Author URI:        https://vaptbuilder.com/
+ * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: vapt-builder
+ * Text Domain:       vapt-builder
+ * Domain Path:       /languages
  */
+
+// If this file is called directly, abort.
+if (!defined('WPINC')) {
+  die;
+}
 
 if (! defined('ABSPATH')) {
   exit;
 }
 
+/**
+ * The current version of the plugin.
+ */
 if (! defined('VAPT_VERSION')) {
-  define('VAPT_VERSION', '3.6.1');
+  define('VAPT_VERSION', '3.6.8');
 }
 if (! defined('VAPT_AUDITOR_VERSION')) {
   define('VAPT_AUDITOR_VERSION', '2.8.0');
@@ -209,6 +218,7 @@ function vapt_activate_plugin()
         wireframe_url TEXT DEFAULT NULL,
         generated_schema LONGTEXT DEFAULT NULL,
         implementation_data LONGTEXT DEFAULT NULL,
+        dev_instruct LONGTEXT DEFAULT NULL,
         PRIMARY KEY  (feature_key)
     ) $charset_collate;";
   // Feature History/Audit Table
@@ -399,6 +409,10 @@ if (! function_exists('vapt_manual_db_fix')) {
       $col_notes = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM {$meta_table} LIKE %s", 'include_operational_notes'));
       if (empty($col_notes)) {
         $wpdb->query("ALTER TABLE {$meta_table} ADD COLUMN include_operational_notes TINYINT(1) DEFAULT 1");
+      }
+      $col_dev = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM {$meta_table} LIKE %s", 'dev_instruct'));
+      if (empty($col_dev)) {
+        $wpdb->query("ALTER TABLE {$meta_table} ADD COLUMN dev_instruct LONGTEXT DEFAULT NULL");
       }
       $col_enabled = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM {$table} LIKE %s", 'is_enabled'));
       if (empty($col_enabled)) {

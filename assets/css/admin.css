@@ -989,47 +989,121 @@
     white-space: nowrap !important;
 }
 
-/* Design Implementation Modal Layout (v3.3.44) */
+/* Design Implementation Modal Layout (v3.3.46 - Fixed) */
 .vapt-design-modal {
-    width: 1000px;
-    max-width: 98%;
-    min-height: 737px;
+    width: 1100px;
+    max-width: 95vw;
+    max-height: 90vh;
 }
 
-#vapt-design-modal-layout {
+.vapt-design-modal .components-modal__content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#vapt-design-modal-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 30px;
-    height: 800px;
-    overflow: hidden !important;
-    /* Force no scroll on outer */
+    gap: 25px;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
 }
 
 #vapt-design-modal-left-col {
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
-    padding-bottom: 20px;
+    overflow-x: hidden;
+    padding-right: 5px;
+    gap: 16px;
 }
 
 #vapt-design-modal-right-col {
     display: flex;
     flex-direction: column;
     background: #f9fafb;
-    /* Lighter gray */
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    height: 100%;
     overflow: hidden;
-    position: relative;
+    min-height: 0;
+}
+
+#vapt-design-modal-actions {
+    margin-bottom: 0;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#vapt-design-modal-toggles {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
+#vapt-design-modal-toggles .components-toggle-control {
+    margin-bottom: 0 !important;
+    flex: 1;
+    min-width: 200px;
+}
+
+#vapt-design-modal-toggles .components-toggle-control .components-base-control__field {
+    margin-bottom: 0 !important;
+}
+
+#vapt-design-modal-toggles .components-toggle-control label {
+    font-size: 11px !important;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#vapt-design-modal-toggles .components-toggle-control:last-child {
+    margin-bottom: 0;
 }
 
 #vapt-design-modal-schema-editor {
+    display: flex;
+    flex-direction: column;
+    min-height: 250px;
     flex: 1;
-    min-height: 300px;
-    margin-bottom: 10px;
+}
+
+#vapt-schema-editor-label {
+    margin-bottom: 6px;
+}
+
+#vapt-schema-editor-hint {
+    margin-bottom: 8px;
+    color: #64748b;
+}
+
+#vapt-schema-textarea {
+    flex: 1;
+    min-height: 200px;
+    font-family: 'SF Mono', Monaco, Inconsolata, 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+#vapt-design-modal-guidance {
+    margin-top: 8px;
+}
+
+.vapt-guidance-box {
+    border-radius: 6px;
 }
 
 #vapt-design-modal-preview-stack {
-    padding: 10px;
+    padding: 0;
 }
 
 /* Ensure controls inside respect bounds */
@@ -1038,6 +1112,39 @@
 .vapt-design-modal-inner-layout select {
     max-width: 100%;
     box-sizing: border-box;
+}
+
+/* Better button alignment in modal header */
+.vapt-design-modal-header {
+    align-items: center;
+}
+
+.vapt-design-modal-header .components-button {
+    height: 32px;
+    min-height: 32px;
+}
+
+/* Preview body flex fix */
+.vapt-design-modal-preview-body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Card box improvements */
+.vapt-card-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Empty state styling */
+.vapt-empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    color: #9ca3af;
+    font-style: italic;
 }
 
 /* Global status notifications (Toasts) */

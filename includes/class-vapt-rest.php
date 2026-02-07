@@ -341,6 +341,7 @@ class VAPT_REST
         $feature['include_operational_notes'] = isset($meta['include_operational_notes']) ? (bool) $meta['include_operational_notes'] : true;
         $feature['is_enforced'] = (bool) $meta['is_enforced'];
         $feature['wireframe_url'] = $meta['wireframe_url'];
+        $feature['dev_instruct'] = isset($meta['dev_instruct']) ? $meta['dev_instruct'] : '';
 
         // Expose Verification Context for AI Prompt
         if (!empty($meta['verification_steps'])) $feature['verification_steps'] = $meta['verification_steps'];
@@ -615,6 +616,9 @@ class VAPT_REST
 
     if ($is_enforced !== null) $meta_updates['is_enforced'] = $is_enforced ? 1 : 0;
     if ($wireframe_url !== null) $meta_updates['wireframe_url'] = $wireframe_url;
+
+    $dev_instruct = $request->get_param('dev_instruct');
+    if ($dev_instruct !== null) $meta_updates['dev_instruct'] = $dev_instruct;
 
     if ($request->has_param('generated_schema')) {
       $generated_schema = $request->get_param('generated_schema');
