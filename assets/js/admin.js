@@ -2553,6 +2553,174 @@ Feature ID: ${feature.id || 'N/A'}
     ]);
   };
 
+  const generateDevInstructions = (f) => {
+    if (!f) return '';
+
+    const lines = [];
+    const baseUrl = window.location.origin;
+
+    // 1. Identity & Context
+    lines.push(`## 1. Identity & Context`);
+    lines.push(`- **Risk ID**: ${f.risk_id || f.key || 'N/A'}`);
+    lines.push(`- **Title**: ${f.title || f.label || 'N/A'}`);
+    lines.push(`- **Category**: ${f.category || 'General'}`);
+    lines.push(`- **Severity**: ${f.severity || 'Medium'}`);
+    if (f.cvss_score) lines.push(`- **CVSS**: ${f.cvss_score} (${f.cvss_vector || 'N/A'})`);
+
+    // 2. Summary & Description
+    if (f.description) {
+      if (typeof f.description === 'string') lines.push(`\n**Summary**: ${f.description}`);
+      else {
+        if (f.description.summary) lines.push(`\n**Summary**: ${f.description.summary}`);
+        if (f.description.detailed) lines.push(`\n**Detailed Analysis**:\n${f.description.detailed}`);
+      }
+    }
+    if (f.attack_scenario) lines.push(`\n**Attack Scenario**:\n${f.attack_scenario}`);
+
+    // 3. Compliance
+    if (f.owasp_mapping || f.pci_dss || f.gdpr || f.nist || f.cwe) {
+      lines.push(`\n## 2. Compliance Mapping`);
+      if (f.owasp_mapping) lines.push(`- **OWASP**: ${Array.isArray(f.owasp_mapping) ? f.owasp_mapping.join(', ') : f.owasp_mapping}`);
+      if (f.pci_dss) lines.push(`- **PCI DSS**: ${Array.isArray(f.pci_dss) ? f.pci_dss.join(', ') : f.pci_dss}`);
+      if (f.gdpr) lines.push(`- **GDPR**: ${Array.isArray(f.gdpr) ? f.gdpr.join(', ') : f.gdpr}`);
+      if (f.nist) lines.push(`- **NIST**: ${Array.isArray(f.nist) ? f.nist.join(', ') : f.nist}`);
+      if (f.cwe) lines.push(`- **CWE**: ${Array.isArray(f.cwe) ? f.cwe.join(', ') : f.cwe}`);
+    }
+
+    // 4. Technical Protection & Mitigation
+    lines.push(`\n## 3. Technical Protection & Mitigation`);
+    if (f.protection) {
+      const p = f.protection;
+      if (p.remediation_effort) lines.push(`- **Effort**: ${p.remediation_effort}`);
+      if (p.estimated_time) lines.push(`- **Est. Time**: ${p.estimated_time}`);
+
+      if (p.automated_protection) {
+        lines.push(`\n### Automated Protection`);
+        lines.push(`- **Method**: ${p.automated_protection.method}`);
+        if (p.automated_protection.implementation_steps) {
+          lines.push(`- **Implementation Steps**:`);
+          const steps = Array.isArray(p.automated_protection.implementation_steps) ? p.automated_protection.implementation_steps : [p.automated_protection.implementation_steps];
+          steps.forEach(s => lines.push(`  - ${s}`));
+        }
+      }
+      if (p.manual_steps) {
+        lines.push(`\n### Manual Steps`);
+        lines.push(`${p.manual_steps.description || JSON.stringify(p.manual_steps)}`);
+      }
+      if (p.configuration) {
+        lines.push(`\n### Configuration`);
+        if (p.configuration.wp_config) lines.push(`- **wp-config.php**: \`${p.configuration.wp_config}\``);
+        if (p.configuration.htaccess) lines.push(`- **.htaccess**: \`${p.configuration.htaccess}\``);
+      }
+    }
+
+    // 5. Verification Engine
+    if (f.verification_engine) {
+      lines.push(`\n## 4. Verification Engine`);
+      if (f.verification_engine.automated_checks) {
+        lines.push(`### Automated Checks`);
+        const checks = Array.isArray(f.verification_engine.automated_checks) ? f.verification_engine.automated_checks : [f.verification_engine.automated_checks];
+        checks.forEach(c => {
+          lines.push(`- **${c.check_id || 'Check'}**: ${c.name}`);
+          lines.push(`  - Method: ${c.method}`);
+          lines.push(`  - Success: ${c.success_criteria}`);
+          lines.push(`  - Fail: ${c.failure_message}`);
+        });
+      }
+    }
+
+    // 6. QA & Testing Protocol
+    lines.push(`\n## 5. QA & Testing Protocol`);
+    if (f.testing) {
+      const t = f.testing;
+      if (t.test_method) lines.push(`- **Method**: ${t.test_method}`);
+      if (t.tools_required) lines.push(`- **Tools**: ${Array.isArray(t.tools_required) ? t.tools_required.join(', ') : t.tools_required}`);
+      if (t.verification_steps) {
+        lines.push(`\n### Verification Steps`);
+        const vSteps = Array.isArray(t.verification_steps) ? t.verification_steps : [t.verification_steps];
+        vSteps.forEach(s => lines.push(`- ${s}`));
+      }
+      if (t.test_payloads) {
+        lines.push(`\n### Test Payloads`);
+        const payloads = Array.isArray(t.test_payloads) ? t.test_payloads : [t.test_payloads];
+        payloads.forEach(p => {
+          let payloadStr = p.payload;
+          if (payloadStr && payloadStr.startsWith('/')) {
+            payloadStr = baseUrl + payloadStr;
+          }
+          lines.push(`- \`${payloadStr}\` (${p.type}) -> ${p.expected_behavior}`);
+        });
+      }
+    }
+
+    // 7. UI Configuration
+    if (f.ui_configuration) {
+      lines.push(`\n## 6. UI Implementation Guide`);
+      const ui = f.ui_configuration;
+      if (ui.components) {
+        const comps = Array.isArray(ui.components) ? ui.components : [ui.components];
+        comps.forEach(c => {
+          lines.push(`- **${c.label}** (${c.type})`);
+          lines.push(`  - ID: \`${c.id}\``);
+          if (c.description) lines.push(`  - Desc: ${c.description}`);
+          if (c.default_value !== undefined) lines.push(`  - Default: ${c.default_value}`);
+        });
+      }
+    }
+
+    // 8. Code Examples
+    if (f.code_examples) {
+      lines.push(`\n## 7. Reference Code`);
+      const ex = Array.isArray(f.code_examples) ? f.code_examples : [f.code_examples];
+      ex.forEach(c => {
+        lines.push(`### ${c.description || 'Example'}`);
+        lines.push(`\`\`\`${c.language || 'php'}\n${c.code}\n\`\`\``);
+      });
+    }
+
+    // 9. Safety & Reliability Guidelines (CRITICAL)
+    lines.push(`\n## 8. Safety & Reliability Guidelines`);
+
+    // Dynamic Context Analysis
+    const lowerTitle = (f.title || '').toLowerCase();
+    const lowerDesc = (typeof f.description === 'string' ? f.description : (f.description?.summary || '')).toLowerCase();
+    const verificationStr = JSON.stringify(f.verification_steps || []).toLowerCase();
+    const payloadsStr = JSON.stringify(f.testing?.test_payloads || []).toLowerCase();
+    const combinedContext = lowerTitle + lowerDesc + verificationStr + payloadsStr;
+
+    lines.push(`### Implementation Strategy (Context-Driven)`);
+
+    // 1. REST API Scope
+    if (combinedContext.includes('/wp-json/') || combinedContext.includes('rest api')) {
+      lines.push(`- **Scope Detected**: REST API / JSON Endpoint`);
+      lines.push(`- **Mandatory Hook**: \`rest_authentication_errors\``);
+      lines.push(`- **Action**: Return \`new WP_Error('rest_forbidden', 'Forbidden', { status: 403 })\`.`);
+      lines.push(`- **Constraint**: DO NOT use \`template_redirect\` for API requests (it may not fire or return HTML instead of JSON).`);
+    }
+
+    // 2. Authentication Scope
+    if (combinedContext.includes('login') || combinedContext.includes('auth') || combinedContext.includes('password')) {
+      lines.push(`- **Scope Detected**: Authentication System`);
+      lines.push(`- **Mandatory Hook**: \`authenticate\` filter (priority 30+) or \`login_init\`.`);
+      lines.push(`- **Action**: Return \`WP_Error\` for blocking conditions.`);
+    }
+
+    // 3. Author / User Enumeration Scope
+    if (combinedContext.includes('author=') || combinedContext.includes('is_author')) {
+      lines.push(`- **Scope Detected**: Author Archives`);
+      lines.push(`- **Mandatory Hook**: \`template_redirect\``);
+      lines.push(`- **Condition**: Check \`is_author()\` or \`$_GET['author']\`.`);
+    }
+
+    lines.push(`\n### General Reliability Rules`);
+    lines.push(`- **Status Code**: STRICTLY enforce HTTP 403 for blocked requests. 200 OK is a failure.`);
+    lines.push(`- **Error Handling**: Wrap critical logic. Avoid PHP Fatal Errors (HTTP 500).`);
+    lines.push(`- **Standardization**: Use \`wp_die()\` for HTML pages, \`WP_Error\` for API.`);
+    lines.push(`- **Bypass Prevention**: Ensure disabling the feature (via toggle) completely removes the hook.`);
+
+    return lines.join('\n');
+  };
+
   const FeatureList = ({
     features, schema, updateFeature, loading, dataFiles, selectedFile, onSelectFile, onUpload, allFiles, hiddenFiles, onUpdateHiddenFiles, manageSourcesStatus, isManageModalOpen, setIsManageModalOpen, designPromptConfig, setDesignPromptConfig,
     historyFeature, setHistoryFeature, designFeature, setDesignFeature, transitioning, setTransitioning, isPromptConfigModalOpen, setIsPromptConfigModalOpen, isMappingModalOpen, setIsMappingModalOpen
@@ -3305,7 +3473,7 @@ Feature ID: ${feature.id || 'N/A'}
                       tests: f.tests || [],
                       evidence: f.evidence || [],
                       schema_hints: f.schema_hints || {},
-                      devInstruct: ''
+                      devInstruct: newStatus === 'Develop' ? generateDevInstructions(f) : ''
                     });
                   }
                 }),

@@ -1,13 +1,16 @@
 {
   "name": "vaptbuilder",
-  "version": "3.6.0",
+  "version": "3.6.1",
   "description": "Originally VAPT Copilot.. Migrated here",
   "main": "index.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "bump:patch": "node scripts/version-bump.js patch",
+    "bump:minor": "node scripts/version-bump.js minor",
+    "bump:major": "node scripts/version-bump.js major"
   },
   "repository": {
     "type": "git",
