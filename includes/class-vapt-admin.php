@@ -14,6 +14,7 @@ class VAPT_Admin
   public function __construct()
   {
     add_action('admin_menu', array($this, 'add_admin_menu'));
+    add_action('admin_init', array($this, 'handle_sync_processing'));
     add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
     add_action('wp_ajax_vapt_check_progress', array($this, 'ajax_check_progress'));
     add_action('wp_ajax_vapt_process_scan', array($this, 'ajax_process_scan'));
@@ -72,9 +73,9 @@ class VAPT_Admin
       try {
         $scanner = new VAPT_Scanner();
         $offset = isset($_POST['offset']) ? intval($_POST['offset']) : 0;
-        error_log("VAPT DEBUG: Starting batch at offset $offset with limit 15");
+        error_log("VAPT DEBUG: Starting batch at offset $offset with limit 10");
 
-        $result = $scanner->run_scan($scan_id, $target_url, $offset, 15); // Increased batch size
+        $result = $scanner->run_scan($scan_id, $target_url, $offset, 10); // increased batch size
 
         // Log debug information
         $debug_log = $scanner->get_debug_log();
@@ -114,7 +115,10 @@ class VAPT_Admin
 
     $progress = get_option('vapt_scan_progress_' . $scan_id);
     $checked = $progress['checked'] ?? 0;
-    $total = $progress['total'] ?? 99;
+
+    // Get real total from active data file
+    $vulnerability_data = $this->get_vulnerability_data();
+    $total = !empty($vulnerability_data) ? count($vulnerability_data) : ($progress['total'] ?? 0);
 
     // Get found count
     $found_count = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}vapt_scan_results WHERE scan_id = %d", $scan_id));
@@ -136,13 +140,37 @@ class VAPT_Admin
   private function get_vulnerability_data()
   {
     if ($this->vulnerabilities_cache === null) {
-      $active_file = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : get_option('vapt_active_feature_file', 'Feature-List-99.json');
+      // Use the active data file configured in the workbench
+      $active_file = VAPT_ACTIVE_DATA_FILE;
       $file_path = VAPT_PATH . 'data/' . sanitize_file_name($active_file);
 
       if (file_exists($file_path)) {
         $data = json_decode(file_get_contents($file_path), true);
-        if ($data && (isset($data['features']) || isset($data['wordpress_vapt']))) {
-          $this->vulnerabilities_cache = isset($data['features']) ? $data['features'] : $data['wordpress_vapt'];
+        if ($data) {
+          $raw_vulns = [];
+          if (isset($data['risk_catalog'])) {
+            $raw_vulns = $data['risk_catalog'];
+          } elseif (isset($data['features'])) {
+            $raw_vulns = $data['features'];
+          } elseif (isset($data['wordpress_vapt'])) {
+            $raw_vulns = $data['wordpress_vapt'];
+          }
+
+          // Normalize
+          $this->vulnerabilities_cache = [];
+          foreach ($raw_vulns as $vuln) {
+            $this->vulnerabilities_cache[] = [
+              'id' => $vuln['risk_id'] ?? $vuln['id'] ?? '',
+              'name' => $vuln['title'] ?? $vuln['name'] ?? '',
+              'severity' => is_array($vuln['severity'] ?? null) ? ($vuln['severity']['level'] ?? 'medium') : ($vuln['severity'] ?? 'medium'),
+              'description' => is_array($vuln['description'] ?? null) ? ($vuln['description']['summary'] ?? '') : ($vuln['description'] ?? ''),
+              'impact' => is_array($vuln['description'] ?? null) ? ($vuln['description']['business_impact'] ?? '') : ($vuln['impact'] ?? ''),
+              'recommendation' => $vuln['remediation'] ?? (isset($vuln['protection']) ? ($vuln['protection']['automated_protection']['method'] ?? '') : ''),
+              'owasp' => is_array($vuln['owasp_mapping'] ?? null) ? ($vuln['owasp_mapping']['owasp_top_10_2021'] ?? '') : ($vuln['owasp_mapping'] ?? ''),
+              'cvss' => $vuln['severity']['cvss_score'] ?? null,
+              'verification_steps' => isset($vuln['testing']['verification_steps']) ? array_column($vuln['testing']['verification_steps'], 'action') : [],
+            ];
+          }
         } else {
           $this->vulnerabilities_cache = [];
         }
@@ -183,6 +211,47 @@ class VAPT_Admin
     ));
   }
 
+  /**
+   * Handle synchronous processing early to avoid "Headers already sent" warnings
+   */
+  public function handle_sync_processing()
+  {
+    if (!isset($_GET['page']) || $_GET['page'] !== 'vapt-auditor' || !isset($_GET['sync_process'])) {
+      return;
+    }
+
+    if (!is_vapt_superadmin()) {
+      wp_die(__('You do not have sufficient permissions to access this page.'));
+    }
+
+    global $wpdb;
+    $scan_id = isset($_GET['scan_id']) ? intval($_GET['scan_id']) : null;
+
+    if (!$scan_id) return;
+
+    // Fetch target URL from database
+    $target_url = $wpdb->get_var($wpdb->prepare(
+      "SELECT target_url FROM {$wpdb->prefix}vapt_scans WHERE id = %d",
+      $scan_id
+    ));
+
+    if (!$target_url) {
+      wp_die(__('Target URL not found for this scan.'));
+    }
+
+    $scanner = new VAPT_Scanner();
+    $scanner->run_scan($scan_id, $target_url, 0, 99);
+
+    $redirect_url = add_query_arg([
+      'page' => 'vapt-auditor',
+      'scan_id' => $scan_id,
+      'vapt_sync_done' => 1
+    ], admin_url('admin.php'));
+
+    wp_redirect($redirect_url);
+    exit;
+  }
+
   public function admin_page()
   {
     global $wpdb;
@@ -211,14 +280,9 @@ class VAPT_Admin
     $scan_data = null;
     $debug_log = [];
 
-    // EMERGENCY SYNC PROCESSING - Uncomment this block if AJAX fails
-    if ($current_scan_id && isset($_GET['sync_process'])) {
-      echo "<h3>Processing scan synchronously...</h3>";
-      $scanner = new VAPT_Scanner();
-      $result = $scanner->run_scan($current_scan_id, $target_url, 0, 99);
-      echo "<pre>Result: " . print_r($result, true) . "</pre>";
-      echo "<pre>Debug Log:\n" . implode("\n", $scanner->get_debug_log()) . "</pre>";
-      wp_die('Sync processing complete');
+    // Success notice for synchronous processing
+    if (isset($_GET['vapt_sync_done'])) {
+      echo '<div class="notice notice-success is-dismissible"><p>Synchronous scan processing complete!</p></div>';
     }
 
     if ($current_scan_id) {
@@ -242,7 +306,7 @@ class VAPT_Admin
 
     ?>
     <div class="wrap">
-      <h1>VAPT Security Auditor</h1>
+      <h1>VAPT Security Auditor <span class="vapt-version-badge">v<?php echo VAPT_AUDITOR_VERSION; ?></span></h1>
 
       <div class="vapt-scan-form">
         <h2>Start New Scan</h2>
@@ -263,13 +327,45 @@ class VAPT_Admin
         </form>
       </div>
 
+      <?php
+      $active_file = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : 'VAPT-Complete-Risk-Catalog-99.json';
+      $is_complete_catalog = (strpos($active_file, 'Complete-Risk-Catalog-99') !== false);
+      ?>
+      <div class="vapt-catalog-status" style="margin: 10px 0 20px 0; padding: 10px 15px; background: <?php echo $is_complete_catalog ? '#f0f6fb' : '#fff8e5'; ?>; border-left: 4px solid <?php echo $is_complete_catalog ? '#007cba' : '#ffb900'; ?>; border-radius: 4px;">
+        <p style="margin: 0; font-size: 13px;">
+          <strong>Active Catalog:</strong> <code><?php echo esc_html($active_file); ?></code>
+          <?php if (!$is_complete_catalog): ?>
+            <span style="color: #d63638; margin-left: 10px;"><span class="dashicons dashicons-warning" style="font-size: 16px; margin-top: 3px;"></span> <strong>Notice:</strong> You are using a partial catalog. For a full security audit, switch to the 99-item Complete Risk Catalog in the workbench.</span>
+          <?php else: ?>
+            <span style="color: #46b450; margin-left: 10px;"><span class="dashicons dashicons-yes" style="font-size: 16px; margin-top: 3px;"></span> High-Fidelity 99-Item Audit Enabled.</span>
+          <?php endif; ?>
+        </p>
+      </div>
+
       <?php if ($current_scan_id): ?>
         <div class="vapt-scan-results">
           <div class="vapt-results-header">
             <h2>Scan Results</h2>
-            <div style="margin-bottom: 10px;">
+            <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
               <a href="<?php echo admin_url('admin.php?page=vapt-auditor&scan_id=' . $current_scan_id); ?>" class="button button-secondary"><span class="dashicons dashicons-update" style="margin-top: 4px; font-size: 16px;"></span> Refresh Results</a>
-              <a href="<?php echo admin_url('admin.php?page=vapt-auditor&scan_id=' . $current_scan_id . '&sync_process=1'); ?>" class="button button-primary" onclick="return confirm('This will process the entire scan synchronously. Continue?')">🔧 Process Synchronously</a>
+              <?php
+              $is_sync = isset($_GET['sync_process']) || isset($_GET['vapt_sync_done']);
+              if ($is_sync) {
+                $btn_url = admin_url('admin.php?page=vapt-auditor&scan_id=' . $current_scan_id);
+                $btn_class = 'button vapt-btn-async';
+                $btn_label = '🔄 Switch to Asynchronous (AJAX)';
+                $mode_badge = '<span class="vapt-mode-badge mode-sync">Processing Mode: SYNC (PHP)</span>';
+              } else {
+                $btn_url = admin_url('admin.php?page=vapt-auditor&scan_id=' . $current_scan_id . '&sync_process=1');
+                $btn_class = 'button vapt-btn-sync';
+                $btn_label = '🔧 Process Synchronously';
+                $mode_badge = '<span class="vapt-mode-badge mode-async">Processing Mode: ASYNC (AJAX)</span>';
+              }
+              ?>
+              <a href="<?php echo $btn_url; ?>" class="<?php echo $btn_class; ?>" <?php echo !$is_sync ? 'onclick="return confirm(\'This will process the entire scan synchronously. Continue?\')"' : ''; ?>>
+                <?php echo $btn_label; ?>
+              </a>
+              <?php echo $mode_badge; ?>
             </div>
           </div>
 
@@ -291,7 +387,11 @@ class VAPT_Admin
             // Fetch real progress from option
             $progress = get_option('vapt_scan_progress_' . $scan_data['id']);
             $checked = $progress['checked'] ?? 0;
-            $total = $progress['total'] ?? 99; // Default to a reasonable number if unknown
+
+            // Get real total from active data file
+            $vulnerability_data = $this->get_vulnerability_data();
+            $total = !empty($vulnerability_data) ? count($vulnerability_data) : ($progress['total'] ?? 0);
+
             $percent = $total > 0 ? min(100, round(($checked / $total) * 100)) : 0;
 
             // Fetch found vulnerabilities count
@@ -365,13 +465,12 @@ class VAPT_Admin
                                 }
                             } else {
                                 console.error('VAPT Batch Error:', response);
-                                // Retry after delay?
-                                setTimeout(function() { processScanBatch(offset); }, 3000);
+                                isProcessing = false; // Allow resume
                             }
                         },
                         error: function() {
-                            // Retry after delay
-                            setTimeout(function() { processScanBatch(offset); }, 3000);
+                            console.error('VAPT Batch AJAX Error');
+                            isProcessing = false; // Allow resume
                         }
                     });
                 }
@@ -446,7 +545,8 @@ class VAPT_Admin
           if ($status === 'completed') {
             // Calculate Stats
             $progress = get_option('vapt_scan_progress_' . $scan_data['id']);
-            $total_checked = $progress['total'] ?? 99;
+            $vulnerability_data = $this->get_vulnerability_data();
+            $total_checked = !empty($vulnerability_data) ? count($vulnerability_data) : ($progress['total'] ?? 0);
             $total_found = count($scan_results);
             $passed = max(0, $total_checked - $total_found);
 
@@ -462,69 +562,73 @@ class VAPT_Admin
             }
 
             echo '<div class="vapt-scan-summary-dashboard">';
-            echo '<div class="vapt-summary-card total">
-                     <span class="vapt-summary-label">Tests Performed</span>
-                     <span class="vapt-summary-value">' . $total_checked . '</span>
-                   </div>';
-            echo '<div class="vapt-summary-card pass">
-                     <span class="vapt-summary-label">Passed</span>
-                     <span class="vapt-summary-value">' . $passed . '</span>
-                   </div>';
-
+            echo '<div class="vapt-summary-card total"><span class="vapt-summary-label">Tests Performed</span><span class="vapt-summary-value">' . $total_checked . '</span></div>';
+            echo '<div class="vapt-summary-card pass"><span class="vapt-summary-label">Passed</span><span class="vapt-summary-value">' . $passed . '</span></div>';
             foreach ($counts as $sev => $count) {
-              echo '<div class="vapt-summary-card ' . $sev . '">
-                        <span class="vapt-summary-label">' . ucfirst($sev) . '</span>
-                        <span class="vapt-summary-value">' . $count . '</span>
-                      </div>';
+              echo '<div class="vapt-summary-card ' . $sev . '"><span class="vapt-summary-label">' . ucfirst($sev) . '</span><span class="vapt-summary-value">' . $count . '</span></div>';
             }
             echo '</div>';
 
+            // Filter Bar
+            echo '<div class="vapt-filter-bar" style="margin: 20px 0; background: #fff; padding: 15px; border: 1px solid #ccd0d4; border-radius: 4px; display: flex; gap: 20px; align-items: center;">
+                    <div class="filter-group">
+                        <label for="filter-severity" style="font-weight: 600; margin-right: 8px;">Severity:</label>
+                        <select id="filter-severity" class="vapt-filter-select">
+                            <option value="">All Severities</option>
+                            <option value="critical">Critical</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-search" style="font-weight: 600; margin-right: 8px;">Search:</label>
+                        <input type="text" id="filter-search" placeholder="Risk title or ID..." class="regular-text" style="width: 250px;">
+                    </div>
+                    <div style="margin-left: auto;">
+                        <span class="description">Showing <span id="vapt-visible-count">' . $total_found . '</span> findings</span>
+                    </div>
+                  </div>';
+
             if (empty($scan_results)) {
               echo '<div class="notice notice-success inline" style="margin-top:20px;"><p><strong>Great job!</strong> No vulnerabilities were found matching the provided signatures.</p></div>';
-            }
-          }
-
-          // Group results by severity
-          $severity_groups = [
-            'critical' => [],
-            'high' => [],
-            'medium' => [],
-            'low' => []
-          ];
-
-          foreach ($scan_results as $result) {
-            $severity = strtolower($result['severity']);
-            if (isset($severity_groups[$severity])) {
-              $severity_groups[$severity][] = $result;
-            }
-          }
-
-          foreach (['critical', 'high', 'medium', 'low'] as $severity):
-            if (!empty($severity_groups[$severity])):
+            } else {
           ?>
-              <div class="vapt-severity-section vapt-severity-<?php echo $severity; ?>">
-                <h3><?php echo ucfirst($severity); ?> Severity Vulnerabilities (<?php echo count($severity_groups[$severity]); ?>)</h3>
-                <table class="wp-list-table widefat fixed striped">
+              <div class="vapt-auditor-results-wrap">
+                <table class="wp-list-table widefat fixed striped" id="vapt-results-table">
                   <thead>
                     <tr>
-                      <th>Vulnerability ID</th>
-                      <th>Title</th>
-                      <th>Severity</th>
-                      <th>Affected URL</th>
-                      <th>Actions</th>
+                      <th class="manage-column column-id sortable" data-sort="id">Risk ID <span class="dashicons dashicons-sort"></span></th>
+                      <th class="manage-column column-title sortable" data-sort="title">Vulnerability Title <span class="dashicons dashicons-sort"></span></th>
+                      <th class="manage-column column-severity sortable" data-sort="severity">Severity <span class="dashicons dashicons-sort"></span></th>
+                      <th class="manage-column column-impact">Impact</th>
+                      <th class="manage-column column-actions" style="width: 120px;">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <?php foreach ($severity_groups[$severity] as $result): ?>
-                      <tr>
-                        <td><?php echo esc_html($result['vulnerability_id']); ?></td>
-                        <td><?php echo esc_html($this->get_vulnerability_name($result['vulnerability_id'])); ?></td>
+                    <?php foreach ($scan_results as $result):
+                      $vuln_info = [];
+                      $all_vulns = $this->get_vulnerability_data();
+                      foreach ($all_vulns as $v) {
+                        if ($v['id'] === $result['vulnerability_id']) {
+                          $vuln_info = $v;
+                          break;
+                        }
+                      }
+                      $severity = strtolower($result['severity']);
+                      $impact = $vuln_info['impact'] ?? 'Risk of compromise leading to data breach or system compromise';
+                    ?>
+                      <tr class="vapt-result-row" data-severity="<?php echo esc_attr($severity); ?>" data-title="<?php echo esc_attr($vuln_info['name'] ?? ''); ?>" data-id="<?php echo esc_attr($result['vulnerability_id']); ?>">
+                        <td><code><?php echo esc_html($result['vulnerability_id']); ?></code></td>
+                        <td><strong><?php echo esc_html($vuln_info['name'] ?? $result['vulnerability_id']); ?></strong></td>
                         <td><span class="vapt-severity-badge vapt-severity-<?php echo $severity; ?>"><?php echo ucfirst($severity); ?></span></td>
-                        <td><a href="<?php echo esc_url($result['affected_url']); ?>" target="_blank"><?php echo esc_html($result['affected_url']); ?></a></td>
+                        <td>
+                          <div class="vapt-truncated-text" title="<?php echo esc_attr($impact); ?>"><?php echo esc_html(wp_trim_words($impact, 10)); ?></div>
+                        </td>
                         <td>
                           <button class="button vapt-details-btn" data-vuln-id="<?php echo esc_attr($result['vulnerability_id']); ?>">Details</button>
                           <?php if (!empty($result['screenshot_path'])): ?>
-                            <a href="<?php echo esc_url(VAPT_URL . 'data/screenshots/' . basename($result['screenshot_path'])); ?>" target="_blank" class="button">Screenshot</a>
+                            <a href="<?php echo esc_url(VAPT_URL . 'data/screenshots/' . basename($result['screenshot_path'])); ?>" target="_blank" class="button" title="View Evidence Screenshot"><span class="dashicons dashicons-visibility"></span></a>
                           <?php endif; ?>
                         </td>
                       </tr>
@@ -533,16 +637,22 @@ class VAPT_Admin
                 </table>
               </div>
           <?php
-            endif;
-          endforeach;
+            }
+          }
           ?>
 
           <!-- Hidden details modal -->
           <div id="vapt-details-modal" class="vapt-modal" style="display: none;">
-            <div class="vapt-modal-content">
+            <div class="vapt-modal-content" style="max-width: 800px; width: 90%;">
               <span class="vapt-modal-close">&times;</span>
-              <h3 id="modal-title"></h3>
+              <div class="vapt-modal-header" style="border-bottom: 2px solid #eee; margin-bottom: 20px; padding-bottom: 10px;">
+                <h2 id="modal-title" style="margin: 0; color: #23282d;"></h2>
+                <div id="modal-subtitle" class="description" style="margin-top: 5px;"></div>
+              </div>
               <div id="modal-content"></div>
+              <div class="vapt-modal-footer" style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 15px; text-align: right;">
+                <button class="button button-secondary vapt-modal-close">Close Report</button>
+              </div>
             </div>
           </div>
 
@@ -589,27 +699,132 @@ class VAPT_Admin
 
     <script type="text/javascript">
       jQuery(document).ready(function($) {
+        // Data for modal
+        var vulnerabilityData = <?php echo json_encode($this->get_vulnerability_data()); ?>;
+        var scanResults = <?php echo json_encode($scan_results); ?>;
+
+        // Filtering Logic
+        function applyFilters() {
+          var severity = $('#filter-severity').val().toLowerCase();
+          var search = $('#filter-search').val().toLowerCase();
+          var visibleCount = 0;
+
+          $('.vapt-result-row').each(function() {
+            var rowSev = $(this).data('severity');
+            var rowTitle = $(this).data('title').toLowerCase();
+            var rowId = $(this).data('id').toLowerCase();
+
+            var showSev = severity === '' || rowSev === severity;
+            var showSearch = search === '' || rowTitle.includes(search) || rowId.includes(search);
+
+            if (showSev && showSearch) {
+              $(this).show();
+              visibleCount++;
+            } else {
+              $(this).hide();
+            }
+          });
+          $('#vapt-visible-count').text(visibleCount);
+        }
+
+        $('#filter-severity, #filter-search').on('change keyup', applyFilters);
+
+        // Sorting Logic
+        $('.sortable').on('click', function() {
+          var table = $(this).closest('table');
+          var rows = table.find('tbody tr').get();
+          var colIndex = $(this).index();
+          var type = $(this).data('sort');
+          var isAsc = $(this).hasClass('asc');
+
+          $('.sortable').removeClass('asc desc');
+          $(this).addClass(isAsc ? 'desc' : 'asc');
+
+          rows.sort(function(a, b) {
+            var valA = $(a).children('td').eq(colIndex).text().toUpperCase();
+            var valB = $(b).children('td').eq(colIndex).text().toUpperCase();
+
+            // Severity weighting
+            if (type === 'severity') {
+              var weights = {
+                critical: 1,
+                high: 2,
+                medium: 3,
+                low: 4
+              };
+              valA = weights[$(a).data('severity')] || 99;
+              valB = weights[$(b).data('severity')] || 99;
+            }
+
+            if (valA < valB) return isAsc ? 1 : -1;
+            if (valA > valB) return isAsc ? -1 : 1;
+            return 0;
+          });
+
+          $.each(rows, function(index, row) {
+            table.children('tbody').append(row);
+          });
+        });
+
+        // Modal Details
         $('.vapt-details-btn').on('click', function() {
           var vulnId = $(this).data('vuln-id');
-          var result = null;
+          var vuln = vulnerabilityData.find(v => v.id === vulnId);
+          var result = scanResults.find(r => r.vulnerability_id === vulnId);
 
-          // Find the result data
-          for (var i = 0; i < vapt_scan_results.length; i++) {
-            if (vapt_scan_results[i].vulnerability_id === vulnId) {
-              result = vapt_scan_results[i];
-              break;
+          if (vuln && result) {
+            $('#modal-title').text(vuln.name);
+            $('#modal-subtitle').html('ID: <code>' + vuln.id + '</code> | Severity: <span class="vapt-severity-badge vapt-severity-' + vuln.severity.toLowerCase() + '">' + vuln.severity + '</span>' + (vuln.cvss ? ' | CVSS: <strong>' + vuln.cvss + '</strong>' : '') + (vuln.owasp ? ' | OWASP: <strong>' + vuln.owasp + '</strong>' : ''));
+
+            var verificationHtml = '';
+            if (vuln.verification_steps && vuln.verification_steps.length > 0) {
+              verificationHtml = '<h4>Manual Verification Steps</h4><ul style="padding-left: 20px; list-style-type: decimal; margin-top: 10px;">';
+              vuln.verification_steps.forEach(function(step) {
+                // Strip leading numbers and dots (e.g., "1. " or "2. ") if they exist to avoid double numbering
+                var cleanStep = step.replace(/^\d+[\s\.]+\s*/, '');
+                verificationHtml += '<li style="margin-bottom: 5px;">' + cleanStep + '</li>';
+              });
+              verificationHtml += '</ul>';
             }
-          }
 
-          if (result) {
-            $('#modal-title').text(result.vulnerability_id);
-            var content = '<div class="vapt-modal-details">' +
-              '<p><strong>Description:</strong> ' + (result.description || 'N/A') + '</p>' +
-              '<p><strong>Impact:</strong> ' + (result.impact || 'N/A') + '</p>' +
-              '<p><strong>Recommendation:</strong> ' + (result.recommendation || 'N/A') + '</p>' +
-              '<p><strong>Steps to Reproduce:</strong> ' + (result.steps_to_reproduce || 'N/A') + '</p>' +
-              '<p><strong>Affected URL:</strong> <a href="' + result.affected_url + '" target="_blank">' + result.affected_url + '</a></p>' +
-              (result.evidence_url ? '<p><strong>Evidence URL:</strong> <a href="' + result.evidence_url + '" target="_blank">' + result.evidence_url + '</a></p>' : '') +
+            var screenshotHtml = '';
+            var rawPaths = result.screenshot_paths || result.screenshot_path;
+            if (rawPaths) {
+              try {
+                var paths = (typeof rawPaths === 'string' && rawPaths.startsWith('[')) ? JSON.parse(rawPaths) : [rawPaths];
+                if (Array.isArray(paths) && paths.length > 0) {
+                  screenshotHtml = '<h4>Audit Evidence Gallery</h4><div class="vapt-evidence-gallery" style="display: flex; gap: 15px; overflow-x: auto; padding: 10px 5px; margin-top: 10px; background: #f0f0f1; border-radius: 6px; border: 1px solid #dcdcde;">';
+                  paths.forEach(function(path) {
+                    if (!path) return;
+                    var screenshotName = path.split(/[\\\\/]/).pop();
+                    var screenshotUrl = '<?php echo esc_url(VAPT_URL); ?>data/screenshots/' + screenshotName;
+                    screenshotHtml += '<div style="flex: 0 0 200px; border: 1px solid #ccd0d4; padding: 4px; background: #fff; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">' +
+                      '<a href="' + screenshotUrl + '" target="_blank"><img src="' + screenshotUrl + '" style="width: 100%; height: auto; display: block; border-radius: 2px;" onerror="this.parentElement.innerHTML=\'<p style=\\\'font-size:10px; padding:10px; color:#666;\\\'>Missing: \' + screenshotName + \'</p>\'"></a>' +
+                      '</div>';
+                  });
+                  screenshotHtml += '</div><p class="description">Click image to view full-size conclusive evidence.</p>';
+                }
+              } catch (e) {
+                console.error("VAPT Image Parse Error:", e);
+              }
+            }
+
+            var content = '<div class="vapt-modal-details-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">' +
+              '<div class="vapt-detail-col">' +
+              '<h4>Description</h4><p>' + (vuln.description || result.description || 'N/A') + '</p>' +
+              '<h4>Impact</h4><p>' + (vuln.impact || result.impact || 'N/A') + '</p>' +
+              screenshotHtml +
+              '</div>' +
+              '<div class="vapt-detail-col">' +
+              '<h4>Remediation / Recommendation</h4><p>' + (vuln.recommendation || result.recommendation || 'N/A') + '</p>' +
+              '<h4>Detection Info</h4>' +
+              '<ul>' +
+              '<li><strong>Detection Endpoint:</strong> <a href="' + result.affected_url + '" target="_blank" style="word-break: break-all;">' + result.affected_url + '</a></li>' +
+              (result.evidence_url && result.evidence_url !== result.affected_url ? '<li><strong>Raw Evidence:</strong> <a href="' + result.evidence_url + '" target="_blank">View Result</a></li>' : '') +
+              '<li><strong>Scan Date:</strong> ' + (result.found_at || result.captured_at || 'N/A') + '</li>' +
+              '</ul>' +
+              verificationHtml +
+              '</div>' +
               '</div>';
             $('#modal-content').html(content);
             $('#vapt-details-modal').show();

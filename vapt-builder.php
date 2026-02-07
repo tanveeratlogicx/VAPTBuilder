@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version:           3.5.1
+ * Version:           3.5.2
  * Author:            Hermas International FZ LLE
  * Author URI:        #
  * License:           GPL-2.0+
@@ -16,13 +16,21 @@ if (! defined('ABSPATH')) {
 }
 
 if (! defined('VAPT_VERSION')) {
-  define('VAPT_VERSION', '3.5.1');
+  define('VAPT_VERSION', '3.5.2');
+}
+if (! defined('VAPT_AUDITOR_VERSION')) {
+  define('VAPT_AUDITOR_VERSION', '2.8.0');
 }
 if (! defined('VAPT_PATH')) {
   define('VAPT_PATH', plugin_dir_path(__FILE__));
 }
 if (! defined('VAPT_URL')) {
   define('VAPT_URL', plugin_dir_url(__FILE__));
+}
+
+// Global Active Data File Configuration
+if (! defined('VAPT_ACTIVE_DATA_FILE')) {
+  define('VAPT_ACTIVE_DATA_FILE', get_option('vapt_active_feature_file', 'VAPT-Complete-Risk-Catalog-99.json'));
 }
 
 // Backward Compatibility Aliases

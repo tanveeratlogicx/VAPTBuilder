@@ -190,7 +190,7 @@ class VAPT_REST
 
   public function get_features($request)
   {
-    $default_file = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : get_option('vapt_active_feature_file', 'Feature-List-99.json');
+    $default_file = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : 'VAPT-Complete-Risk-Catalog-99.json';
     $file = $request->get_param('file') ?: $default_file;
     $json_path = VAPT_PATH . 'data/' . sanitize_file_name($file);
 
@@ -516,7 +516,7 @@ class VAPT_REST
     $json_files = [];
 
     $hidden_files = get_option('vapt_hidden_json_files', array());
-    $active_file  = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : get_option('vapt_active_feature_file', 'Feature-List-99.json');
+    $active_file  = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : 'VAPT-Complete-Risk-Catalog-99.json';
 
     $hidden_normalized = array_map('sanitize_file_name', $hidden_files);
     $active_normalized = sanitize_file_name($active_file);
@@ -1430,7 +1430,7 @@ class VAPT_REST
     }
 
     return new WP_REST_Response(array(
-      'active_file' => get_option('vapt_active_feature_file', 'Feature-List-99.json')
+      'active_file' => defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : 'VAPT-Complete-Risk-Catalog-99.json'
     ), 200);
   }
 }

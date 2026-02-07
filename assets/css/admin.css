@@ -31,10 +31,16 @@
     color: #666;
 }
 
-.vapt-stat-card .stat-number {
-    font-size: 24px;
-    font-weight: bold;
-    color: #0073aa;
+.vapt-version-badge {
+    display: inline-block;
+    background: #2271b1;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    vertical-align: middle;
+    margin-left: 10px;
+    font-weight: 500;
 }
 
 /* VAPT Auditor Styles */
@@ -794,6 +800,62 @@
     /* Neutral gray for all summary caps */
 }
 
+/* Button Toggle States */
+.vapt-btn-active {
+    background: #46b450 !important;
+    border-color: #317f38 !important;
+    color: #fff !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    position: relative;
+    padding-left: 30px !important;
+}
+
+.vapt-btn-active::before {
+    content: "\f147";
+    /* dashicons-yes */
+    font-family: dashicons;
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+}
+
+/* Scan Mode Indicators & Toggles */
+.vapt-mode-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+.mode-async,
+.vapt-btn-async {
+    background: #46b450 !important;
+    color: #fff !important;
+    border: 1px solid #34963d !important;
+}
+
+.mode-sync,
+.vapt-btn-sync {
+    background: #f6a316 !important;
+    color: #fff !important;
+    border: 1px solid #d18a12 !important;
+}
+
+.vapt-btn-async:hover {
+    background: #34963d !important;
+}
+
+.vapt-btn-sync:hover {
+    background: #d18a12 !important;
+}
+
 
 
 .vapt-results-header h2 {
@@ -1232,4 +1294,94 @@
 
 .vapt-license-table-wrap th.sorted.desc .sorting-indicator::before {
     content: "\f140";
+}
+
+/* Auditor Results Enhancements */
+.vapt-filter-bar {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.vapt-filter-select,
+.vapt-filter-bar input {
+    height: 32px;
+    line-height: normal;
+}
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 25px !important;
+}
+
+.sortable:hover {
+    background: #f0f0f1 !important;
+    color: #2271b1;
+}
+
+.sortable .dashicons {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    opacity: 0.3;
+}
+
+.sortable.asc .dashicons {
+    opacity: 1;
+    color: #2271b1;
+}
+
+.sortable.desc .dashicons {
+    opacity: 1;
+    color: #2271b1;
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.vapt-truncated-text {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #646970;
+    font-size: 13px;
+}
+
+.vapt-severity-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.vapt-detail-col h4 {
+    margin: 15px 0 8px;
+    color: #1d2327;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.vapt-detail-col p {
+    color: #50575e;
+    line-height: 1.6;
+}
+
+.vapt-modal-header h2 {
+    font-size: 1.5em;
+    font-weight: 700;
+}
+
+.vapt-summary-value {
+    transition: transform 0.2s ease;
+}
+
+.vapt-summary-card:hover .vapt-summary-value {
+    transform: scale(1.1);
 }

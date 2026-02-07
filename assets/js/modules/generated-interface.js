@@ -382,9 +382,133 @@
     }
   };
 
+  /*
+   * Evidence Gallery Component (v3.5.2)
+   * Handles multiple screenshot rendering with modal preview
+   */
+  const EvidenceGallery = ({ screenshots }) => {
+    const [selectedImage, setSelectedImage] = useState(null);
+
+    if (!screenshots || !Array.isArray(screenshots) || screenshots.length === 0) return null;
+
+    return el('div', { className: 'vapt-evidence-gallery', style: { marginTop: '10px' } }, [
+      el('div', { style: { fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: '#64748b', marginBottom: '6px' } },
+        sprintf(__('%d Evidence Captured', 'vapt-builder'), screenshots.length)
+      ),
+      el('div', {
+        style: {
+          display: 'flex',
+          gap: '8px',
+          overflowX: 'auto',
+          padding: '4px',
+          background: '#f1f5f9',
+          borderRadius: '4px',
+          border: '1px solid #e2e8f0'
+        }
+      }, screenshots.map((url, i) =>
+        el('div', {
+          key: i,
+          onClick: () => setSelectedImage(url),
+          style: {
+            width: '60px',
+            height: '60px',
+            flexShrink: 0,
+            cursor: 'pointer',
+            backgroundImage: `url(${url})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            borderRadius: '3px',
+            border: '1px solid #cbd5e1',
+            position: 'relative'
+          }
+        }, el(Icon, { icon: 'search', size: 12, style: { position: 'absolute', bottom: '2px', right: '2px', background: 'rgba(255,255,255,0.8)', borderRadius: '50%', padding: '2px' } }))
+      )),
+
+      selectedImage && el(Modal, {
+        title: __('Evidence Detail', 'vapt-builder'),
+        onRequestClose: () => setSelectedImage(null),
+        style: { maxWidth: '90vw', maxHeight: '90vh' }
+      }, [
+        el('div', { style: { display: 'flex', justifyContent: 'center', background: '#000', borderRadius: '4px', overflow: 'hidden' } },
+          el('img', { src: selectedImage, style: { maxWidth: '100%', maxHeight: '70vh' } })
+        ),
+        el('div', { style: { marginTop: '15px', textAlign: 'right' } },
+          el(Button, { isPrimary: true, onClick: () => setSelectedImage(null) }, __('Close', 'vapt-builder'))
+        )
+      ])
+    ]);
+  };
+
+  /*
+   * File Inspector Component (v3.5.2)
+   * Specialized rendering for file contents/directory listings
+   */
+  const FileInspector = ({ content, label = __('Inspector Output', 'vapt-builder') }) => {
+    if (!content) return null;
+
+    // Auto-detect if content implies a directory listing
+    const isDir = content.includes('Index of /') || content.includes('Parent Directory');
+    const displayLabel = isDir ? __('Directory Listing Exposed', 'vapt-builder') : label;
+
+    return el('div', { className: 'vapt-file-inspector', style: { marginTop: '10px', display: 'flex', flexDirection: 'column' } }, [
+      el('div', { style: { fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', color: '#b91c1c', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '5px' } }, [
+        el(Icon, { icon: 'media-code', size: 16 }),
+        displayLabel
+      ]),
+      el('pre', {
+        style: {
+          fontSize: '10px',
+          fontFamily: 'monospace',
+          background: '#fff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '4px',
+          padding: '10px',
+          maxHeight: '200px',
+          overflow: 'auto',
+          whiteSpace: 'pre-wrap',
+          color: '#334155'
+        }
+      }, content)
+    ]);
+  };
+
+  /*
+   * Sync/Async Toggle Component (v3.5.2)
+   * Stateful toggle for execution mode
+   */
+  const SyncAsyncToggle = ({ isAsync, onChange, disabled }) => {
+    return el('div', {
+      className: 'vapt-sync-async-toggle',
+      style: { display: 'flex', alignItems: 'center', gap: '6px' }
+    }, [
+      el(Tooltip, { text: isAsync ? __('Async: Runs via background process (Simulated)', 'vapt-builder') : __('Sync: Runs directly in browser session', 'vapt-builder') },
+        el(Button, {
+          isSmall: true,
+          variant: 'tertiary',
+          onClick: () => !disabled && onChange(!isAsync),
+          disabled: disabled,
+          style: {
+            fontSize: '10px',
+            padding: '0 4px',
+            height: '20px',
+            minHeight: '20px',
+            color: isAsync ? '#7c3aed' : '#0f172a',
+            borderColor: isAsync ? '#ddd6fe' : '#e2e8f0',
+            background: isAsync ? '#f5f3ff' : '#f8fafc'
+          }
+        }, [
+          el(Icon, { icon: isAsync ? 'update' : 'controls-repeat', size: 12, style: { marginRight: '4px' } }),
+          isAsync ? 'ASYNC PROCESSED' : 'SYNC'
+        ])
+      )
+    ]);
+  };
+
   const TestRunnerControl = ({ control, featureData, featureKey }) => {
     const [status, setStatus] = useState('idle');
     const [result, setResult] = useState(null);
+    // Stateful toggle (Default false/Sync)
+    const [isAsync, setIsAsync] = useState(false);
 
     const runTest = async () => {
       setStatus('running');
@@ -398,7 +522,8 @@
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Test timeout after 30 seconds')), 30000)
         );
-        const handlerPromise = handler(siteUrl, control, featureData, featureKey);
+        // Pass isAsync context to handler (v3.5.2)
+        const handlerPromise = handler(siteUrl, { ...control, isAsync }, featureData, featureKey);
         const res = await Promise.race([handlerPromise, timeoutPromise]);
 
         if (res && typeof res === 'object') {
@@ -431,7 +556,11 @@
 
     return el('div', { className: 'vapt-test-runner', style: { padding: '15px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', marginBottom: '10px' } }, [
       el('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' } }, [
-        el('strong', { style: { fontSize: '12px', color: '#334155' } }, displayLabel),
+        el('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
+          el('strong', { style: { fontSize: '12px', color: '#334155' } }, displayLabel),
+          // Inject Sync/Async Toggle
+          el(SyncAsyncToggle, { isAsync, onChange: setIsAsync, disabled: status === 'running' })
+        ]),
         el(Button, { isSecondary: true, isSmall: true, isBusy: status === 'running', onClick: handleClick, disabled: status === 'running' }, 'Run Verify')
       ]),
       control.help && el('p', { style: { margin: '2px 0 0', fontSize: '11px', color: '#64748b', opacity: 0.8 } }, control.help),
@@ -450,7 +579,15 @@
         el('div', { style: { fontWeight: '700', marginBottom: '8px' } }, status === 'success' ? '✅ SUCCESS' : '❌ FAILURE'),
         el('div', { style: { marginBottom: '8px' } }, result.message),
 
-        result.meta && el('div', { style: { background: 'rgba(255,255,255,0.5)', padding: '10px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.05)' } }, [
+        // v3.5.2: Multiple Evidence Gallery Renderer
+        (result.screenshot_paths || (result.meta && result.meta.screenshot_paths)) &&
+        el(EvidenceGallery, { screenshots: result.screenshot_paths || result.meta.screenshot_paths }),
+
+        // v3.5.2: Specialized File Inspector for Directory/Raw Content
+        (result.raw && (typeof result.raw === 'string')) &&
+        el(FileInspector, { content: result.raw }),
+
+        result.meta && !result.meta.screenshot_paths && el('div', { style: { background: 'rgba(255,255,255,0.5)', padding: '10px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.05)' } }, [
           el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' } }, [
             el('div', { style: { color: '#059669' } }, [__('Accepted: '), el('strong', null, result.meta.accepted)]),
             el('div', { style: { color: '#dc2626' } }, [__('Blocked (429): '), el('strong', null, result.meta.blocked)]),
