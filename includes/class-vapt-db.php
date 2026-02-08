@@ -91,33 +91,61 @@ class VAPT_DB
     global $wpdb;
     $table = $wpdb->prefix . 'vapt_feature_meta';
 
-    $defaults = array(
-      'feature_key'          => $key,
-      'category'             => '',
-      'test_method'          => '',
-      'verification_steps'   => '',
-      'include_test_method'           => 0,
-      'include_verification'          => 0,
-      'include_verification_engine'   => 0,
-      'include_verification_guidance' => 1,
-      'include_manual_protocol'       => 1,
-      'include_operational_notes'      => 1,
-      'is_enforced'                   => 0,
-      'wireframe_url'        => null,
-      'generated_schema'     => null,
-      'implementation_data'  => null,
-      'override_schema'      => null,
-      'override_implementation_data' => null,
-      'dev_instruct'         => null,
+    // 1. Define Strict Column-Format Mapping (Must match DB Schema in vapt-builder.php)
+    // NOTE: 'override_schema' and 'override_implementation_data' are not in current schema version.
+    $schema_map = array(
+      'feature_key'                   => '%s',
+      'category'                      => '%s',
+      'test_method'                   => '%s',
+      'verification_steps'            => '%s',
+      'include_test_method'           => '%d',
+      'include_verification'          => '%d',
+      'include_verification_engine'   => '%d',
+      'include_verification_guidance' => '%d',
+      'include_manual_protocol'       => '%d',
+      'include_operational_notes'     => '%d',
+      'is_enforced'                   => '%d',
+      'wireframe_url'                 => '%s',
+      'generated_schema'              => '%s',
+      'implementation_data'           => '%s',
+      'dev_instruct'                  => '%s'
     );
 
+    // 2. Fetch existing to merge
     $existing = self::get_feature_meta($key);
-    $final_data = wp_parse_args($data, $existing ? $existing : $defaults);
+    $merged_data = $existing ? array_merge($existing, $data) : $data;
+
+    // Ensure key is set
+    $merged_data['feature_key'] = $key;
+
+    // 3. Construct Query Data explicitly in order
+    $final_data = array();
+    $formats = array();
+
+    foreach ($schema_map as $col => $fmt) {
+      if (array_key_exists($col, $merged_data)) {
+        $final_data[$col] = $merged_data[$col];
+        $formats[] = $fmt;
+      } else {
+        // If missing in data/existing, set default based on type
+        // This handles fresh inserts where $existing is null
+        if ($col === 'feature_key') {
+          $final_data[$col] = $key;
+        } else {
+          $final_data[$col] = ($fmt === '%d') ? 0 : null;
+          // Special defaults
+          if (in_array($col, ['include_verification_guidance', 'include_manual_protocol', 'include_operational_notes'])) {
+            $final_data[$col] = 1;
+          }
+        }
+        $formats[] = $fmt;
+      }
+    }
 
     return $wpdb->replace(
       $table,
       $final_data,
-      array('%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s')
+      $formats
     );
   }
 

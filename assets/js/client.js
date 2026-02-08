@@ -155,6 +155,7 @@
     // Helper to render a single feature card
     const renderFeatureCard = (f, setVerifFeature) => {
       const schema = typeof f.generated_schema === 'string' ? JSON.parse(f.generated_schema) : (f.generated_schema || { controls: [] });
+      console.log(`[VAPT] Rendering Feature ${f.key}:`, schema);
       const isVerifEngine = f.include_verification_engine;
 
       // Filter controls

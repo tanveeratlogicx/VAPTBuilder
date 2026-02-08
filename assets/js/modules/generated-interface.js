@@ -685,7 +685,21 @@
   };
 
   const GeneratedInterface = ({ feature, onUpdate, isGuidePanel = false, hideMonitor = false }) => {
-    const schema = feature.generated_schema ? (typeof feature.generated_schema === 'string' ? JSON.parse(feature.generated_schema) : feature.generated_schema) : {};
+    console.log('[VAPT] GeneratedInterface Render:', { key: feature?.key, controls: feature?.generated_schema?.controls, isGuidePanel });
+    let schema = feature.generated_schema ? (typeof feature.generated_schema === 'string' ? JSON.parse(feature.generated_schema) : feature.generated_schema) : {};
+
+    // 🛡️ Resilience: Auto-Convert Legacy "manual" type (v3.6.15)
+    if (schema && schema.type === 'manual') {
+      schema = {
+        controls: [
+          { type: 'header', label: __('Implementation Status', 'vapt-builder') },
+          { type: 'toggle', label: __('Enable Feature', 'vapt-builder'), key: 'feat_enabled', default: true },
+          { type: 'info', label: __('Manual Implementation Required', 'vapt-builder'), content: schema.instruction || __('Please refer to the manual verification protocol.', 'vapt-builder') }
+        ],
+        enforcement: { driver: 'manual', mappings: {} },
+        _instructions: schema.instruction
+      };
+    }
     const currentData = feature.implementation_data ? (typeof feature.implementation_data === 'string' ? JSON.parse(feature.implementation_data) : feature.implementation_data) : {};
     const [localAlert, setLocalAlert] = useState(null);
 

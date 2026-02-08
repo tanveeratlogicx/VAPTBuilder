@@ -492,7 +492,7 @@ class VAPT_REST
           return in_array($f['key'], $enabled_features);
         }
 
-        if ($is_superadmin && in_array($s, ['develop', 'test'])) {
+        if ($is_superadmin && in_array($s, ['draft', 'develop', 'test'])) {
           return true;
         }
 
@@ -1388,7 +1388,7 @@ class VAPT_REST
         );
       }
 
-      $valid_drivers = ['hook', 'htaccess', 'universal'];
+      $valid_drivers = ['hook', 'htaccess', 'universal', 'manual'];
       if (!in_array($schema['enforcement']['driver'], $valid_drivers)) {
         return new WP_Error(
           'invalid_schema',

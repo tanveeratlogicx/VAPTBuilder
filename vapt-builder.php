@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version:           3.6.8
+ * Version:           3.6.18
  * Author:            Automated Penetration Testing Builder
  * Author URI:        https://vaptbuilder.com/
  * License:           GPL-2.0-or-later
@@ -25,7 +25,7 @@ if (! defined('ABSPATH')) {
  * The current version of the plugin.
  */
 if (! defined('VAPT_VERSION')) {
-  define('VAPT_VERSION', '3.6.8');
+  define('VAPT_VERSION', '3.6.18');
 }
 if (! defined('VAPT_AUDITOR_VERSION')) {
   define('VAPT_AUDITOR_VERSION', '2.8.0');
@@ -690,6 +690,7 @@ function vapt_enqueue_admin_assets($hook)
     wp_localize_script('vapt-client-js', 'vaptSettings', array(
       'root' => esc_url_raw(rest_url()),
       'nonce' => wp_create_nonce('wp_rest'),
+      'isSuper' => $is_superadmin,
       'pluginVersion' => VAPT_VERSION
     ));
   }

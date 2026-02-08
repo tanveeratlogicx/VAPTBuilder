@@ -219,23 +219,53 @@ window.vaptScriptLoaded = true;
 
   // Design/Schema Modal
   const DesignModal = ({ feature, onClose, updateFeature, designPromptConfig, setDesignPromptConfig, setIsPromptConfigModalOpen, selectedFile }) => {
-    // Default prompt for guidance but still valid JSON
-    const defaultState = {
-      controls: [],
-      _instructions: "STOP! Do NOT copy this text. 1. Click 'Copy AI Design Prompt' button below. 2. Paste that into Antigravity Chat. 3. Paste the JSON result back here."
+    // Default prompt for guidance but still valid JSON (v3.6.11)
+    const MEANINGFUL_DEFAULT = {
+      "controls": [
+        {
+          "type": "header",
+          "label": "Feature Configuration"
+        },
+        {
+          "type": "toggle",
+          "label": "Enable Feature",
+          "key": "feat_enabled",
+          "default": true
+        }
+      ],
+      "enforcement": {
+        "driver": "hook",
+        "mappings": {
+          "feat_enabled": "your_backend_hook_here"
+        }
+      },
+      "_instructions": "Paste the AI-generated JSON here to replace this default."
     };
+
     const getInitialSchema = () => {
-      if (!feature.generated_schema) return defaultState;
+      if (!feature.generated_schema) return MEANINGFUL_DEFAULT;
       if (typeof feature.generated_schema === 'string') {
         try {
           const parsed = JSON.parse(feature.generated_schema);
+          // Standardize empty/invalid schemas
+          if (!parsed || (Array.isArray(parsed) && parsed.length === 0) || (typeof parsed === 'object' && Object.keys(parsed).length === 0)) {
+            return MEANINGFUL_DEFAULT;
+          }
           // If double-encoded, parse again
-          if (typeof parsed === 'string') return JSON.parse(parsed);
+          if (typeof parsed === 'string') {
+            const doubleParsed = JSON.parse(parsed);
+            if (!doubleParsed || (Array.isArray(doubleParsed) && doubleParsed.length === 0)) return MEANINGFUL_DEFAULT;
+            return doubleParsed;
+          }
           return parsed;
         } catch (e) {
-          return defaultState;
+          return MEANINGFUL_DEFAULT;
         }
       }
+      // Direct object check
+      if (Array.isArray(feature.generated_schema) && feature.generated_schema.length === 0) return MEANINGFUL_DEFAULT;
+      if (typeof feature.generated_schema === 'object' && Object.keys(feature.generated_schema).length === 0) return MEANINGFUL_DEFAULT;
+
       return feature.generated_schema;
     };
 
@@ -440,7 +470,6 @@ window.vaptScriptLoaded = true;
               "risks": "{{risks}}",
               "assurance_against": "{{assurance_against}}"
             },
-            "safety_guidelines": "{{dev_guidelines}}",
             "raw_feature_context": "{{raw_json}}",
             "previous_implementation": "{{previous_schema}}"
           }
@@ -449,7 +478,27 @@ window.vaptScriptLoaded = true;
         contextJson = JSON.stringify(defaultTemplate, null, 2);
       }
 
-      // Replace Placeholders in the JSON portion
+      // 1. Extract Development Guidance
+      let displayInstruct = feature.dev_instruct || feature.devInstruct || '';
+      if (!displayInstruct && feature.generated_schema) {
+        try {
+          const schema = typeof feature.generated_schema === 'string' ? JSON.parse(feature.generated_schema) : feature.generated_schema;
+          if (schema && schema.instruction) {
+            displayInstruct = schema.instruction;
+          }
+        } catch (e) { }
+      }
+      if (!displayInstruct) displayInstruct = 'No specific guidelines provided.';
+
+      // 2. Extract Reference Code (v3.6.10)
+      let referenceCode = '';
+      if (feature.code_examples && Array.isArray(feature.code_examples)) {
+        referenceCode = feature.code_examples.map(ex => {
+          return `Language: ${ex.language || 'PHP'}\nDescription: ${ex.description || 'Implementation Logic'}\nCode:\n${ex.code}`;
+        }).join('\n\n');
+      }
+
+      // Replace Placeholders
       const replaceAll = (str, key, val) => {
         const value = Array.isArray(val) ? val.join(', ') : (val || '');
         return str.split(`{{${key}}}`).join(value).split(`{${key}}`).join(value);
@@ -479,70 +528,84 @@ window.vaptScriptLoaded = true;
       delete rawContext.implementation_data;
       contextJson = replaceAll(contextJson, 'raw_json', JSON.stringify(rawContext, null, 2));
       contextJson = replaceAll(contextJson, 'previous_schema', feature.generated_schema || 'None');
-      contextJson = replaceAll(contextJson, 'dev_guidelines', feature.dev_instruct || 'No specific guidelines provided.');
 
-      // Dynamic Substitution from automation_prompts
+      // Dynamic Substitution
       const prompts = feature.automation_prompts || {};
       contextJson = replaceAll(contextJson, 'automation_prompts.ai_ui', prompts.ai_ui || `Interactive JSON Schema for VAPT Workbench.`);
       contextJson = replaceAll(contextJson, 'automation_prompts.ai_check', prompts.ai_check || `PHP verification logic for ${feature.label || 'this feature'}.`);
       contextJson = replaceAll(contextJson, 'automation_prompts.ai_schema', prompts.ai_schema || `Essential schema fields for ${feature.label || 'this feature'}.`);
 
       // Assemble HYBRID PROMPT
-      const finalPrompt = `You are an Expert WordPress Security Engineer, UI Designer, and VAPT Specialist. Your core mandate is to implement security controls that adhere to VAPT and OWASP Top 10 risks and WordPress Coding Standards.
+      const finalPrompt = `
+      --- ROLE & OBJECTIVE ---
+      You are an Expert WordPress Security Engineer, UI Designer, and VAPT Specialist. Your core mandate is to implement security controls that adhere to VAPT and OWASP Top 10 risks and WordPress Coding Standards.
 
-I need you to generate a highly optimized JSON Schema for a 'Functional Workbench' interface for the following security feature:
+      I need you to generate a highly optimized JSON Schema for a 'Functional Workbench' interface for the following security feature:
 
---- DESIGN CONTEXT ---
-${contextJson}
---- 
+      --- DESIGN CONTEXT (JSON) ---
+      ${contextJson}
+      --- 
 
-INSTRUCTIONS & CRITICAL RULES:
-1. **Response Format**: Provide ONLY a JSON block. No preamble or conversation.
-2. **Schema Structure**: You MUST include both 'controls' and 'enforcement' blocks.
-3. **Control Properties (MANDATORY)**:
-   - Every object in the 'controls' array **MUST** have a 'type' field.
-   - **Functional**: 'toggle', 'input', 'select', 'textarea', 'code', 'test_action', 'button', 'password'. (MUST HAVE 'key' & 'default').
-   - **Presentational**: 'info', 'alert', 'section', 'group', 'divider', 'html', 'header', 'label'. (NO 'key' required).
-   - **Rich UI**: 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'. (NO 'key' required).
-    - **Optional**: 'visibility': { 'condition': 'has_content', 'fallback': 'hide' } - Use this to suppress empty informational blocks.
-4. **JSON Skeleton**:
-\`\`\`json
-{
-  "controls": [
-    { "type": "header", "label": "Implementation" },
-    { "type": "toggle", "label": "Enable Feature", "key": "feat_enabled", "default": true },
-    { "type": "test_action", "label": "Verify Protection", "key": "verify_feat", "test_logic": "universal_probe", "test_config": { ... } }
-  ],
-  "enforcement": { 
-    "driver": "hook", 
-    "mappings": { "feat_enabled": "backend_method_name" } 
-  },
-  "// Alternative Htaccess Driver": {
-    "enforcement": {
-      "driver": "htaccess",
-      "target": "root",
-      "mappings": {
-        "feat_enabled": "<FilesMatch \"readme\\.html\">\\nOrder allow,deny\\nDeny from all\\n</FilesMatch>"
+      --- REFERENCE CODE ---
+      ${referenceCode || 'No specific reference code provided in catalog.'}
+      ---
+
+      --- FEATURE-SPECIFIC REQUIREMENTS ---
+      ${displayInstruct}
+      ---
+
+      --- INSTRUCTIONS & CRITICAL RULES ---
+      1. **Response Format**: Provide ONLY a JSON block. No preamble or conversation.
+      2. **Schema Structure**: You MUST include both 'controls' and 'enforcement' blocks.
+      3. **Reference Code Usage**: You **MUST** first check the 'REFERENCE CODE' section.
+         - If 'htaccess' rules are provided, use the 'htaccess' driver.
+         - If PHP code is provided, use the 'hook' driver.
+         - Map controls to the exact logic shown in the reference.
+      4. **Control Properties (MANDATORY)**:
+         - Every object in the 'controls' array ** MUST ** have a 'type' field.
+         - ** Functional **: 'toggle', 'input', 'select', 'textarea', 'code', 'test_action', 'button', 'password'. (MUST HAVE 'key' & 'default').
+         - ** Presentational **: 'info', 'alert', 'section', 'group', 'divider', 'html', 'header', 'label'. (NO 'key' required).
+         - ** Rich UI **: 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'. (NO 'key' required).
+          - ** Optional **: 'visibility': { 'condition': 'has_content', 'fallback': 'hide' } - Use this to suppress empty informational blocks.
+      5. ** JSON Skeleton **:
+        \`\`\`json
+      {
+        "controls": [
+          { "type": "header", "label": "Implementation" },
+          { "type": "toggle", "label": "Enable Feature", "key": "feat_enabled", "default": true },
+          { "type": "test_action", "label": "Verify Protection", "key": "verify_feat", "test_logic": "universal_probe", "test_config": { ... } }
+        ],
+        "enforcement": { 
+          "driver": "hook", 
+          "mappings": { "feat_enabled": "backend_method_name" } 
+        },
+        "// Alternative Htaccess Driver": {
+          "enforcement": {
+            "driver": "htaccess",
+            "target": "root",
+            "mappings": {
+              "feat_enabled": "<FilesMatch \\"readme\\\\.html\\">\\\\nOrder allow,deny\\\\nDeny from all\\\\n</FilesMatch>"
+            }
+          }
+        }
       }
-    }
-  }
-}
-\`\`\`
-5. **Enforcement Drivers (INTELLIGENT SELECTION)**:
-   - **MANDATORY**: Use 'htaccess' for any feature targeting physical files (e.g. readme.html, license.txt, xmlrpc.php, .env). PHP hooks CANNOT block these effectively on Apache.
-   - Use 'hook' for dynamic logic, API interceptions, or header injections.
-   - For 'htaccess', ALWAYS include 'target': 'root' in the enforcement block.
-6. **Visibility Overrides**:
-   - INCLUDE 'test_checklist' and 'evidence_list' for verification.
-    - ${includeNotes ? "INCLUDE a 'textarea' with key 'operational_notes' for Implementation Notes. Use visibility: { \"condition\": \"has_content\", \"fallback\": \"hide\" } to ensure it remains hidden if empty." : "EXCLUDE operational notes textarea."}
-7. **No Orphan Headers**: Do NOT include 'header' or 'section' controls if they are not followed by functional controls.
-8. **Automated Verification (CRITICAL)**:
+      \`\`\`
+      6. **Enforcement Drivers (INTELLIGENT SELECTION)**:
+         - **MANDATORY**: Use 'htaccess' for any feature targeting physical files (e.g. readme.html, license.txt, xmlrpc.php, .env). PHP hooks CANNOT block these effectively on Apache.
+         - Use 'hook' for dynamic logic, API interceptions, or header injections.
+         - For 'htaccess', ALWAYS include 'target': 'root' in the enforcement block.
+      7. **Visibility Overrides**:
+         - INCLUDE 'test_checklist' and 'evidence_list' for verification.
+         - ${includeNotes ? "INCLUDE a 'textarea' with key 'operational_notes' for Implementation Notes. Use visibility: { \"condition\": \"has_content\", \"fallback\": \"hide\" } to ensure it remains hidden if empty." : "EXCLUDE operational notes textarea."}
+      8. **No Orphan Headers**: Do NOT include 'header' or 'section' controls if they are not followed by functional controls.
+
+9. **Automated Verification (CRITICAL)**:
    - Use 'test_action' for verification buttons.
    - **MUST** include 'test_logic'. Valid options: 'universal_probe', 'check_headers', 'spam_requests', 'block_xmlrpc', 'disable_directory_browsing', 'hide_wp_version', 'block_null_byte_injection'.
    - For 'universal_probe', ensure 'test_config' is complete: { "method": "GET|POST", "path": "/", "expected_status": [200|403|429], "expected_text": "text_to_find" }.
    - If information is missing for a valid test, add an 'alert' control explaining exactly what is needed (e.g., "Missing endpoint path").
-8. **Toggle Labels**: All 'toggle' controls MUST have a clear 'label' explaining what they enable/disable.
-9. **Enforcement Logic**: Ensure 'enforcement.mappings' bind the functional keys (e.g., toggles) to the backend strategy.
+10. **Toggle Labels**: All 'toggle' controls MUST have a clear 'label' explaining what they enable/disable.
+11. **Enforcement Logic**: Ensure 'enforcement.mappings' bind the functional keys (e.g., toggles) to the backend strategy.
 
 Feature Name: ${feature.name || feature.label || feature.title}
 Feature ID: ${feature.id || 'N/A'}
@@ -567,11 +630,10 @@ Feature ID: ${feature.id || 'N/A'}
         return Promise.resolve();
       };
 
-      copyToClipboard(personalizedPrompt)
-        .then(() => {
-          setSaveStatus({ message: __('Design Prompt copied!', 'vapt-builder'), type: 'success' });
-          setTimeout(() => setSaveStatus(null), 3000);
-        });
+      copyToClipboard(personalizedPrompt).then(() => {
+        setSaveStatus({ message: __('Design Prompt copied!', 'vapt-builder'), type: 'success' });
+        setTimeout(() => setSaveStatus(null), 3000);
+      });
     };
 
     return el(Modal, {
@@ -597,10 +659,10 @@ Feature ID: ${feature.id || 'N/A'}
         saveStatus.message
       ]),
 
-      el('form', { 
-        id: 'vapt-design-modal-form', 
-        onSubmit: (e) => e.preventDefault(), 
-        className: 'vapt-design-modal-inner-layout' 
+      el('form', {
+        id: 'vapt-design-modal-form',
+        onSubmit: (e) => e.preventDefault(),
+        className: 'vapt-design-modal-inner-layout'
       }, [
         el('div', { id: 'vapt-design-modal-left-col' }, [
 

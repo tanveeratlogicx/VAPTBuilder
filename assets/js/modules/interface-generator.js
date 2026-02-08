@@ -2,29 +2,47 @@
 // Analyzes remediation text and returns a UI Schema for the dashboard.
 
 (function () {
+  console.log('VAPT Interface Generator Loaded v3.6.11-FIXED'); // Verify cache bust
   const InterfaceGenerator = {
+
     /**
      * Main entry point to generate a schema from a feature's remediation text.
      * @param {string} remediationText 
      * @param {string} customInstruction Optional user-provided context
-     * @returns {object} Schema object { type, props }
+     * @returns {object} Schema object { controls, enforcement, _instructions }
      */
     generate: function (remediationText, customInstruction = '') {
-      if (!remediationText) return { type: 'manual', instruction: customInstruction || '' };
-
       const fullInstruction = customInstruction
         ? customInstruction + '\n\n--- Original Remediation ---\n' + remediationText
-        : remediationText;
+        : remediationText || 'No specific remediation tracking provided.';
+
+      // Base Structure
+      const baseSchema = {
+        controls: [
+          { type: 'header', label: 'Implementation Status' },
+          { type: 'toggle', label: 'Enable Feature', key: 'feat_enabled', default: true }
+        ],
+        enforcement: {
+          driver: 'manual', // Default to manual unless specific code is found
+          mappings: {}
+        },
+        _instructions: fullInstruction
+      };
+
+      if (!remediationText) return baseSchema;
 
       // 1. Check for wp-config.php modifications
       // Pattern: "Add to wp-config.php: `CODE`" or similar
       const wpConfigMatch = remediationText.match(/wp-config\.php.*?:?\s*`([^`]+)`/i);
       if (wpConfigMatch) {
-        return {
-          type: 'wp_config',
-          code: wpConfigMatch[1].trim(),
-          instruction: fullInstruction
-        };
+        const code = wpConfigMatch[1].trim();
+        baseSchema.controls.push({
+          type: 'info',
+          label: 'wp-config.php Requirement',
+          content: `Add the following to your wp-config.php:\n\n<code>${code}</code>`
+        });
+        // wp-config is usually manual or file-based, keeping driver as manual for safety unless we have a specific file driver
+        return baseSchema;
       }
 
       // 2. Check for .htaccess modifications
@@ -33,36 +51,49 @@
         remediationText.match(/Add\s*`([^`]+)`\s*to\s*\.htaccess/i);
 
       if (htaccessMatch) {
-        return {
-          type: 'htaccess',
-          rule: htaccessMatch[1].trim(),
-          instruction: fullInstruction
+        const rule = htaccessMatch[1].trim();
+        baseSchema.enforcement.driver = 'htaccess';
+        baseSchema.enforcement.target = 'root';
+        baseSchema.enforcement.mappings = {
+          'feat_enabled': rule
         };
+        // Add a read-only view of the rule
+        baseSchema.controls.push({
+          type: 'code',
+          label: 'Generated .htaccess Rule',
+          default: rule,
+          readOnly: true
+        });
+        return baseSchema;
       }
 
       // 3. Check for specific numeric inputs (heuristics)
       // Pattern: "min X chars" or "X minutes"
       const minLengthMatch = remediationText.match(/min(?:imum)?\s*(\d+)\s*char/i);
       if (minLengthMatch) {
-        return {
-          type: 'complex_input',
-          instruction: fullInstruction,
-          inputs: [
-            {
-              id: 'min_length',
-              type: 'number',
-              label: 'Minimum Character Length',
-              default: parseInt(minLengthMatch[1], 10)
-            }
-          ]
-        };
+        baseSchema.controls.push({
+          type: 'input',
+          inputType: 'number',
+          key: 'min_length',
+          label: 'Minimum Character Length',
+          default: parseInt(minLengthMatch[1], 10)
+        });
+        // Update enforcement to use this key if it were a real hook, 
+        // but for now we keep manual/hook driver placeholder
+        baseSchema.enforcement.driver = 'hook';
+        baseSchema.enforcement.mappings = { 'feat_enabled': 'vapt_enforce_min_length' };
+        return baseSchema;
       }
 
       // 4. Fallback: Manual Instruction
-      return {
-        type: 'manual',
-        instruction: fullInstruction
-      };
+      // Already set up in baseSchema
+      baseSchema.controls.push({
+        type: 'info',
+        label: 'Manual Implementation Required',
+        content: 'Please refer to the implementation guide in the side panel.'
+      });
+
+      return baseSchema;
     }
   };
 
