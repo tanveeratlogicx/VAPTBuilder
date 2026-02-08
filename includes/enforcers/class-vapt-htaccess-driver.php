@@ -53,6 +53,12 @@ class VAPT_Htaccess_Driver
    */
   public static function generate_rules($data, $schema)
   {
+    // 🛡️ TWO-WAY DEACTIVATION (v3.6.19)
+    $is_enabled = isset($data['enabled']) ? (bool)$data['enabled'] : true;
+    if (!$is_enabled) {
+      return array(); // Return empty set if disabled
+    }
+
     $enf_config = isset($schema['enforcement']) ? $schema['enforcement'] : array();
     $rules = array();
     $mappings = isset($enf_config['mappings']) ? $enf_config['mappings'] : array();
@@ -95,6 +101,28 @@ class VAPT_Htaccess_Driver
     }
 
     return $rules;
+  }
+
+  /**
+   * 🔍 VERIFICATION LOGIC (v3.6.19)
+   * Phisically checks the .htaccess file for the feature marker.
+   */
+  public static function verify($key, $impl_data, $schema)
+  {
+    $target_key = $schema['enforcement']['target'] ?? 'root';
+    $htaccess_path = ABSPATH . '.htaccess';
+    if ($target_key === 'uploads') {
+      $upload_dir = wp_upload_dir();
+      $htaccess_path = $upload_dir['basedir'] . '/.htaccess';
+    }
+
+    if (!file_exists($htaccess_path)) {
+      return false;
+    }
+
+    $content = file_get_contents($htaccess_path);
+    // Look for the specific feature key within our VAPT block
+    return (strpos($content, "X-VAPT-Feature \"$key\"") !== false);
   }
 
   /**

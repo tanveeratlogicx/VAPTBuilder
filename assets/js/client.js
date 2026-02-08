@@ -158,6 +158,36 @@
       console.log(`[VAPT] Rendering Feature ${f.key}:`, schema);
       const isVerifEngine = f.include_verification_engine;
 
+      // 🛡️ Resilience: Auto-Inject Verification Controls (Moved from GeneratedInterface v3.6.19)
+      // This ensures they are correctly filtered into 'automControls' and don't appear in 'implControls'
+      if (schema && Array.isArray(schema.controls)) {
+        const hasTests = schema.controls.some(c => c.type === 'test_action');
+        const featureKey = f.key || '';
+
+        if (!hasTests) {
+          // 1. Rate Limiting / Brute Force
+          if (['limit-login-attempts', 'rate-limiting', 'login-protection', 'xmlrpc-protection'].some(k => featureKey.includes(k))) {
+            schema.controls.push({
+              type: 'test_action',
+              label: featureKey.includes('xmlrpc') ? 'Test: XML-RPC Block' : 'Test: Rate Limit (Spike)',
+              key: 'auto_verify_resilience',
+              test_logic: featureKey.includes('xmlrpc') ? 'block_xmlrpc' : 'spam_requests',
+              help: __('Auto-injected verification test.', 'vapt-builder')
+            });
+          }
+          // 2. Generic Fallback
+          else if (f.include_verification_engine || (f.generated_schema && f.generated_schema.include_verification_engine)) {
+            schema.controls.push({
+              type: 'test_action',
+              label: 'Test: Basic Verification',
+              key: 'auto_verify_generic',
+              test_logic: 'default',
+              help: __('Basic availability check.', 'vapt-builder')
+            });
+          }
+        }
+      }
+
       // Filter controls
       // 1. Implementation Controls (Left Column)
       const implControls = schema.controls ? schema.controls.filter(c =>
@@ -196,9 +226,8 @@
                   const toggle = el(ToggleControl, {
                     checked: isEnforced,
                     onChange: (val) => updateFeature(f.key, { is_enforced: val }),
-                    disabled: isHtaccess,
                     __nextHasNoMarginBottom: true,
-                    style: { margin: 0, opacity: isHtaccess ? 0.6 : 1 }
+                    style: { margin: 0 }
                   });
 
                   return isHtaccess
@@ -402,14 +431,7 @@
         el('main', { style: { flexGrow: 1, padding: '30px', overflowY: 'auto', background: '#f9fafb' } }, [
           !activeFeatureKey ? el('div', { style: { textAlign: 'center', padding: '100px', color: '#9ca3af' } }, __('Select a feature from the list to view implementation controls.', 'vapt-builder')) :
             el('div', { style: { maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' } }, [
-              // Breadcrumb
-              features.find(f => f.key === activeFeatureKey) && el('nav', { style: { marginBottom: '0', fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '8px', background: '#fff', padding: '12px 20px', borderRadius: '8px', border: '1px solid #e5e7eb' } }, [
-                el('span', { style: { cursor: 'pointer' }, onClick: () => setActiveCategory('all') }, __('Configuration', 'vapt-builder')),
-                el('span', null, '›'),
-                el('span', null, features.find(f => f.key === activeFeatureKey).category || __('Uncategorized', 'vapt-builder')),
-                el('span', null, '›'),
-                el('span', { style: { color: '#111827', fontWeight: 600 } }, features.find(f => f.key === activeFeatureKey).label)
-              ]),
+              // Breadcrumb Removed (v3.6.19 Request)
               renderFeatureCard(features.find(f => f.key === activeFeatureKey), setVerifFeature)
             ])
         ])

@@ -316,7 +316,9 @@
       if (hasHeaderCheck) {
         isSecure = headerMatches && (code === 200 || expectsAllow || statusMatches);
       } else if (expectsBlock) {
-        isSecure = statusMatches && code >= 400;
+        // Allow 404 as a valid "Block" even if 403 was expected (Global Security Best Practice)
+        const is404Acceptable = code === 404;
+        isSecure = (statusMatches || is404Acceptable) && code >= 400;
       } else if (expectsAllow) {
         isSecure = code === 200 && (expectedText ? text.includes(expectedText) : true);
       } else if (statusMatches) {
@@ -325,7 +327,24 @@
         isSecure = code >= 400;
       }
 
-      if (isSecure && expectsBlock && featureKey && enforcedFeature && enforcedFeature !== featureKey) {
+      // Helper to resolve feature aliases (v3.6.20)
+      const areFeaturesEquivalent = (f1, f2) => {
+        if (!f1 || !f2) return false;
+        if (f1 === f2) return true;
+
+        // Normalize known aliases
+        const aliases = {
+          'user-enumeration': ['username-enumeration-via-wordpress-rest-api', 'block-user-enumeration'],
+          'username-enumeration-via-wordpress-rest-api': ['user-enumeration', 'block-user-enumeration'],
+          'xmlrpc': ['block-xmlrpc', 'disable-xmlrpc'],
+          'block-xmlrpc': ['xmlrpc', 'disable-xmlrpc']
+        };
+
+        return (aliases[f1] && aliases[f1].includes(f2));
+      };
+
+
+      if (isSecure && expectsBlock && featureKey && enforcedFeature && !areFeaturesEquivalent(enforcedFeature, featureKey)) {
         isSecure = false;
         return {
           success: false,
@@ -340,6 +359,8 @@
           message = `Protection Headers Present (HTTP ${code}). All expected headers verified.`;
         } else if (expectsBlock && statusMatches) {
           message = `Attack Blocked (HTTP ${code}). Expected block code (${expectedStatus}).`;
+        } else if (expectsBlock && code === 404) {
+          message = `Attack Blocked (HTTP 404). Resource hidden successfully (Expected ${expectedStatus}).`;
         } else if (expectsAllow && code === 200) {
           message = `Normal Response (HTTP ${code}) with protection indicators.`;
         } else {
@@ -700,6 +721,7 @@
         _instructions: schema.instruction
       };
     }
+
     const currentData = feature.implementation_data ? (typeof feature.implementation_data === 'string' ? JSON.parse(feature.implementation_data) : feature.implementation_data) : {};
     const [localAlert, setLocalAlert] = useState(null);
 

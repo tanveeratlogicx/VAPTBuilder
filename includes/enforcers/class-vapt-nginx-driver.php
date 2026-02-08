@@ -18,6 +18,12 @@ class VAPT_Nginx_Driver
    */
   public static function generate_rules($data, $schema)
   {
+    // 🛡️ TWO-WAY DEACTIVATION (v3.6.19)
+    $is_enabled = isset($data['enabled']) ? (bool)$data['enabled'] : true;
+    if (!$is_enabled) {
+      return array();
+    }
+
     $enf_config = isset($schema['enforcement']) ? $schema['enforcement'] : array();
     $rules = array();
     $mappings = isset($enf_config['mappings']) ? $enf_config['mappings'] : array();
@@ -39,9 +45,26 @@ class VAPT_Nginx_Driver
     if (!empty($rules)) {
       $feature_key = isset($schema['feature_key']) ? $schema['feature_key'] : 'unknown';
       array_unshift($rules, "# Rule for: $feature_key");
+      $rules[] = "add_header X-VAPT-Feature \"$feature_key\" always;"; // Marker for verify
     }
 
     return $rules;
+  }
+
+  /**
+   * 🔍 VERIFICATION LOGIC (v3.6.19)
+   */
+  public static function verify($key, $impl_data, $schema)
+  {
+    $upload_dir = wp_upload_dir();
+    $file_path = $upload_dir['basedir'] . '/vapt-nginx-rules.conf';
+
+    if (!file_exists($file_path)) {
+      return false;
+    }
+
+    $content = file_get_contents($file_path);
+    return (strpos($content, "X-VAPT-Feature \"$key\"") !== false);
   }
 
   /**

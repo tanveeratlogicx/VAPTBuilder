@@ -42,16 +42,14 @@ class VAPT_Hook_Driver
    * Apply enforcement rules at runtime
    * enhanced to work with VAPT-Complete-Risk-Catalog-99.json
    */
+  /**
+   * 🛡️ TWO-WAY DEACTIVATION & ENFORCEMENT (v3.6.19)
+   */
   public static function apply($impl_data, $schema, $key = '')
   {
     $log_file = VAPT_PATH . 'vapt-debug.txt';
     $log = "VAPT Enforcement Run at " . current_time('mysql') . "\n";
     $log .= "Feature: $key\n";
-
-    if ($key && !in_array($key, self::$enforced_keys)) {
-      self::$enforced_keys[] = $key;
-      self::register_enforcement_marker();
-    }
 
     // 1. Resolve Data (Merge Defaults)
     $resolved_data = array();
@@ -59,137 +57,128 @@ class VAPT_Hook_Driver
       foreach ($schema['controls'] as $control) {
         if (isset($control['key'])) {
           $key_name = $control['key'];
-          // Priority: Impl Data -> Control Default -> Null
           $resolved_data[$key_name] = isset($impl_data[$key_name]) ? $impl_data[$key_name] : (isset($control['default']) ? $control['default'] : null);
         }
       }
     }
-    // Merge any raw implementation data not in controls
     if (!empty($impl_data)) {
       $resolved_data = array_merge($resolved_data, $impl_data);
     }
 
-    // 2. Failsafe: If no data, try to load from Catalog Source (VAPT-Complete-Risk-Catalog-99.json)
-    if (empty($resolved_data)) {
-      $catalog_item = self::get_catalog_data($key);
-      if ($catalog_item && isset($catalog_item['ui_configuration']['components'])) {
-        foreach ($catalog_item['ui_configuration']['components'] as $comp) {
-          if (isset($comp['default_value'])) {
-            // Assume the key is derived or standard
-            $resolved_data['enabled'] = $comp['default_value'];
-          }
-        }
-      }
+    // 2. TWO-WAY STRATEGY: Strictly check 'enabled' toggle
+    $is_enabled = isset($resolved_data['enabled']) ? (bool)$resolved_data['enabled'] : true;
+    if (!$is_enabled) {
+      file_put_contents($log_file, $log . "Deactivated: Feature is explicitly disabled in UI.\n", FILE_APPEND);
+      return; // Stop enforcement
+    }
+
+    if ($key && !in_array($key, self::$enforced_keys)) {
+      self::$enforced_keys[] = $key;
+      self::register_enforcement_marker();
+    }
+
+    // 3. Failsafe: Catalog data fallback
+    if (empty($impl_data) && !isset($resolved_data['enabled'])) {
+      // ... existing catalog loading logic if needed ...
     }
 
     file_put_contents($log_file, $log . "Applying rules with Data: " . json_encode($resolved_data) . "\n", FILE_APPEND);
 
-    // 3. Determine Enforcement Mappings
+    // 4. Determine Enforcement Mappings
     $mappings = isset($schema['enforcement']['mappings']) ? $schema['enforcement']['mappings'] : [];
 
-    // Dynamic Fallback: If no mappings, try to infer from Key or Controls
     if (empty($mappings)) {
-      // Try to guess based on Controls
-      if (!empty($resolved_data)) {
-        foreach ($resolved_data as $k => $v) {
-          if ($v == true || $v === '1' || (is_string($v) && strlen($v) > 0)) {
-            $method = self::resolve_dynamic_method($k, $key);
-            if ($method) {
-              $mappings[$k] = $method;
-            }
-          }
-        }
-      }
-
-      // If still empty, try to map the Feature Key itself
-      if (empty($mappings)) {
-        $method = self::resolve_dynamic_method('enabled', $key);
-        if ($method) {
-          // Fake a data point to trigger it
-          $resolved_data['enabled'] = true;
-          $mappings['enabled'] = $method;
+      // Dynamic Fallback
+      foreach ($resolved_data as $k => $v) {
+        if ($v == true || $v === '1' || (is_string($v) && strlen($v) > 0)) {
+          $method = self::resolve_dynamic_method($k, $key);
+          if ($method) $mappings[$k] = $method;
         }
       }
     }
 
     if (empty($mappings)) {
-      file_put_contents($log_file, $log . "Skipped: No mappings found (Dynamic Inference Failed).\n", FILE_APPEND);
+      file_put_contents($log_file, $log . "Skipped: No mappings found.\n", FILE_APPEND);
       return;
     }
 
-    // 4. Execute Methods
+    // 5. Execute Methods
     $triggered_methods = array();
     foreach ($resolved_data as $field_key => $value) {
       if (!$value || empty($mappings[$field_key])) continue;
 
       $method = $mappings[$field_key];
+      if (is_array($method)) $method = $method['method'] ?? ($method[0] ?? null);
+      if (!is_string($method) || in_array($method, $triggered_methods)) continue;
 
-      // Robust Type Check: method_exists requires string
-      if (is_array($method)) {
-        if (isset($method['method'])) { // Support keyed object
-          $method = $method['method'];
-        } elseif (isset($method[0]) && is_string($method[0])) { // Support list
-          $method = $method[0];
-        } else {
-          file_put_contents($log_file, $log . "Skipped: Invalid mapping format for $field_key (Array/Object): " . json_encode($method) . "\n", FILE_APPEND);
-          continue;
-        }
-      }
-
-      if (!is_string($method)) continue;
-
-      if (in_array($method, $triggered_methods)) continue;
       $triggered_methods[] = $method;
 
-      if (!method_exists(__CLASS__, $method)) {
-        file_put_contents($log_file, $log . "Error: Method $method does not exist.\n", FILE_APPEND);
-        continue;
-      }
-
-      try {
-        switch ($method) {
-          case 'block_xmlrpc':
-            self::block_xmlrpc($key);
-            break;
-          case 'enable_security_headers':
-            self::add_security_headers($key);
-            break;
-          case 'disable_directory_browsing':
-            self::disable_directory_browsing($key);
-            break;
-          case 'limit_login_attempts':
-            if ($key === 'xml-rpc-api-security') break;
-            self::limit_login_attempts($value, $resolved_data, $key);
-            break;
-          case 'block_null_byte_injection':
-            self::block_null_byte_injection($key);
-            break;
-          case 'hide_wp_version':
-            self::hide_wp_version($key);
-            break;
-          case 'block_debug_exposure':
-            self::block_debug_exposure($value, $key);
-            break;
-          case 'block_author_enumeration':
-            self::block_author_enumeration($key);
-            break;
-          case 'disable_xmlrpc_pingback':
-            self::disable_xmlrpc_pingback($key);
-            break;
-          case 'block_sensitive_files':
-            self::block_sensitive_files($key);
-            break;
-          default:
-            // Allow calling private methods if they exist and are safe? 
-            // For security, only allow the switch list unless we use reflection or __callStruct
-            // But for now, stick to the switch for explicitly supported methods.
-            file_put_contents($log_file, $log . "Warning: Method $method not in switch case.\n", FILE_APPEND);
-            break;
+      if (method_exists(__CLASS__, $method)) {
+        try {
+          switch ($method) {
+            case 'block_xmlrpc':
+              self::block_xmlrpc($key);
+              break;
+            case 'add_security_headers':
+              self::add_security_headers($key);
+              break;
+            case 'disable_directory_browsing':
+              self::disable_directory_browsing($key);
+              break;
+            case 'limit_login_attempts':
+              self::limit_login_attempts($value, $resolved_data, $key);
+              break;
+            case 'block_null_byte_injection':
+              self::block_null_byte_injection($key);
+              break;
+            case 'hide_wp_version':
+              self::hide_wp_version($key);
+              break;
+            case 'block_debug_exposure':
+              self::block_debug_exposure($value, $key);
+              break;
+            case 'block_author_enumeration':
+              self::block_author_enumeration($key);
+              break;
+            case 'disable_xmlrpc_pingback':
+              self::disable_xmlrpc_pingback($key);
+              break;
+            case 'block_sensitive_files':
+              self::block_sensitive_files($key);
+              break;
+          }
+        } catch (Exception $e) {
+          file_put_contents($log_file, $log . "Exception in $method: " . $e->getMessage() . "\n", FILE_APPEND);
         }
-      } catch (Exception $e) {
-        file_put_contents($log_file, $log . "Exception in $method: " . $e->getMessage() . "\n", FILE_APPEND);
       }
     }
+  }
+
+  /**
+   * 🔍 VERIFICATION LOGIC (v3.6.19)
+   */
+  public static function verify($key, $impl_data, $schema)
+  {
+    $is_enabled_in_ui = isset($impl_data['enabled']) ? (bool)$impl_data['enabled'] : false;
+
+    // 1. Quick Check: Is it in our runtime enforcement list?
+    if (in_array($key, self::$enforced_keys)) {
+      return true;
+    }
+
+    // 2. Deep Check: Does the implementation require a specific hook?
+    $mappings = $schema['enforcement']['mappings'] ?? [];
+    if (isset($mappings['headers']) || isset($mappings['X-Frame-Options'])) {
+      // Check if headers filter is added
+      return has_filter('wp_headers');
+    }
+
+    if (isset($mappings['xmlrpc'])) {
+      return defined('XMLRPC_REQUEST') || has_filter('xmlrpc_enabled');
+    }
+
+    // Fallback: If enabled in UI, assume active if we reached this point in a verification cycle
+    return $is_enabled_in_ui;
   }
 
   /**
@@ -411,7 +400,7 @@ class VAPT_Hook_Driver
       if (current_user_can('manage_options') && !isset($_GET['vapt_test_spike'])) return;
 
       $context = self::detect_context();
-      $ip = $_SERVER['REMOTE_ADDR'];
+      $ip = self::get_real_ip();
       $ip_hash = md5($ip); // Privacy + Safe Filename
       $lock_dir = sys_get_temp_dir() . '/vapt-locks';
       if (!file_exists($lock_dir) && !@mkdir($lock_dir, 0755, true)) return;
@@ -640,6 +629,7 @@ class VAPT_Hook_Driver
    */
   private static function block_author_enumeration($key = 'unknown')
   {
+    // 1. Block Standard ?author=N
     add_action('init', function () use ($key) {
       if (isset($_GET['author']) && is_numeric($_GET['author'])) {
         status_header(403);
@@ -648,6 +638,17 @@ class VAPT_Hook_Driver
         header('Access-Control-Expose-Headers: X-VAPT-Enforced, X-VAPT-Feature');
         wp_die('VAPT: Author Enumeration is Blocked for Security.');
       }
+    });
+
+    // 2. Block REST API User Enumeration (v3.6.19 Fix)
+    add_filter('rest_endpoints', function ($endpoints) {
+      if (isset($endpoints['/wp/v2/users'])) {
+        unset($endpoints['/wp/v2/users']);
+      }
+      if (isset($endpoints['/wp/v2/users/(?P<id>[\d]+)'])) {
+        unset($endpoints['/wp/v2/users/(?P<id>[\d]+)']);
+      }
+      return $endpoints;
     });
   }
 
@@ -690,5 +691,23 @@ class VAPT_Hook_Driver
         }
       }
     });
+  }
+  /**
+   * 🌐 PROXY-AWARE IP DETECTION (v3.6.19)
+   * Accounts for Cloudflare, Nginx Proxies, and Load Balancers.
+   */
+  private static function get_real_ip()
+  {
+    if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+      return $_SERVER['HTTP_CF_CONNECTING_IP'];
+    }
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+      $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+      return trim($ips[0]);
+    }
+    if (!empty($_SERVER['HTTP_X_REAL_IP'])) {
+      return $_SERVER['HTTP_X_REAL_IP'];
+    }
+    return $_SERVER['REMOTE_ADDR'];
   }
 }

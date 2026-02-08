@@ -3560,8 +3560,7 @@ Feature ID: ${feature.id || 'N/A'}
                     if (newStatus === 'Develop') {
                       defaultNote = `Initiating implementation for ${title}. Configuring workbench and internal security drivers.`;
                     } else if (newStatus === 'Test') {
-                      const risk = (f.assurance_against && f.assurance_against.length > 0) ? f.assurance_against[0] : __('identified risks', 'vapt-builder');
-                      defaultNote = `Development phase complete. Ready to verify protection against: ${risk}.`;
+                      defaultNote = `Basic implementation and verifications are complete. Entering Test Stage.\n\nNow ready for customized changes to refine the User Experience for this feature.`;
                     } else if (newStatus === 'Release') {
                       defaultNote = `Verification protocol passed for ${title}. Ready for baseline deployment.`;
                     } else {

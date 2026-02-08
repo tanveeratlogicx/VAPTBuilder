@@ -14,6 +14,12 @@ class VAPT_IIS_Driver
    */
   public static function generate_rules($data, $schema)
   {
+    // 🛡️ TWO-WAY DEACTIVATION (v3.6.19)
+    $is_enabled = isset($data['enabled']) ? (bool)$data['enabled'] : true;
+    if (!$is_enabled) {
+      return array();
+    }
+
     $enf_config = isset($schema['enforcement']) ? $schema['enforcement'] : array();
     $rules = array();
     $mappings = isset($enf_config['mappings']) ? $enf_config['mappings'] : array();
@@ -27,6 +33,20 @@ class VAPT_IIS_Driver
       }
     }
     return $rules;
+  }
+
+  /**
+   * 🔍 VERIFICATION LOGIC (v3.6.19)
+   */
+  public static function verify($key, $impl_data, $schema)
+  {
+    $config_path = ABSPATH . 'web.config';
+    if (!file_exists($config_path)) {
+      return false;
+    }
+
+    $content = file_get_contents($config_path);
+    return (strpos($content, "VAPT-Feature: $key") !== false);
   }
 
   private static function translate_to_iis($key, $directive)

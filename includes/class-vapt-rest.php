@@ -73,6 +73,12 @@ class VAPT_REST
       'permission_callback' => array($this, 'check_permission'),
     ));
 
+    register_rest_route('vapt/v1', '/features/(?P<key>[a-zA-Z0-9_-]+)/verify', array(
+      'methods'             => 'POST',
+      'callback'            => array($this, 'verify_implementation'),
+      'permission_callback' => array($this, 'check_permission'),
+    ));
+
     register_rest_route('vapt/v1', '/features/(?P<key>[a-zA-Z0-9_-]+)/reset', array(
       'methods'  => 'POST',
       'callback' => array($this, 'reset_feature_stats'),
@@ -671,7 +677,39 @@ class VAPT_REST
       $current_feat = $current_feat ?? VAPT_DB::get_feature($key);
       $current_status = $current_feat ? strtolower($current_feat['status']) : 'draft';
 
+      // 🛡️ VALIDATION: Check implementation data against schema (v3.6.19)
+      // Get the effective schema for validation
+      $schema_for_val = null;
+      if ($request->has_param('generated_schema')) {
+        $schema_for_val = $schema; // Already decoded above
+      } else {
+        $meta = VAPT_DB::get_feature_meta($key);
+        $raw_schema = ($current_status === 'test') ? ($meta['override_schema'] ?? $meta['generated_schema']) : ($meta['generated_schema'] ?? null);
+        $schema_for_val = $raw_schema ? json_decode($raw_schema, true) : null;
+      }
+
       $implementation_data = $request->get_param('implementation_data');
+
+      // 🛡️ TYPE SANITIZATION: Handle stringified JSON from client (v3.6.19 Fix)
+      if (is_string($implementation_data)) {
+        $decoded = json_decode($implementation_data, true);
+        if (is_array($decoded)) {
+          $implementation_data = $decoded;
+        }
+      }
+
+      if ($schema_for_val) {
+        $val_result = self::validate_implementation_data($implementation_data, $schema_for_val);
+        if (is_wp_error($val_result)) {
+          // [FIX] Proactive Error Reporting
+          return new WP_REST_Response(array(
+            'error' => 'Implementation validation failed',
+            'message' => $val_result->get_error_message(),
+            'code' => $val_result->get_error_code()
+          ), 400);
+        }
+      }
+
       $val = ($implementation_data === null) ? null : (is_array($implementation_data) ? json_encode($implementation_data) : $implementation_data);
 
       if ($current_status === 'test') {
@@ -1419,6 +1457,139 @@ class VAPT_REST
     }
 
     return true;
+  }
+
+  /**
+   * 🛡️ IMPLEMENTATION VALIDATOR (v3.6.19)
+   * Validates user-provided implementation settings against the feature's JSON schema.
+   */
+  private static function validate_implementation_data($data, $schema)
+  {
+    if (!isset($schema['controls']) || !is_array($schema['controls'])) {
+      return true; // No controls to validate against (dynamic features)
+    }
+
+    if (!is_array($data)) {
+      return new WP_Error('invalid_impl_data', 'Implementation data must be an object/array', array('status' => 400));
+    }
+
+    foreach ($schema['controls'] as $control) {
+      $key = $control['key'] ?? null;
+      if (!$key) continue;
+
+      if (!isset($data[$key])) {
+        // Only error if it's marked as required (non-existent field currently, but for future proofing)
+        if (!empty($control['required'])) {
+          return new WP_Error('missing_field', sprintf('Missing required field: %s', $key), array('status' => 400));
+        }
+        continue;
+      }
+
+      $value = $data[$key];
+      $type = $control['type'] ?? 'text';
+
+      switch ($type) {
+        case 'toggle':
+          if (!is_bool($value) && $value !== 0 && $value !== 1 && $value !== '0' && $value !== '1') {
+            return new WP_Error('invalid_type', sprintf('Field %s must be a boolean/toggle', $key), array('status' => 400));
+          }
+          break;
+
+        case 'input':
+        case 'password':
+          if ($control['input_type'] === 'number') {
+            if (!is_numeric($value)) {
+              return new WP_Error('invalid_type', sprintf('Field %s must be numeric', $key), array('status' => 400));
+            }
+            if (isset($control['min']) && (float)$value < (float)$control['min']) {
+              return new WP_Error('out_of_range', sprintf('Field %s is below minimum (%s)', $key, $control['min']), array('status' => 400));
+            }
+            if (isset($control['max']) && (float)$value > (float)$control['max']) {
+              return new WP_Error('out_of_range', sprintf('Field %s is above maximum (%s)', $key, $control['max']), array('status' => 400));
+            }
+          }
+          break;
+
+        case 'select':
+          if (isset($control['options'])) {
+            $valid_values = array_map(function ($opt) {
+              return is_array($opt) ? $opt['value'] : $opt;
+            }, $control['options']);
+            if (!in_array($value, $valid_values)) {
+              return new WP_Error('invalid_option', sprintf('Field %s contains an invalid option', $key), array('status' => 400));
+            }
+          }
+          break;
+
+        case 'code':
+        case 'textarea':
+          if (!is_string($value) && $value !== null) {
+            return new WP_Error('invalid_type', sprintf('Field %s must be a string', $key), array('status' => 400));
+          }
+          break;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * 🔍 VERIFICATION PING (v3.6.19)
+   * Two-Way Activation/Deactivation check.
+   */
+  public function verify_implementation($request)
+  {
+    $key = $request['key'];
+    $meta = VAPT_DB::get_feature_meta($key);
+    if (!$meta) {
+      return new WP_Error('not_found', 'Feature not found', array('status' => 404));
+    }
+
+    $current_feat = VAPT_DB::get_feature($key);
+    $current_status = $current_feat ? strtolower($current_feat['status']) : 'draft';
+
+    $schema_raw = ($current_status === 'test' ? ($meta['override_schema'] ?? $meta['generated_schema']) : $meta['generated_schema']);
+    $impl_raw = ($current_status === 'test' ? ($meta['override_implementation_data'] ?? $meta['implementation_data']) : $meta['implementation_data']);
+
+    $schema = json_decode($schema_raw, true);
+    $impl_data = json_decode($impl_raw, true);
+
+    if (!$schema) {
+      return new WP_REST_Response(array(
+        'success'  => false,
+        'message'  => 'No schema generated for this feature.',
+        'status'   => 'unconfigured'
+      ), 200);
+    }
+
+    $driver = $schema['enforcement']['driver'] ?? 'hook';
+    $is_active = false;
+
+    // Instantiate appropriate driver for verification
+    switch ($driver) {
+      case 'hook':
+        $is_active = VAPT_Hook_Driver::verify($key, $impl_data, $schema);
+        break;
+      case 'htaccess':
+        $is_active = VAPT_Htaccess_Driver::verify($key, $impl_data, $schema);
+        break;
+      default:
+        // For nginx/iis, we might just check if the implementation data exists and is enabled
+        $is_active = isset($impl_data['enabled']) ? (bool)$impl_data['enabled'] : false;
+    }
+
+    // Two-Way Strategy: If UI says disabled, we expect is_active to be false
+    $expected_enabled = isset($impl_data['enabled']) ? (bool)$impl_data['enabled'] : false;
+    $sync_status = ($is_active === $expected_enabled) ? 'in_sync' : 'out_of_sync';
+
+    return new WP_REST_Response(array(
+      'success'     => true,
+      'is_active'   => $is_active,
+      'expected'    => $expected_enabled,
+      'sync_status' => $sync_status,
+      'timestamp'   => current_time('mysql'),
+      'driver'      => $driver
+    ), 200);
   }
 
   public function handle_active_file($request)
