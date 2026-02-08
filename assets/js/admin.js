@@ -639,6 +639,30 @@ Feature ID: ${feature.id || 'N/A'}
     return el(Modal, {
       title: el('div', { className: 'vapt-design-modal-header' }, [
         el('span', null, sprintf(__('Design Implementation: %s', 'vapt-builder'), feature.label)),
+        // Status Pill
+        el('span', {
+          style: {
+            display: 'inline-flex',
+            alignItems: 'center',
+            marginLeft: '15px',
+            padding: '3px 10px',
+            borderRadius: '12px',
+            fontSize: '11px',
+            fontWeight: '600',
+            color: '#fff',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            verticalAlign: 'middle',
+            background: (() => {
+              const s = (feature.status || 'Draft').toLowerCase();
+              if (s === 'develop') return '#10b981'; // Green
+              if (s === 'test') return '#eab308'; // Yellowish Gold
+              if (s === 'release') return '#f97316'; // Orange
+              return '#94a3b8'; // Slate 400 (Draft)
+            })(),
+            boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+          }
+        }, feature.status || 'Draft'),
         el(Button, {
           isDestructive: true,
           isSmall: true,
@@ -3959,7 +3983,22 @@ Feature ID: ${feature.id || 'N/A'}
     return el('div', { id: 'vapt-admin-dashboard--main', className: 'vapt-admin-wrap' }, [
       el('h1', null, [
         __('VAPT Builder Dashboard', 'vapt-builder'),
-        el('span', { style: { fontSize: '0.5em', marginLeft: '10px', color: '#666', fontWeight: 'normal' } }, `v${settings.pluginVersion}`)
+        el('span', { style: { fontSize: '0.5em', marginLeft: '10px', color: '#666', fontWeight: 'normal' } }, `v${settings.pluginVersion}`),
+        isSuper && el('span', {
+          style: {
+            marginLeft: '10px',
+            fontSize: '0.45em',
+            color: '#fff',
+            background: '#1e3a8a', // Dark Blue
+            padding: '4px 8px',
+            borderRadius: '5px',
+            fontWeight: '600',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+            verticalAlign: 'middle',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+          }
+        }, 'SUPERADMIN')
       ]),
       saveStatus && el('div', {
         id: 'vapt-global-status-toast',
