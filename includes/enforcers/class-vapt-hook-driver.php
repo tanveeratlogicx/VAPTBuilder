@@ -353,19 +353,36 @@ class VAPT_Hook_Driver
     $limit = null;
 
     // Resolve Limit Value
+    $rl_key = isset($all_data['rate_limit_key']) ? $all_data['rate_limit_key'] : null;
     $candidates = [
+      $config,
+      $rl_key ? ($all_data[$rl_key] ?? null) : null,
       $all_data['rate_limit'] ?? null,
       $all_data['limit'] ?? null,
+      $all_data['rpm'] ?? null,
       $all_data['max_login_attempts'] ?? null,
-      $all_data['max_attempts'] ?? null,
-      $all_data['attempts_allowed'] ?? null,
-      $all_data['api_limit'] ?? null
+      $all_data['max_attempts'] ?? null
     ];
 
     foreach ($candidates as $val) {
       if (isset($val) && is_numeric($val) && (int)$val > 1) {
         $limit = (int) $val;
         break;
+      }
+      // Support Semantic Strictness (v3.6.25)
+      if (isset($val) && is_string($val)) {
+        if ($val === 'strict') {
+          $limit = 5;
+          break;
+        }
+        if ($val === 'moderate') {
+          $limit = 10;
+          break;
+        }
+        if ($val === 'permissive') {
+          $limit = 20;
+          break;
+        }
       }
     }
 
@@ -434,12 +451,16 @@ class VAPT_Hook_Driver
             if (!headers_sent()) {
               header('X-VAPT-Limit-' . $feature_key . ': ' . $limit, false);
               header('X-VAPT-Count-' . $feature_key . ': ' . $current, false);
+              header('X-VAPT-Count: ' . $current, false); // Generic header for Verification Engine (v3.6.24)
+              header('Access-Control-Expose-Headers: X-VAPT-Count, X-VAPT-Limit', false);
             }
 
             if ($current >= $limit) {
               if (!headers_sent()) {
                 header('X-VAPT-Enforced: php-rate-limit');
                 header('X-VAPT-Feature: ' . $feature_key);
+                header('X-VAPT-Count: ' . $current, false); // Ensure count is visible even on block (v3.6.24)
+                header('Access-Control-Expose-Headers: X-VAPT-Count, X-VAPT-Enforced, X-VAPT-Feature, X-VAPT-Limit', false);
                 header('Retry-After: ' . $duration);
               }
               flock($fp, LOCK_UN);
@@ -474,7 +495,8 @@ class VAPT_Hook_Driver
 
     if (!is_dir($lock_dir)) return ['status' => 'no_dir'];
 
-    $files = glob("$lock_dir/vapt_limit_*");
+    // Updated glob to clear ALL vapt locks (v3.6.24)
+    $files = glob("$lock_dir/vapt_*");
     $results = [];
 
     foreach ($files as $file) {

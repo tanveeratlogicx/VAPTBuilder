@@ -1492,3 +1492,83 @@
 .vapt-summary-card:hover .vapt-summary-value {
     transform: scale(1.1);
 }
+
+/* 🛡️ CROSS-FILE FEATURE VISIBILITY (v3.6.30) */
+
+/* Golden-Yellow: Features only in inactive files */
+.vapt-feature-inactive-only {
+    background: #fef3c7 !important;
+    border-left: 4px solid #f59e0b !important;
+}
+
+/* Blue-Teal: Features present in multiple files */
+.vapt-feature-multi-file {
+    background: #dbeafe !important;
+    border-left: 4px solid #3b82f6 !important;
+}
+
+/* Color Legend for Superadmin */
+.vapt-color-legend {
+    background: transparent;
+    border: none;
+    padding: 0 5px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+
+
+.vapt-legend-items {
+    display: flex;
+    gap: 20px;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.vapt-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.vapt-legend-color-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    border: 1px solid #cbd5e1;
+}
+
+.vapt-legend-color-box.normal {
+    background: #ffffff;
+}
+
+.vapt-legend-color-box.inactive-only {
+    background: #fef3c7;
+    border-color: #f59e0b;
+}
+
+.vapt-legend-color-box.multi-file {
+    background: #dbeafe;
+    border-color: #3b82f6;
+}
+
+color: #475569;
+font-weight: 500;
+}
+
+/* Panel Header Height Reduction */
+.vapt-feature-panel .components-panel__body-title,
+.vapt-feature-panel .components-panel__body-toggle.components-button {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    min-height: 0 !important;
+    height: auto !important;
+}
+
+.vapt-feature-panel .components-panel__body-title h2 {
+    margin: 0 !important;
+    font-size: 13px !important;
+}

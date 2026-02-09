@@ -507,11 +507,117 @@ class VAPT_REST
       $features = array_values($features);
     }
 
-    return new WP_REST_Response(array(
+    // 🛡️ MULTI-FILE LOADING (v3.6.30): Load companion file and detect overlaps
+    $companion_file = null;
+    if ($file === 'VAPT-Complete-Risk-Catalog-99.json') {
+      $companion_file = 'VAPT-Sixteen-Risk-Catalog-12.json';
+    } elseif ($file === 'VAPT-Sixteen-Risk-Catalog-12.json') {
+      $companion_file = 'VAPT-Complete-Risk-Catalog-99.json';
+    }
+
+    $feature_keys_in_active = [];
+    foreach ($features as $feature) {
+      $key = isset($feature['key']) ? $feature['key'] : (isset($feature['id']) ? $feature['id'] : null);
+      if ($key) {
+        $feature_keys_in_active[$key] = true;
+      }
+    }
+
+    // Load companion file if it exists
+    $companion_features = [];
+    if ($companion_file) {
+      $companion_path = VAPT_PATH . 'data/' . sanitize_file_name($companion_file);
+      if (file_exists($companion_path)) {
+        $companion_content = file_get_contents($companion_path);
+        $companion_data = json_decode($companion_content, true);
+
+        if (is_array($companion_data)) {
+          $raw_companion_features = [];
+
+          if (isset($companion_data['wordpress_vapt']) && is_array($companion_data['wordpress_vapt'])) {
+            $raw_companion_features = $companion_data['wordpress_vapt'];
+          } elseif (isset($companion_data['features']) && is_array($companion_data['features'])) {
+            $raw_companion_features = $companion_data['features'];
+          } elseif (isset($companion_data['risk_catalog']) && is_array($companion_data['risk_catalog'])) {
+            // Process risk catalog format (simplified version)
+            foreach ($companion_data['risk_catalog'] as $item) {
+              if (isset($item['description']) && is_array($item['description'])) {
+                $item['description'] = isset($item['description']['summary']) ? $item['description']['summary'] : '';
+              }
+              if (isset($item['severity']) && is_array($item['severity'])) {
+                $item['severity'] = isset($item['severity']['level']) ? $item['severity']['level'] : 'medium';
+              }
+              $raw_companion_features[] = $item;
+            }
+          }
+
+          // Add unique features from companion file
+          foreach ($raw_companion_features as $comp_feature) {
+            $comp_key = isset($comp_feature['key']) ? $comp_feature['key'] : (isset($comp_feature['id']) ? $comp_feature['id'] : null);
+            if ($comp_key && !isset($feature_keys_in_active[$comp_key])) {
+              $companion_features[] = $comp_feature;
+            }
+          }
+        }
+      }
+    }
+
+    // Add source metadata to all features
+    foreach ($features as &$feature) {
+      $key = isset($feature['key']) ? $feature['key'] : (isset($feature['id']) ? $feature['id'] : null);
+      $feature['source_file'] = $file;
+      $feature['is_from_active_file'] = true;
+
+      // Check if this feature exists in companion file
+      $exists_in_companion = false;
+      if ($companion_file && $key) {
+        $companion_path = VAPT_PATH . 'data/' . sanitize_file_name($companion_file);
+        if (file_exists($companion_path)) {
+          $companion_content = file_get_contents($companion_path);
+          $companion_data = json_decode($companion_content, true);
+          if (is_array($companion_data)) {
+            $check_features = [];
+            if (isset($companion_data['wordpress_vapt'])) $check_features = $companion_data['wordpress_vapt'];
+            elseif (isset($companion_data['features'])) $check_features = $companion_data['features'];
+            elseif (isset($companion_data['risk_catalog'])) $check_features = $companion_data['risk_catalog'];
+
+            foreach ($check_features as $cf) {
+              $cf_key = isset($cf['key']) ? $cf['key'] : (isset($cf['id']) ? $cf['id'] : null);
+              if ($cf_key === $key) {
+                $exists_in_companion = true;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      $feature['exists_in_multiple_files'] = $exists_in_companion;
+      $feature['all_source_files'] = $exists_in_companion ? [$file, $companion_file] : [$file];
+    }
+
+    // Add companion features with their metadata
+    foreach ($companion_features as &$comp_feature) {
+      $comp_feature['source_file'] = $companion_file;
+      $comp_feature['is_from_active_file'] = false;
+      $comp_feature['exists_in_multiple_files'] = false; // Already checked, these are unique
+      $comp_feature['all_source_files'] = [$companion_file];
+      $features[] = $comp_feature;
+    }
+
+    $response_data = array(
       'features' => $features,
       'schema' => $schema,
       'design_prompt' => isset($raw_data['design_prompt']) ? $raw_data['design_prompt'] : null
-    ), 200);
+    );
+
+    // 🛡️ SUPERADMIN OBSERVABILITY: Inject Data Source Metadata (v3.6.29)
+    if ($is_superadmin) {
+      $response_data['active_catalog'] = $file;
+      $response_data['total_features'] = count($features);
+    }
+
+    return new WP_REST_Response($response_data, 200);
   }
 
   public function get_data_files()

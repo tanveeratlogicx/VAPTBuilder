@@ -1161,7 +1161,7 @@ Feature ID: ${feature.id || 'N/A'}
     const [newDomain, setNewDomain] = useState('');
     const [isWildcardNew, setIsWildcardNew] = useState(false);
     const [activeCategory, setActiveCategory] = useState('all');
-    const [statusFilters, setStatusFilters] = useState(['develop', 'test', 'release']);
+    const [statusFilters, setStatusFilters] = useState(['draft', 'develop', 'test', 'release']);
     const [sortConfig, setSortConfig] = useState({ key: 'domain', direction: 'asc' });
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [editDomainData, setEditDomainData] = useState({ id: '', domain: '', is_wildcard: false, is_enabled: true });
@@ -1217,7 +1217,13 @@ Feature ID: ${feature.id || 'N/A'}
 
     const filteredByStatus = useMemo(() => {
       return (features || []).filter(f => {
-        const s = f.status ? f.status.toLowerCase() : '';
+        // 1. Inactive File Visibility Check (Superadmin)
+        if (isSuper && !f.is_from_active_file) {
+          const s = f.status ? f.status.toLowerCase() : 'draft';
+          if (s === 'draft' || s === 'default' || !s) return false;
+        }
+
+        const s = f.status ? f.status.toLowerCase() : 'draft';
         const normalized = (s === 'implemented') ? 'release' : s;
         return (statusFilters || []).includes(normalized);
       });
@@ -1249,8 +1255,38 @@ Feature ID: ${feature.id || 'N/A'}
       return sortedResult;
     }, [displayFeatures]);
 
-    return el(PanelBody, { title: __('Domain Specific Features', 'vapt-builder'), initialOpen: true }, [
-      el('div', { key: 'add-domain-header', style: { padding: '0 0 10px', fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Add New Domain')),
+    const renderDomainLegend = () => {
+      if (!isSuper) return null;
+      return el('div', { className: 'vapt-color-legend' }, [
+        el('div', { className: 'vapt-legend-items' }, [
+          el('div', { className: 'vapt-legend-item' }, [
+            el('div', { className: 'vapt-legend-color-box normal' }),
+            el('span', { className: 'vapt-legend-label' }, __('Active File Only', 'vapt-builder'))
+          ]),
+          el('div', { className: 'vapt-legend-item' }, [
+            el('div', { className: 'vapt-legend-color-box inactive-only' }),
+            el('span', { className: 'vapt-legend-label' }, __('Inactive File Only', 'vapt-builder'))
+          ]),
+          el('div', { className: 'vapt-legend-item' }, [
+            el('div', { className: 'vapt-legend-color-box multi-file' }),
+            el('span', { className: 'vapt-legend-label' }, __('Present in Both Files', 'vapt-builder'))
+          ])
+        ])
+      ]);
+    };
+
+    return el(PanelBody, { className: 'vapt-feature-panel', title: __('Domain Specific Features', 'vapt-builder'), initialOpen: true }, [
+      el('div', {
+        style: {
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '10px'
+        }
+      }, [
+        el('div', { key: 'add-domain-header', style: { fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Add New Domain', 'vapt-builder')),
+        renderDomainLegend()
+      ]),
       el('div', {
         key: 'add-domain-row',
         style: {
@@ -1502,20 +1538,21 @@ Feature ID: ${feature.id || 'N/A'}
         }, [
           el('span', { style: { fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' } }, __('Status Visibility:')),
           el(Button, {
-            isPrimary: (statusFilters || []).length !== 3,
-            variant: (statusFilters || []).length === 3 ? 'secondary' : 'primary',
+            isPrimary: (statusFilters || []).length !== 4,
+            variant: (statusFilters || []).length === 4 ? 'secondary' : 'primary',
             onClick: () => {
-              if ((statusFilters || []).length === 3) setStatusFilters([]);
-              else setStatusFilters(['develop', 'test', 'release']);
+              if ((statusFilters || []).length === 4) setStatusFilters([]);
+              else setStatusFilters(['draft', 'develop', 'test', 'release']);
             },
             style: {
               fontWeight: 700,
               padding: '8px 20px',
               height: 'auto',
-              boxShadow: (statusFilters || []).length !== 3 ? '0 2px 4px rgba(34, 113, 177, 0.2)' : 'none'
+              boxShadow: (statusFilters || []).length !== 4 ? '0 2px 4px rgba(34, 113, 177, 0.2)' : 'none'
             }
-          }, (statusFilters || []).length === 3 ? __('Reset All Filters', 'vapt-builder') : __('Select All Statuses', 'vapt-builder')),
+          }, (statusFilters || []).length === 4 ? __('Reset All Filters', 'vapt-builder') : __('Select All Statuses', 'vapt-builder')),
           el('div', { style: { display: 'flex', gap: '15px', paddingLeft: '20px', borderLeft: '2px solid #e2e8f0' } }, [
+            { label: __('Draft', 'vapt-builder'), value: 'draft' },
             { label: __('Develop', 'vapt-builder'), value: 'develop' },
             { label: __('Test', 'vapt-builder'), value: 'test' },
             { label: __('Release', 'vapt-builder'), value: 'release' }
@@ -1615,7 +1652,7 @@ Feature ID: ${feature.id || 'N/A'}
                 ]),
                 el('div', { className: 'vapt-feature-grid' }, catFeatures.map(f => el('div', {
                   key: f.key,
-                  className: 'vapt-domain-feature-card',
+                  className: `vapt-domain-feature-card ${f.exists_in_multiple_files ? 'vapt-feature-multi-file' : (f.is_from_active_file === false ? 'vapt-feature-inactive-only' : '')}`,
                   style: {
                     padding: '20px',
                     border: '1px solid #e2e8f0',
@@ -1638,14 +1675,12 @@ Feature ID: ${feature.id || 'N/A'}
                           textTransform: 'uppercase',
                           padding: '2px 8px',
                           borderRadius: '4px',
-                          background: (f.status === 'Develop' || f.status === 'develop') ? '#fee2e2' :
-                            (f.status === 'Test' || f.status === 'test') ? '#dbeafe' :
-                              (f.status === 'Release' || f.status === 'release' || f.status === 'implemented') ? '#dcfce7' : '#f1f5f9',
-                          color: (f.status === 'Develop' || f.status === 'develop') ? '#b91c1c' :
-                            (f.status === 'Test' || f.status === 'test') ? '#1d4ed8' :
-                              (f.status === 'Release' || f.status === 'release' || f.status === 'implemented') ? '#15803d' : '#64748b',
-                          border: '1px solid currentColor',
-                          borderOpacity: 0.1
+                          color: '#fff',
+                          background: (f.status === 'Develop' || f.status === 'develop') ? '#10b981' :
+                            (f.status === 'Test' || f.status === 'test') ? '#eab308' :
+                              (f.status === 'Release' || f.status === 'release' || f.status === 'implemented') ? '#f97316' : '#94a3b8',
+                          border: 'none',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                         }
                       }, f.status)
                     ]),
@@ -1742,12 +1777,11 @@ Feature ID: ${feature.id || 'N/A'}
                       textTransform: 'uppercase',
                       padding: '3px 8px',
                       borderRadius: '12px',
-                      background: (f.status === 'Develop' || f.status === 'develop') ? '#fee2e2' :
-                        (f.status === 'Test' || f.status === 'test') ? '#dbeafe' :
-                          (f.status === 'Release' || f.status === 'release' || f.status === 'implemented') ? '#dcfce7' : '#f1f5f9',
-                      color: (f.status === 'Develop' || f.status === 'develop') ? '#b91c1c' :
-                        (f.status === 'Test' || f.status === 'test') ? '#1d4ed8' :
-                          (f.status === 'Release' || f.status === 'release' || f.status === 'implemented') ? '#15803d' : '#64748b'
+                      color: '#fff',
+                      background: (f.status === 'Develop' || f.status === 'develop') ? '#10b981' :
+                        (f.status === 'Test' || f.status === 'test') ? '#eab308' :
+                          (f.status === 'Release' || f.status === 'release' || f.status === 'implemented') ? '#f97316' : '#94a3b8',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                     }
                   }, f.status || 'Unknown')
                 ]),
@@ -3497,6 +3531,25 @@ Feature ID: ${feature.id || 'N/A'}
         ]),
       ]), // End Header PanelBody
 
+      // 🛡️ SUPERADMIN: Visual Legend (v3.6.30)
+      isSuper && !loading && el('div', { className: 'vapt-color-legend' }, [
+        el('h4', null, __('Data Source Legend (Superadmin View)', 'vapt-builder')),
+        el('div', { className: 'vapt-legend-items' }, [
+          el('div', { className: 'vapt-legend-item' }, [
+            el('div', { className: 'vapt-legend-color-box normal' }),
+            el('span', { className: 'vapt-legend-label' }, __('Active File Only', 'vapt-builder'))
+          ]),
+          el('div', { className: 'vapt-legend-item' }, [
+            el('div', { className: 'vapt-legend-color-box inactive-only' }),
+            el('span', { className: 'vapt-legend-label' }, __('Inactive File Only', 'vapt-builder'))
+          ]),
+          el('div', { className: 'vapt-legend-item' }, [
+            el('div', { className: 'vapt-legend-color-box multi-file' }),
+            el('span', { className: 'vapt-legend-label' }, __('Present in Both Files', 'vapt-builder'))
+          ])
+        ])
+      ]),
+
       loading ? el(Spinner, { key: 'loader' }) : el('table', { id: 'vapt-main-feature-table', key: 'table', className: 'wp-list-table widefat fixed striped vapt-feature-table' }, [
         el('thead', null, el('tr', null, [
           ...activeCols.map(col => {
@@ -3536,7 +3589,9 @@ Feature ID: ${feature.id || 'N/A'}
           el('th', { style: { width: '144px' } }, __('Include', 'vapt-builder')),
         ])),
         el('tbody', null, processedFeatures.map((f) => el(Fragment, { key: f.key }, [
-          el('tr', null, [
+          el('tr', {
+            className: f.exists_in_multiple_files ? 'vapt-feature-multi-file' : (f.is_from_active_file === false ? 'vapt-feature-inactive-only' : '')
+          }, [
             ...activeCols.map(col => {
               let content = f[col] || '-';
               if (col === 'title' || col === 'label' || col === 'name') {
@@ -3673,6 +3728,7 @@ Feature ID: ${feature.id || 'N/A'}
     const [confirmState, setConfirmState] = useState(null);
     const [selectedDomains, setSelectedDomains] = useState([]);
     const [alertState, setAlertState] = useState(null);
+    const [catalogInfo, setCatalogInfo] = useState({ file: '', count: 0 }); // v3.6.29
 
     // Status Auto-clear helper
     useEffect(() => {
@@ -3694,6 +3750,9 @@ Feature ID: ${feature.id || 'N/A'}
           setFeatures(res.features || []);
           setSchema(res.schema || { item_fields: [] });
           setDesignPromptConfig(res.design_prompt || null); // Load prompt config
+          if (res.active_catalog) {
+            setCatalogInfo({ file: res.active_catalog, count: res.total_features || 0 });
+          }
           return res;
         })
         .catch(err => { console.error('VAPT Builder: Features fetch error:', err); return []; });
@@ -3987,7 +4046,7 @@ Feature ID: ${feature.id || 'N/A'}
         isSuper && el('span', {
           style: {
             marginLeft: '10px',
-            fontSize: '0.45em',
+            fontSize: '10px',
             color: '#fff',
             background: '#1e3a8a', // Dark Blue
             padding: '4px 8px',
@@ -3998,7 +4057,20 @@ Feature ID: ${feature.id || 'N/A'}
             verticalAlign: 'middle',
             boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
           }
-        }, 'SUPERADMIN')
+        }, 'SUPERADMIN'),
+        isSuper && catalogInfo.file && el('span', {
+          style: {
+            marginLeft: '10px',
+            fontSize: '10px',
+            color: '#1e3a8a',
+            background: '#eff6ff',
+            padding: '4px 8px',
+            border: '1px solid #dbeafe',
+            borderRadius: '5px',
+            fontWeight: '600',
+            verticalAlign: 'middle'
+          }
+        }, `${__('Source:', 'vapt-builder')} ${catalogInfo.file} (${catalogInfo.count} ${__('items', 'vapt-builder')})`)
       ]),
       saveStatus && el('div', {
         id: 'vapt-global-status-toast',

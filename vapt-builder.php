@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version:           3.6.21
+ * Version:           3.7.0
  * Author:            Automated Penetration Testing Builder
  * Author URI:        https://vaptbuilder.com/
  * License:           GPL-2.0-or-later
@@ -25,7 +25,7 @@ if (! defined('ABSPATH')) {
  * The current version of the plugin.
  */
 if (! defined('VAPT_VERSION')) {
-  define('VAPT_VERSION', '3.6.21');
+  define('VAPT_VERSION', '3.7.0');
 }
 if (! defined('VAPT_AUDITOR_VERSION')) {
   define('VAPT_AUDITOR_VERSION', '2.8.0');
@@ -378,7 +378,14 @@ if (! function_exists('vapt_manual_db_fix')) {
       $table_meta = $wpdb->prefix . 'vapt_feature_meta';
       $col_enforced = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM {$table_meta} LIKE %s", 'is_enforced'));
       if (empty($col_enforced)) {
-        $wpdb->query("ALTER TABLE {$table_meta} ADD COLUMN is_enforced TINYINT(1) DEFAULT 0");
+        $wpdb->query("ALTER TABLE {$table_meta} ADD COLUMN is_enforced TINYINT(1) DEFAULT 1");
+        // Migration: Enable by default for existing records
+        $wpdb->query("UPDATE {$table_meta} SET is_enforced = 1 WHERE is_enforced IS NULL OR is_enforced = 0");
+      } else {
+        // Migration: Update default for existing column
+        $wpdb->query("ALTER TABLE {$table_meta} ALTER COLUMN is_enforced SET DEFAULT 1");
+        // Migration: Force enable '0' or NULL values based on user request ("Protection should work out of the box")
+        $wpdb->query("UPDATE {$table_meta} SET is_enforced = 1 WHERE is_enforced IS NULL OR is_enforced = 0");
       }
       // 5. Force add assigned_to column
       $col_assigned = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM {$status_table} LIKE %s", 'assigned_to'));

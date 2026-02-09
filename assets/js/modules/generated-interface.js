@@ -50,20 +50,29 @@
       return { success: false, message: `Security headers present, but NOT by this plugin. VAPT enforcement header missing.`, raw: headers };
     },
 
-    // 2. Batch Probe: Verifies Rate Limiting (Sends 125% of RPM)
-    spam_requests: async (siteUrl, control, featureData, featureKey) => {
+    // 2. Batch Probe: Verifies Rate Limiting (Sends 125% of RPM) (v3.6.25 Sequential)
+    spam_requests: async (siteUrl, control, featureData, featureKey, onProgress) => {
       try {
-        let rpm = parseInt(featureData['rpm'] || featureData['rate_limit'], 10);
+        let rpm = parseInt(control.numTests || featureData['rpm'] || featureData['rate_limit'], 10);
 
-        // Dynamic Context Detection (v3.3.40)
+        // Dynamic Context Detection (v3.3.40 / v3.6.24 expanded)
         let contextParam = '';
-        if (featureKey && (featureKey.includes('login') || featureKey.includes('brute'))) {
+        const loginKeywords = ['login', 'brute', 'auth', 'password', 'email', 'reset'];
+        if (featureKey && loginKeywords.some(kw => featureKey.toLowerCase().includes(kw))) {
           contextParam = '&vapt_test_context=login';
         }
 
         if (isNaN(rpm)) {
           const limitKey = Object.keys(featureData).find(k => k.includes('limit') || k.includes('max') || k.includes('rpm'));
           if (limitKey) rpm = parseInt(featureData[limitKey], 10);
+        }
+
+        // Fallback for custom strictness keywords (v3.6.25/26)
+        if (isNaN(rpm)) {
+          const val = control.numTests || featureData['rpm'] || featureData['rate_limit'];
+          if (val === 'strict') rpm = 5;
+          else if (val === 'moderate') rpm = 10;
+          else if (val === 'permissive') rpm = 20;
         }
 
         if (isNaN(rpm)) rpm = 5;
@@ -86,39 +95,51 @@
           console.warn('[VAPT] Failed to reset rate limit:', e);
         }
 
-        const probes = [];
-        for (let i = 0; i < load; i++) {
-          probes.push(
-            fetch(siteUrl + '?vapt_test_spike=' + i + contextParam, { cache: 'no-store' })
-              .then(r => ({ status: r.status, headers: r.headers }))
-              .catch(err => {
-                console.warn(`[VAPT] Request ${i} failed:`, err);
-                return { status: 0, headers: new Headers(), error: err.message };
-              })
-          );
-        }
-
-        const responses = await Promise.all(probes);
+        const responses = [];
+        const stats = {};
         let debugInfo = '';
         let lastCount = -1;
         let traceInfo = '';
-
         let hasVaptHeader = false;
-        const stats = responses.reduce((acc, r) => {
-          acc[r.status] = (acc[r.status] || 0) + 1;
 
-          if (r.headers.has('x-vapt-debug')) debugInfo = r.headers.get('x-vapt-debug');
-          if (r.headers.has('x-vapt-count')) lastCount = r.headers.get('x-vapt-count');
-          if (r.headers.has('x-vapt-trace')) traceInfo = r.headers.get('x-vapt-trace');
-          if (r.headers.get('x-vapt-enforced') === 'php-rate-limit') hasVaptHeader = true;
+        // Process sequentially for real-time reporting (v3.6.25)
+        for (let i = 0; i < load; i++) {
+          try {
+            const r = await fetch(siteUrl + '?vapt_test_spike=' + i + contextParam, { cache: 'no-store' });
+            const respData = { status: r.status, headers: r.headers };
+            responses.push(respData);
 
-          return acc;
-        }, {});
+            // Update stats
+            stats[r.status] = (stats[r.status] || 0) + 1;
+            if (r.headers.has('x-vapt-debug')) debugInfo = r.headers.get('x-vapt-debug');
+            if (r.headers.has('x-vapt-count')) lastCount = r.headers.get('x-vapt-count');
+            if (r.headers.has('x-vapt-trace')) traceInfo = r.headers.get('x-vapt-trace');
+            if (r.headers.get('x-vapt-enforced') === 'php-rate-limit') hasVaptHeader = true;
 
-        const errorCount = stats[500] || 0;
+            // Report progress every 2 requests or if blocked
+            if (onProgress && (i % 2 === 0 || r.status === 429 || i === load - 1)) {
+              onProgress({
+                total: load,
+                current: i + 1,
+                accepted: stats[200] || 0,
+                blocked: stats[429] || 0,
+                errors: stats[500] || 0
+              });
+
+              // Always trigger monitor refresh for immediate feedback (v3.6.26/28)
+              // Standardized to lowercase (v3.6.28)
+              window.dispatchEvent(new CustomEvent('vapt-refresh-stats', { detail: { featureKey: featureKey.toLowerCase() } }));
+            }
+          } catch (err) {
+            console.warn(`[VAPT] Request ${i} failed:`, err);
+            stats[0] = (stats[0] || 0) + 1;
+          }
+        }
+
         const blocked = stats[429] || 0;
         const total = load;
         const successCount = stats[200] || 0;
+        const errorCount = stats[500] || 0;
         const debugMsg = `(Debug: ${debugInfo || 'None'}, Count: ${lastCount}, Trace: ${traceInfo || 'None'})`;
 
         const resultMeta = {
@@ -130,11 +151,16 @@
         };
 
         if (blocked > 0 && hasVaptHeader) {
+          window.dispatchEvent(new CustomEvent('vapt-refresh-stats', { detail: { featureKey } }));
           return {
             success: true,
             message: `Rate limiter is ACTIVE. Security measures are working correctly.`,
             meta: resultMeta
           };
+        }
+
+        if (successCount > 0 || lastCount > 0) {
+          window.dispatchEvent(new CustomEvent('vapt-refresh-stats', { detail: { featureKey } }));
         }
 
         if (errorCount > 0) {
@@ -528,6 +554,8 @@
   const TestRunnerControl = ({ control, featureData, featureKey }) => {
     const [status, setStatus] = useState('idle');
     const [result, setResult] = useState(null);
+    const [progress, setProgress] = useState(null);
+    const [numTests, setNumTests] = useState(''); // Custom test count (v3.6.26)
     // Stateful toggle (Default false/Sync)
     const [isAsync, setIsAsync] = useState(false);
 
@@ -541,10 +569,13 @@
 
       try {
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Test timeout after 30 seconds')), 30000)
+          setTimeout(() => reject(new Error('Test timeout after 120 seconds')), 120000)
         );
-        // Pass isAsync context to handler (v3.5.2)
-        const handlerPromise = handler(siteUrl, { ...control, isAsync }, featureData, featureKey);
+        // Pass isAsync and progress callback to handler (v3.6.25)
+        // Also pass custom numTests (v3.6.26)
+        const handlerPromise = handler(siteUrl, { ...control, isAsync, numTests }, featureData, featureKey, (p) => {
+          setProgress(p);
+        });
         const res = await Promise.race([handlerPromise, timeoutPromise]);
 
         if (res && typeof res === 'object') {
@@ -570,7 +601,8 @@
     }
     if (isNaN(rpmValue)) rpmValue = 5;
 
-    const loadValue = Math.ceil(rpmValue * 1.25);
+    const currentRPM = parseInt(numTests || rpmValue, 10);
+    const loadValue = Math.ceil(currentRPM * 1.25);
     const displayLabel = control.test_logic === 'spam_requests'
       ? control.label.replace(/\(\s*\d+.*\)/g, '').trim() + ` (${loadValue} requests)`
       : control.label;
@@ -585,6 +617,36 @@
         el(Button, { isSecondary: true, isSmall: true, isBusy: status === 'running', onClick: handleClick, disabled: status === 'running' }, 'Run Verify')
       ]),
       control.help && el('p', { style: { margin: '2px 0 0', fontSize: '11px', color: '#64748b', opacity: 0.8 } }, control.help),
+
+      // Real-time Progress Bar (v3.6.25)
+      status === 'running' && progress && el('div', { style: { marginTop: '10px', background: '#e2e8f0', borderRadius: '4px', height: '4px', overflow: 'hidden' } }, [
+        el('div', { style: { background: '#2563eb', width: `${(progress.current / progress.total) * 100}%`, height: '100%', transition: 'width 0.3s' } })
+      ]),
+      status === 'running' && progress && el('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '10px', color: '#64748b' } }, [
+        el('span', null, sprintf(__('Testing: %d/%d requests...', 'vapt-builder'), progress.current, progress.total)),
+        el('div', { style: { display: 'flex', gap: '8px' } }, [
+          el('span', { style: { color: '#10b981' } }, `${progress.accepted} Accepted`),
+          el('span', { style: { color: progress.blocked > 0 ? '#ef4444' : '#64748b' } }, `${progress.blocked} Blocked`)
+        ])
+      ]),
+
+      // Custom Test Count Input (v3.6.26/28)
+      // Visible whenever NOT running (v3.6.28)
+      status !== 'running' && control.test_logic === 'spam_requests' && el('div', { style: { marginTop: '10px', display: 'flex', alignItems: 'center', gap: '10px' } }, [
+        el('div', { style: { flex: 1 } }, [
+          el(TextControl, {
+            label: __('Number of Tests to Run', 'vapt-builder'),
+            value: numTests,
+            type: 'number',
+            placeholder: sprintf(__('Default: %d', 'vapt-builder'), rpmValue),
+            onChange: (val) => setNumTests(val),
+            style: { marginBottom: 0 }
+          })
+        ]),
+        el('div', { style: { fontSize: '11px', color: '#64748b', marginTop: '20px' } },
+          numTests ? sprintf(__('Target: %d requests', 'vapt-builder'), Math.ceil(parseInt(numTests) * 1.25)) : ''
+        )
+      ]),
 
       status !== 'idle' && status !== 'running' && result && el('div', {
         style: {
@@ -663,7 +725,19 @@
     useEffect(() => {
       fetchStats();
       const interval = setInterval(fetchStats, 10000); // Poll every 10s
-      return () => clearInterval(interval);
+
+      // Listen for sync events (v3.6.24)
+      const handleSync = (e) => {
+        if (e.detail && (e.detail.featureKey === featureKey || e.detail.featureKey === featureKey.toLowerCase())) {
+          fetchStats();
+        }
+      };
+      window.addEventListener('vapt-refresh-stats', handleSync);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('vapt-refresh-stats', handleSync);
+      };
     }, [featureKey]);
 
     if (!stats) return null;
@@ -685,11 +759,8 @@
         el('div', null, [
           el('div', { style: { fontSize: '10px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700' } }, __('Active Blocks (IPs)', 'vapt-builder')),
           el('div', { style: { fontSize: '18px', fontWeight: '800', color: stats.active_ips > 0 ? '#ef4444' : '#10b981' } }, stats.active_ips)
-        ]),
-        el('div', null, [
-          el('div', { style: { fontSize: '10px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700' } }, sprintf(__('Total Attempts (Last %ss)', 'vapt-builder'), stats.window || 60)),
-          el('div', { style: { fontSize: '18px', fontWeight: '800', color: '#334155' } }, stats.total_attempts)
         ])
+        // Total Attempts removed as requested (redundant with Verification results - v3.6.24)
       ]),
       el('div', null, [
         el(Button, {

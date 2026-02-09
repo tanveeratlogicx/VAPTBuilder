@@ -62,7 +62,9 @@
       const domain = settings.currentDomain || window.location.hostname;
       apiFetch({ path: `vapt/v1/features?scope=client&domain=${domain}` })
         .then(data => {
-          setFeatures(data.features || []);
+          // Dedup features by key to prevent list inflation
+          const uniqueFeatures = Array.from(new Map((data.features || []).map(item => [item.key, item])).values());
+          setFeatures(uniqueFeatures);
           setLoading(false);
           setIsRefreshing(false);
         })
@@ -104,7 +106,7 @@
           return ['develop', 'test', 'release', 'in_progress', 'testing', 'implemented'].includes(s);
         }
 
-        if (active === 'develop') return ['develop', 'in_progress', 'draft'].includes(s);
+        if (active === 'develop') return ['develop', 'in_progress'].includes(s);
         if (active === 'test') return ['test', 'testing'].includes(s);
         if (active === 'release') return ['release', 'implemented'].includes(s);
         return s === active;
@@ -217,12 +219,27 @@
               ])
             ]),
             el('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' } }, [
-              el('span', { className: `vapt-status-badge status-${f.status.toLowerCase()}`, style: { fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase' } }, f.status),
+              el('span', {
+                className: `vapt-status-badge status-${f.status.toLowerCase()}`,
+                style: {
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  textTransform: 'uppercase',
+                  color: '#fff',
+                  background: (f.status === 'Develop' || f.status === 'develop') ? '#10b981' :
+                    (f.status === 'Test' || f.status === 'test') ? '#eab308' :
+                      (f.status === 'Release' || f.status === 'release' || f.status === 'implemented') ? '#f97316' : '#94a3b8',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                }
+              }, f.status),
               el('div', { style: { display: 'flex', alignItems: 'center', background: '#f8fafc', padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0' } }, [
                 el('span', { style: { fontSize: '12px', fontWeight: 600, color: '#334155', marginRight: '12px', whiteSpace: 'nowrap' } }, __('Enforce Rule')),
                 (() => {
                   const isHtaccess = schema.enforcement && schema.enforcement.driver === 'htaccess';
-                  const isEnforced = isHtaccess ? true : !!f.is_enforced;
+                  // Default to TRUE if undefined/null (v3.6.23)
+                  const isEnforced = isHtaccess ? true : (f.is_enforced === undefined || f.is_enforced === null || f.is_enforced == 1);
                   const toggle = el(ToggleControl, {
                     checked: isEnforced,
                     onChange: (val) => updateFeature(f.key, { is_enforced: val }),
@@ -330,7 +347,21 @@
             __('VAPT Implementation Dashboard'),
             el('span', { style: { fontSize: '11px', color: '#9ca3af', fontWeight: '400' } }, `v${settings.pluginVersion}`)
           ]),
-          el('span', { style: { fontSize: '10px', background: '#dcfce7', color: '#166534', padding: '1px 6px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' } }, isSuper ? __('Superadmin') : __('Standard')),
+          isSuper && el('span', {
+            style: {
+              marginLeft: '10px',
+              fontSize: '10px',
+              color: '#fff',
+              background: '#1e3a8a', // Dark Blue
+              padding: '4px 8px',
+              borderRadius: '5px',
+              fontWeight: '600',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              verticalAlign: 'middle',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+            }
+          }, 'SUPERADMIN'),
           el(Button, {
             icon: 'update',
             isSmall: true,
@@ -400,16 +431,33 @@
 
         // Pane 2: Feature List (Middle)
         el('div', { className: 'vapt-workbench-list', style: { width: '320px', borderRight: '1px solid #e5e7eb', background: '#fcfcfd', overflowY: 'auto', flexShrink: 0 } }, [
+          isSuper && el('div', { className: 'vapt-color-legend', style: { padding: '10px 20px', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' } }, [
+            el('div', { className: 'vapt-legend-items', style: { display: 'flex', gap: '15px', alignItems: 'center' } }, [
+              el('div', { className: 'vapt-legend-item', style: { display: 'flex', alignItems: 'center', gap: '6px' } }, [
+                el('div', { className: 'vapt-legend-color-box normal', style: { width: '12px', height: '12px', borderRadius: '2px', border: '1px solid #cbd5e1', background: '#fff' } }),
+                el('span', { className: 'vapt-legend-label', style: { fontSize: '11px', fontWeight: 500, color: '#64748b' } }, __('Active', 'vapt-builder'))
+              ]),
+              el('div', { className: 'vapt-legend-item', style: { display: 'flex', alignItems: 'center', gap: '6px' } }, [
+                el('div', { className: 'vapt-legend-color-box inactive-only', style: { width: '12px', height: '12px', borderRadius: '2px', border: '1px solid #f59e0b', background: '#fef3c7' } }),
+                el('span', { className: 'vapt-legend-label', style: { fontSize: '11px', fontWeight: 500, color: '#64748b' } }, __('Inactive', 'vapt-builder'))
+              ]),
+              el('div', { className: 'vapt-legend-item', style: { display: 'flex', alignItems: 'center', gap: '6px' } }, [
+                el('div', { className: 'vapt-legend-color-box multi-file', style: { width: '12px', height: '12px', borderRadius: '2px', border: '1px solid #3b82f6', background: '#dbeafe' } }),
+                el('span', { className: 'vapt-legend-label', style: { fontSize: '11px', fontWeight: 500, color: '#64748b' } }, __('Both', 'vapt-builder'))
+              ])
+            ])
+          ]),
           el('div', { style: { padding: '20px', fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', borderBottom: '1px solid #f3f4f6' } },
             activeCategory === 'all' ? __('All Features', 'vapt-builder') : sprintf(__('%s Features', 'vapt-builder'), activeCategory)
           ),
           displayFeatures.length === 0 ? el('p', { style: { padding: '20px', color: '#9ca3af', fontSize: '13px' } }, __('No features available', 'vapt-builder')) :
             displayFeatures.map(f => {
               const isActive = activeFeatureKey === f.key;
+              const multiFileClass = f.exists_in_multiple_files ? ' vapt-feature-multi-file' : (f.is_from_active_file === false ? ' vapt-feature-inactive-only' : '');
               return el('button', {
                 key: f.key,
                 onClick: () => setActiveFeatureKey(f.key),
-                className: 'vapt-feature-item' + (isActive ? ' is-active' : ''),
+                className: 'vapt-feature-item' + (isActive ? ' is-active' : '') + multiFileClass,
                 style: {
                   width: '100%', border: 'none', borderBottom: '1px solid #f3f4f6',
                   background: isActive ? '#eff6ff' : 'transparent',
