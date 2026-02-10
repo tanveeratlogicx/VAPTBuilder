@@ -179,23 +179,33 @@
     width: 100%;
     border-collapse: collapse;
     background: #fff;
+    margin-bottom: 20px;
 }
 
 .vapt-feature-table th,
 .vapt-feature-table td {
-    padding: 6px 10px;
-    border: 1px solid #ddd;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
     text-align: left;
     vertical-align: middle !important;
 }
 
 .vapt-feature-table th {
-    background: #f8f9fa;
+    background: #f8fafc;
     font-weight: 600;
+    color: #475569;
 }
 
-.vapt-feature-table tr:nth-child(even) {
-    background: #f8f9fa;
+.vapt-feature-table tbody tr:nth-child(odd) {
+    background-color: #ffffff !important;
+}
+
+.vapt-feature-table tbody tr:nth-child(even) {
+    background-color: #f5f5f5 !important;
+}
+
+.vapt-feature-table tbody tr:hover {
+    background-color: #e8e8e8 !important;
 }
 
 .severity {
@@ -1210,8 +1220,9 @@
 
 .vapt-flex-row {
     display: flex;
-    gap: 10px;
+    gap: 3px;
     align-items: center;
+    padding-right: 5px;
 }
 
 .vapt-flex-col {
@@ -1509,17 +1520,28 @@
 
 /* Color Legend for Superadmin */
 .vapt-color-legend {
-    background: transparent;
-    border: none;
-    padding: 0 5px;
-    margin-bottom: 5px;
-    font-size: 12px;
+    background: #f6f7f7 !important;
+    border: 1px solid #dcdcde !important;
+    border-radius: 4px;
+    height: 33px !important;
+    box-sizing: border-box !important;
+    padding: 0 15px !important;
+    margin-bottom: 15px !important;
+    font-size: 11px;
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
 
+
+.vapt-color-legend h4 {
+    margin: 0 !important;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1d2327;
+    line-height: normal;
+}
 
 .vapt-legend-items {
     display: flex;
@@ -1555,8 +1577,9 @@
     border-color: #3b82f6;
 }
 
-color: #475569;
-font-weight: 500;
+.vapt-legend-label {
+    color: #475569;
+    font-weight: 500;
 }
 
 /* Panel Header Height Reduction */

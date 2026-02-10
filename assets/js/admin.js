@@ -3586,15 +3586,13 @@ Feature ID: ${feature.id || 'N/A'}
         ])
       ]),
 
-      loading ? el(Spinner, { key: 'loader' }) : el('table', { id: 'vapt-main-feature-table', key: 'table', className: 'wp-list-table widefat fixed striped vapt-feature-table' }, [
+      loading ? el(Spinner, { key: 'loader' }) : el('table', { id: 'vapt-main-feature-table', key: 'table', className: 'wp-list-table widefat striped vapt-feature-table' }, [
         el('thead', null, el('tr', null, [
           ...activeCols.map(col => {
             const label = col.charAt(0).toUpperCase() + col.slice(1).replace(/_/g, ' ');
-            let width = 'auto';
-            if (col === 'title' || col === 'name') width = '300px';
-            if (col === 'category') width = '120px';
-            if (col === 'severity') width = '80px';
-            if (col === 'id') width = '100px';
+            const isDescription = col === 'description';
+            const width = isDescription ? 'auto' : '1%';
+            const whiteSpace = isDescription ? 'normal' : 'nowrap';
 
             const isSortable = ['title', 'name', 'category', 'severity'].includes(col);
             const isActive = sortBy === col || (col === 'title' && sortBy === 'name');
@@ -3604,7 +3602,7 @@ Feature ID: ${feature.id || 'N/A'}
               key: col,
               onClick: isSortable ? () => toggleSort(col === 'title' ? 'name' : col) : null,
               className: `vapt-th-sortable ${isActive ? 'is-active' : ''} ${isSortable ? 'sortable' : ''}`,
-              style: { width }
+              style: { width, whiteSpace }
             }, [
               isSortable && el('span', {
                 id: `vapt-sort-indicator-${col}`,
@@ -3621,8 +3619,8 @@ Feature ID: ${feature.id || 'N/A'}
               label
             ]);
           }),
-          el('th', { style: { width: '300px' } }, __('Lifecycle Status', 'vapt-builder')),
-          el('th', { style: { width: '144px' } }, __('Include', 'vapt-builder')),
+          el('th', { style: { width: '1%', whiteSpace: 'nowrap' } }, __('Lifecycle Status', 'vapt-builder')),
+          el('th', { style: { width: '1%', whiteSpace: 'nowrap' } }, __('Include', 'vapt-builder')),
         ])),
         el('tbody', null, processedFeatures.map((f) => el(Fragment, { key: f.key }, [
           el('tr', {
@@ -3652,7 +3650,7 @@ Feature ID: ${feature.id || 'N/A'}
               } else if (typeof f[col] === 'object' && f[col] !== null) {
                 content = el('pre', { style: { fontSize: '10px', margin: 0, background: '#f0f0f0', padding: '4px', whiteSpace: 'pre-wrap' } }, JSON.stringify(f[col], null, 2));
               }
-              return el('td', { key: col }, content);
+              return el('td', { key: col, style: { whiteSpace: col === 'description' ? 'normal' : 'nowrap' } }, content);
             }),
             el('td', { style: { verticalAlign: 'middle' } }, [
               el('div', { style: { display: 'flex', gap: '10px', alignItems: 'center' } }, [
