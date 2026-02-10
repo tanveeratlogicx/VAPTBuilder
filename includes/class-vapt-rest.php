@@ -42,6 +42,12 @@ class VAPT_REST
       'permission_callback' => array($this, 'check_permission'),
     ));
 
+    register_rest_route('vapt/v1', '/data-files/remove', array(
+      'methods' => 'POST',
+      'callback' => array($this, 'remove_data_file'),
+      'permission_callback' => array($this, 'check_permission'),
+    ));
+
     register_rest_route('vapt/v1', '/reset-limit', array(
       'methods' => 'POST',
       'callback' => array($this, 'reset_rate_limit'),
@@ -208,7 +214,8 @@ class VAPT_REST
     $raw_data = json_decode($content, true);
 
     if (! is_array($raw_data)) {
-      return new WP_REST_Response(array('error' => 'Invalid JSON format'), 400);
+      error_log('VAPT Builder: JSON Decode Error for file ' . $file . ': ' . json_last_error_msg());
+      return new WP_REST_Response(array('error' => 'Invalid JSON format: ' . json_last_error_msg()), 400);
     }
 
     $features = [];
@@ -225,6 +232,14 @@ class VAPT_REST
       $raw_features = $raw_data['risk_catalog'];
       $features = array();
       foreach ($raw_features as $item) {
+        // 0. Map ID/Key
+        if (isset($item['risk_id']) && empty($item['id'])) {
+          $item['id'] = $item['risk_id'];
+        }
+        if (isset($item['risk_id']) && empty($item['key'])) {
+          $item['key'] = $item['risk_id'];
+        }
+
         // 1. Flatten Description
         if (isset($item['description']) && is_array($item['description'])) {
           $item['description'] = isset($item['description']['summary']) ? $item['description']['summary'] : '';
@@ -510,8 +525,8 @@ class VAPT_REST
     // 🛡️ MULTI-FILE LOADING (v3.6.30): Load companion file and detect overlaps
     $companion_file = null;
     if ($file === 'VAPT-Complete-Risk-Catalog-99.json') {
-      $companion_file = 'VAPT-Sixteen-Risk-Catalog-12.json';
-    } elseif ($file === 'VAPT-Sixteen-Risk-Catalog-12.json') {
+      $companion_file = 'VAPT-SixT-Risk-Catalog-12.json';
+    } elseif ($file === 'VAPT-SixT-Risk-Catalog-12.json') {
       $companion_file = 'VAPT-Complete-Risk-Catalog-99.json';
     }
 
@@ -541,6 +556,14 @@ class VAPT_REST
           } elseif (isset($companion_data['risk_catalog']) && is_array($companion_data['risk_catalog'])) {
             // Process risk catalog format (simplified version)
             foreach ($companion_data['risk_catalog'] as $item) {
+              // 0. Map ID/Key
+              if (isset($item['risk_id']) && empty($item['id'])) {
+                $item['id'] = $item['risk_id'];
+              }
+              if (isset($item['risk_id']) && empty($item['key'])) {
+                $item['key'] = $item['risk_id'];
+              }
+
               if (isset($item['description']) && is_array($item['description'])) {
                 $item['description'] = isset($item['description']['summary']) ? $item['description']['summary'] : '';
               }
@@ -551,9 +574,21 @@ class VAPT_REST
             }
           }
 
-          // Add unique features from companion file
+          // Add unique features from companion file (ONLY if not Draft)
           foreach ($raw_companion_features as $comp_feature) {
             $comp_key = isset($comp_feature['key']) ? $comp_feature['key'] : (isset($comp_feature['id']) ? $comp_feature['id'] : null);
+
+            // Check Live Status from DB to determine if it should be loaded
+            $db_status = 'Draft';
+            if ($comp_key && isset($status_map[$comp_key])) {
+              $db_status = $status_map[$comp_key]['status'];
+            }
+
+            // RULE: Only including from inactive file if it is NOT in Draft (i.e. is active in some form)
+            if ($db_status === 'Draft') {
+              continue;
+            }
+
             if ($comp_key && !isset($feature_keys_in_active[$comp_key])) {
               $companion_features[] = $comp_feature;
             }
@@ -628,15 +663,23 @@ class VAPT_REST
     $files = array_diff(scandir($data_dir), array('..', '.'));
     $json_files = [];
 
-    $hidden_files = get_option('vapt_hidden_json_files', array());
-    $active_file  = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : 'VAPT-Complete-Risk-Catalog-99.json';
+    $hidden_files  = get_option('vapt_hidden_json_files', array());
+    $removed_files = get_option('vapt_removed_json_files', array());
+    $active_file   = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : 'VAPT-Complete-Risk-Catalog-99.json';
 
-    $hidden_normalized = array_map('sanitize_file_name', $hidden_files);
-    $active_normalized = sanitize_file_name($active_file);
+    $hidden_normalized  = array_map('sanitize_file_name', $hidden_files);
+    $removed_normalized = array_map('sanitize_file_name', $removed_files);
+    $active_normalized  = sanitize_file_name($active_file);
 
     foreach ($files as $file) {
       if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'json') {
         $normalized_current = sanitize_file_name($file);
+
+        // Skip removed files
+        if (in_array($normalized_current, $removed_normalized) || in_array($file, $removed_files)) {
+          continue;
+        }
+
         $is_active = ($normalized_current === $active_normalized || $file === $active_file);
         $is_hidden = in_array($normalized_current, $hidden_normalized) || in_array($file, $hidden_files);
 
@@ -926,6 +969,7 @@ class VAPT_REST
   {
     $files = $request->get_file_params();
     if (empty($files['file'])) {
+      error_log('VAPT Builder: Upload JSON - No file param found.');
       return new WP_REST_Response(array('error' => 'No file uploaded'), 400);
     }
 
@@ -939,7 +983,11 @@ class VAPT_REST
     }
 
     $json_path = VAPT_PATH . 'data/' . $filename;
-    file_put_contents($json_path, $content);
+    $saved = file_put_contents($json_path, $content);
+
+    if ($saved === false) {
+      return new WP_REST_Response(array('error' => 'Failed to write file to disk. Check permissions.'), 500);
+    }
 
     // Auto-unhide if it was hidden
     $hidden_files = get_option('vapt_hidden_json_files', array());
@@ -950,6 +998,17 @@ class VAPT_REST
         return sanitize_file_name($f) !== $filename && $f !== $files['file']['name'];
       });
       update_option('vapt_hidden_json_files', array_values($new_hidden));
+    }
+
+    // Auto-restore if it was removed
+    $removed_files = get_option('vapt_removed_json_files', array());
+    $normalized_removed = array_map('sanitize_file_name', $removed_files);
+
+    if (in_array($filename, $normalized_removed) || in_array($files['file']['name'], $removed_files)) {
+      $new_removed = array_filter($removed_files, function ($f) use ($filename, $files) {
+        return sanitize_file_name($f) !== $filename && $f !== $files['file']['name'];
+      });
+      update_option('vapt_removed_json_files', array_values($new_removed));
     }
 
     return new WP_REST_Response(array('success' => true, 'filename' => $filename), 200);
@@ -969,6 +1028,27 @@ class VAPT_REST
     return new WP_REST_Response(array('success' => true, 'hidden_files' => $hidden_files), 200);
   }
 
+  public function remove_data_file($request)
+  {
+    $filename = $request->get_param('filename');
+    if (!$filename) {
+      return new WP_REST_Response(array('error' => 'Missing filename'), 400);
+    }
+
+    $active_file = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : 'VAPT-Complete-Risk-Catalog-99.json';
+    if ($filename === $active_file || sanitize_file_name($filename) === sanitize_file_name($active_file)) {
+      return new WP_REST_Response(array('error' => 'Cannot remove the active file.'), 400);
+    }
+
+    $removed_files = get_option('vapt_removed_json_files', array());
+    if (!in_array($filename, $removed_files)) {
+      $removed_files[] = $filename;
+      update_option('vapt_removed_json_files', $removed_files);
+    }
+
+    return new WP_REST_Response(array('success' => true), 200);
+  }
+
   public function reset_rate_limit($request)
   {
     require_once(VAPT_PATH . 'includes/enforcers/class-vapt-hook-driver.php');
@@ -986,12 +1066,21 @@ class VAPT_REST
 
     $files = array_diff(scandir($data_dir), array('..', '.'));
     $json_files = [];
-    $hidden_files = get_option('vapt_hidden_json_files', array());
-    $hidden_normalized = array_map('sanitize_file_name', $hidden_files);
+    $hidden_files  = get_option('vapt_hidden_json_files', array());
+    $removed_files = get_option('vapt_removed_json_files', array());
+
+    $hidden_normalized  = array_map('sanitize_file_name', $hidden_files);
+    $removed_normalized = array_map('sanitize_file_name', $removed_files);
 
     foreach ($files as $file) {
       if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'json') {
         $normalized_current = sanitize_file_name($file);
+
+        // Skip removed files
+        if (in_array($normalized_current, $removed_normalized) || in_array($file, $removed_files)) {
+          continue;
+        }
+
         $json_files[] = array(
           'filename' => $file,
           'isHidden' => in_array($normalized_current, $hidden_normalized) || in_array($file, $hidden_files)
@@ -1323,6 +1412,10 @@ class VAPT_REST
     if (empty($_FILES['file'])) {
       return new WP_Error('no_file', 'No file uploaded', array('status' => 400));
     }
+
+    require_once(ABSPATH . 'wp-admin/includes/file.php');
+    require_once(ABSPATH . 'wp-admin/includes/media.php');
+    require_once(ABSPATH . 'wp-admin/includes/image.php');
 
     require_once(ABSPATH . 'wp-admin/includes/file.php');
     require_once(ABSPATH . 'wp-admin/includes/media.php');
@@ -1702,11 +1795,14 @@ class VAPT_REST
   {
     if ($request->get_method() === 'POST') {
       $file = $request->get_param('file');
+      error_log("VAPT Builder: Activating file request: " . print_r($file, true));
       if (!$file) {
         return new WP_REST_Response(array('error' => 'No file specified'), 400);
       }
       $filename = sanitize_file_name($file);
-      update_option('vapt_active_feature_file', $filename);
+      $updated = update_option('vapt_active_feature_file', $filename);
+      error_log("VAPT Builder: Activated file '$filename'. DB Update Result: " . ($updated ? 'true' : 'false (unchanged)'));
+
       return new WP_REST_Response(array('success' => true, 'active_file' => $filename), 200);
     }
 

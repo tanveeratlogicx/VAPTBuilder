@@ -2888,9 +2888,10 @@ Feature ID: ${feature.id || 'N/A'}
   };
 
   const FeatureList = ({
-    features, schema, updateFeature, loading, dataFiles, selectedFile, onSelectFile, onUpload, allFiles, hiddenFiles, onUpdateHiddenFiles, manageSourcesStatus, isManageModalOpen, setIsManageModalOpen, designPromptConfig, setDesignPromptConfig,
+    features, schema, updateFeature, loading, dataFiles, selectedFile, onSelectFile, onUpload, allFiles, hiddenFiles, onUpdateHiddenFiles, manageSourcesStatus, isManageModalOpen, setIsManageModalOpen, onRemoveFile, designPromptConfig, setDesignPromptConfig,
     historyFeature, setHistoryFeature, designFeature, setDesignFeature, transitioning, setTransitioning, isPromptConfigModalOpen, setIsPromptConfigModalOpen, isMappingModalOpen, setIsMappingModalOpen
   }) => {
+    const [confirmingFile, setConfirmingFile] = useState(null);
     const [columnOrder, setColumnOrder] = useState(() => {
       const saved = localStorage.getItem(`vapt_col_order_${selectedFile}`);
       return saved ? JSON.parse(saved) : ['title', 'category', 'severity', 'description'];
@@ -3354,18 +3355,53 @@ Feature ID: ${feature.id || 'N/A'}
           }, [
             el('p', null, __('Deselect files to hide them from the Feature Source dropdown. The active file cannot be hidden.', 'vapt-builder')),
             el('div', { style: { maxHeight: '400px', overflowY: 'auto' } }, [
-              allFiles.map(file => el(CheckboxControl, {
+              allFiles.map(file => el('div', {
                 key: file.filename,
-                label: file.display_name || file.filename.replace(/_/g, ' '),
-                checked: !hiddenFiles.includes(file.filename),
-                disabled: file.filename === selectedFile,
-                onChange: (val) => {
-                  const newHidden = val
-                    ? hiddenFiles.filter(h => h !== file.filename)
-                    : [...hiddenFiles, file.filename];
-                  onUpdateHiddenFiles(newHidden);
-                }
-              }))
+                style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #eee' }
+              }, [
+                el(CheckboxControl, {
+                  label: file.display_name || file.filename.replace(/_/g, ' '),
+                  checked: !hiddenFiles.includes(file.filename),
+                  disabled: file.filename === selectedFile,
+                  onChange: (val) => {
+                    const newHidden = val
+                      ? hiddenFiles.filter(h => h !== file.filename)
+                      : [...hiddenFiles, file.filename];
+                    onUpdateHiddenFiles(newHidden);
+                  }
+                }),
+                el(Button, {
+                  icon: 'no',
+                  isDestructive: true,
+                  isSmall: true,
+                  disabled: file.filename === selectedFile,
+                  onClick: () => setConfirmingFile(file.filename),
+                  label: __('Remove from list', 'vapt-builder'),
+                  style: { marginLeft: '10px' }
+                })
+              ]))
+            ]),
+            confirmingFile && el(Modal, {
+              title: __('Confirm Removal', 'vapt-builder'),
+              onRequestClose: () => setConfirmingFile(null),
+              className: 'vapt-confirm-modal',
+              overlayClassName: 'vapt-confirm-modal-overlay'
+            }, [
+              el('p', null, __('Are you sure you want to remove this source from the list? The physical file will remains on the server as a backup and can be restored by re-uploading.', 'vapt-builder')),
+              el('div', { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' } }, [
+                el(Button, {
+                  isSecondary: true,
+                  onClick: () => setConfirmingFile(null)
+                }, __('Cancel', 'vapt-builder')),
+                el(Button, {
+                  isPrimary: true,
+                  isDestructive: true,
+                  onClick: () => {
+                    onRemoveFile(confirmingFile);
+                    setConfirmingFile(null);
+                  }
+                }, __('Confirm Removal', 'vapt-builder'))
+              ])
             ]),
             el('div', { style: { marginTop: '20px', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px' } }, [
               manageSourcesStatus === 'saving' && el(Spinner),
@@ -3998,10 +4034,29 @@ Feature ID: ${feature.id || 'N/A'}
         method: 'POST',
         data: { hidden_files: newHidden }
       }).then(() => {
-        fetchData(); // Refresh dropdown list
+        // Only refresh dropdown list, not features
+        apiFetch({ path: 'vapt/v1/data-files' }).then(res => setDataFiles(res));
         setManageSourcesStatus('saved');
         setTimeout(() => setManageSourcesStatus(null), 2000);
       }).catch(() => setManageSourcesStatus('error'));
+    };
+
+    const removeJSONFile = (filename) => {
+      setManageSourcesStatus('saving');
+      apiFetch({
+        path: 'vapt/v1/data-files/remove',
+        method: 'POST',
+        data: { filename }
+      }).then(() => {
+        fetchAllFiles(); // Refresh management list
+        // Only refresh dropdown list, not features
+        apiFetch({ path: 'vapt/v1/data-files' }).then(res => setDataFiles(res));
+        setManageSourcesStatus('saved');
+        setTimeout(() => setManageSourcesStatus(null), 2000);
+      }).catch(() => {
+        setManageSourcesStatus('error');
+        setAlertState({ message: __('Failed to remove file from list', 'vapt-builder') });
+      });
     };
 
 
@@ -4106,6 +4161,7 @@ Feature ID: ${feature.id || 'N/A'}
             onUpload: uploadJSON,
             isManageModalOpen,
             setIsManageModalOpen,
+            onRemoveFile: removeJSONFile,
             designPromptConfig,
             setDesignPromptConfig,
             isPromptConfigModalOpen,
