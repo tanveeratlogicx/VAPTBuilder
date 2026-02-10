@@ -16,6 +16,36 @@
         "block_debug_exposure",
         "limit_login_attempts"
       ]
+    },
+    "nginx": {
+      "directives": ["add_header", "location", "deny", "autoindex", "return", "if"],
+      "markers": ["# Rule for: [feature]", "add_header X-VAPT-Feature"],
+      "forbidden": ["lua_code_cache", "content_by_lua"]
+    },
+    "iis": {
+      "directives": ["customHeaders", "requestFiltering", "directoryBrowse", "hiddenSegments"],
+      "markers": ["VAPT-Feature: [feature]"],
+      "forbidden": []
+    },
+    "manual": {
+      "supported_platforms": ["cloudflare", "caddy", "node", "openresty"]
+    }
+  },
+  "manual_references": {
+    "cloudflare": {
+      "waf_syntax": {
+        "block_uri": "(http.request.uri.path eq \"/target\") action: block",
+        "block_query": "(http.request.uri.query contains \"eval(\") action: block",
+        "challenge_country": "(ip.geoip.country eq \"CN\") action: challenge"
+      }
+    },
+    "caddy": {
+      "directives": ["header", "respond", "abort", "file_server", "basicauth"],
+      "snippet": "@block { path /target } respond @block 403"
+    },
+    "node": {
+      "middleware": ["helmet", "cors", "express-rate-limit"],
+      "snippet": "app.use('/target', (req, res) => res.status(403).send('Forbidden'));"
     }
   },
   "probes": {

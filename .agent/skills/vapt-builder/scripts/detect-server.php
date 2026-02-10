@@ -20,10 +20,23 @@ $detection = [
 // 1. Detect Server Type
 if (stripos($detection['server_software'], 'apache') !== false) {
   $detection['is_apache'] = true;
-} elseif (stripos($detection['server_software'], 'nginx') !== false) {
+} elseif (stripos($detection['server_software'], 'nginx') !== false || stripos($detection['server_software'], 'openresty') !== false) {
   $detection['is_nginx'] = true;
 } elseif (stripos($detection['server_software'], 'microsoft-iis') !== false) {
   $detection['is_iis'] = true;
+} elseif (stripos($detection['server_software'], 'litespeed') !== false) {
+  // Litespeed is generally Apache-compatible (.htaccess)
+  $detection['is_litespeed'] = true;
+  $detection['is_apache'] = true; 
+}
+
+// 1b. Check for Config Files (Stronger Signal)
+if (file_exists(dirname(__DIR__ . '/../../../../') . '/web.config')) {
+  $detection['has_web_config'] = true;
+  if (!$detection['is_iis']) { 
+     // Suggest IIS if web.config exists, even if PHP reports otherwise (e.g. proxied)
+     $detection['hints'][] = 'web.config found - likely IIS';
+  }
 }
 
 // 2. Detect Apache Modules (if explicitly available or via apache_get_modules)

@@ -2,7 +2,7 @@
 
 **Specially trained agent skill for the VAPTBuilder WordPress Plugin.**
 
-This skill equips the AI agent with the specific knowledge required to configure, enforce, and verify security features within the VAPTBuilder ecosystem. It strictly adheres to the "Configuration over Implementation" philosophy, prioritizing `.htaccess` rules and JSON configuration schemas over custom PHP code.
+This skill equips the AI agent with the specific knowledge required to configure, enforce, and verify security features within the VAPTBuilder ecosystem. It adheres to the "Configuration over Implementation" philosophy, generating standardized configurations for **Apache, Nginx, IIS, Litespeed**, and providing manual guidance for **Cloudflare, Caddy,** and **Node.js**.
 
 ## 📂 Structure
 
@@ -11,18 +11,22 @@ This skill equips the AI agent with the specific knowledge required to configure
     *   `driver-reference.json`: Lookup table for valid drivers (`htaccess`, `hook`), directives, and probe types.
 *   **`examples/`**: "Gold Standard" implementation patterns.
     *   `apache-templates.conf`: Verified `.htaccess` snippets.
+    *   `nginx-custom-rules.conf`: Nginx security rules.
+    *   `iis-web-config-snippet.xml`: IIS `web.config` patterns.
+    *   `manual-implementation-patterns.md`: Guide for Cloudflare/Caddy/Node.js.
     *   `complete-schema-example.json`: A perfect example of a feature schema.
 *   **`scripts/`**: Utility scripts for validation.
-    *   `validate-schema.js`: A Node.js tool to verify generated JSON schemas against plugin requirements.
+    *   `validate-schema.js`: Updated to support `nginx`, `iis`, and `manual` drivers.
+    *   `detect-server.php`: Helper to identify target environment.
 
 ## 🎯 Usage
 
 When the user asks for help with VAPTBuilder features (e.g., "Implement XML-RPC blocking"), the agent loads this skill to:
 1.  Consult the Risk Catalog (external data).
-2.  Determine the best driver (Apache vs PHP).
-3.  Generate a valid JSON schema.
-4.  Construct necessary `.htaccess` rules or select the correct Hook method.
-5.  Validate the output.
+2.  **Determine Server Type**: Identify if the target is Apache, Nginx, IIS, or other.
+3.  **Select Driver**: Choose `htaccess`, `nginx`, `iis`, or `manual`.
+4.  **Generate JSON**: Construct a valid schema with appropriate rules or manual steps.
+5.  **Validation**: Verify the output against the `driver-reference.json` logic.
 
 ## 🛠 Maintenance
 

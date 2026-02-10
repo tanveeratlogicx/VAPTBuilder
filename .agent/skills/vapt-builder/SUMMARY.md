@@ -2,14 +2,15 @@
 
 ## Capabilities
 *   **Schema Generation**: Creates strict JSON schemas for the VAPTBuilder UI.
-*   **Apache/Htaccess**: Generates validated `.htaccess` rules for security headers, access control, and blocking.
+*   **Multi-Server Support**: Validated schemas for **Apache**, **Nginx**, **IIS**, and **Manual** configs (Cloudflare/Caddy).
+*   **Native Drivers**: Generates native `nginx.conf` and `web.config` rules alongside `.htaccess`.
 *   **Verification**: Automatically configures `universal_probe` tests to verify security controls.
 *   **Validation**: Includes tooling to syntax-check generated configurations.
 
 ## Source of Truth
 *   **Risk Catalog**: `data/VAPT-Complete-Risk-Catalog-99.json`
 *   **Plugin Version**: 3.3.20+
-*   **Drivers**: `VAPT_Htaccess_Driver`, `VAPT_Hook_Driver`
+*   **Drivers**: `vapt_htaccess_driver`, `vapt_nginx_driver`, `vapt_iis_driver`, `vapt_hook_driver`
 
 ## Quick Manifest
 
@@ -18,12 +19,16 @@
 | **Instructions** | `SKILL.md` | Main agent prompt and guidelines. |
 | **Reference** | `resources/driver-reference.json` | Valid method/directive lookup. |
 | **Template** | `examples/apache-templates.conf` | Copy-paste .htaccess rules. |
+| **Template** | `examples/nginx-custom-rules.conf` | Nginx security rules. |
+| **Template** | `examples/iis-web-config-snippet.xml` | IIS configuration snippets. |
+| **Guide** | `examples/manual-implementation-patterns.md` | Cloudflare/Caddy/Node patterns. |
 | **Example** | `examples/complete-schema-example.json` | Reference JSON schema. |
 | **Tool** | `scripts/validate-schema.js` | Schema validation script. |
 
 ## Key Philosophy
 > "Do not write code when a configuration will suffice."
 
-1.  **Prefer .htaccess** for all blocking/header logic.
+1.  **Prefer Server-Level Rules** (Native Drivers) where possible.
+2.  **Use Manual Driver** for platforms like Cloudflare or Caddy.
 2.  **Use existing methods** in `VAPT_Hook_Driver` for logic.
 3.  **Always verify** with `test_action`.

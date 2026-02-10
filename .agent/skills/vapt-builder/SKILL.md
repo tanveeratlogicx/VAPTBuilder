@@ -1,6 +1,6 @@
 ---
 name: vapt-builder
-description: Specialized VAPT Builder skill trained on the 99-item Risk Catalog. Focuses on generating JSON configuration schemas for the VAPTBuilder plugin, specifically prioritizing .htaccess (Apache) rules for server-side security enforcement.
+description: Specialized VAPT Builder skill trained on the 99-item Risk Catalog and SixT Risk Catalog. Focuses on generating JSON configuration schemas for the VAPTBuilder plugin, specifically prioritizing .htaccess (Apache) rules for server-side security enforcement.
 ---
 
 # VAPT Builder Expert Skill
@@ -9,67 +9,77 @@ This skill is a specialized extension of the generic WordPress VAPT expert, spec
 
 ## 🎯 Primary Goal
 
-To implement security features by **generating configuration schemas** rather than writing custom PHP code. The VAPTBuilder plugin uses a "Driver" system where you map features to existing drivers.
+To implement security features by **generating configuration schemas** for various server architectures. The VAPTBuilder plugin uses a "Driver" system where you map features to existing drivers (Apache, Nginx, IIS) or provide manual configuration steps (Cloudflare, Caddy, Node.js).
 
 ## 🧠 Intelligent Trigger (When to use this skill)
 
 **You MUST use this skill whenever:**
 1.  The user mentions "VAPTBuilder".
-2.  **The active workspace contains a file matching `*Risk-Catalogue*.json` (e.g., `VAPT-Complete-Risk-Catalog-99.json`).**
-3.  The task involves implementing security controls from a risk list.
+2.  **The user references "VAPTBuilder", "99-item catalog", or "SixT catalog".**
+3.  The task involves implementing security controls from a risk list found in the resources.
 
 ## 📚 Source of Truth
 
-*   **Risk Catalog**: `VAPTBuilder/data/VAPT-Complete-Risk-Catalog-99.json`
+*   **Primary Risk Catalog**: `.agent/skills/vapt-builder/resources/VAPT-Complete-Risk-Catalog-99.json`
+*   **Supplementary Risk Catalog**: `.agent/skills/vapt-builder/resources/VAPT-SixT-Risk-Catalog-12.json`
 *   **Driver System**:
-    *   `VAPT_Htaccess_Driver`: For all server-level blocking, headers, and access control.
-    *   `VAPT_Hook_Driver`: For WordPress-specific logic (auth, XML-RPC, user enumeration).
+    *   `vapt_htaccess_driver`: For Apache/Litespeed (native support).
+    *   `vapt_nginx_driver`: For Nginx/OpenResty (native support).
+    *   `vapt_iis_driver`: For IIS (native support).
+    *   `vapt_hook_driver`: For WordPress-specific logic.
+    *   `manual`: For Cloudflare, Caddy, Node.js, etc.
 
 ## 🛠️ Implementation Strategy
 
-### 1. Server-Side Rules (Apache/.htaccess) - **PRIORITY**
+### 1. Server-Side Rules (Apache/Nginx/IIS) - **PRIORITY**
 
-For any feature that *can* be implemented at the server level (e.g., blocking files, adding headers, stopping injection patterns), you **MUST** use the `htaccess` driver.
+For any feature that can be implemented at the server level, check the target architecture and use the appropriate driver.
 
-**Schema Pattern:**
+**Driver Selection:**
+*   **Apache / Litespeed** -> `driver: "htaccess"`
+*   **Nginx / OpenResty** -> `driver: "nginx"`
+*   **IIS** -> `driver: "iis"`
+
+**Schema Pattern (Native Drivers):**
 ```json
 {
-  "controls": [
-    { "type": "toggle", "label": "Enable Feature", "key": "enable_feature" }
-  ],
   "enforcement": {
-    "driver": "htaccess",
+    "driver": "nginx", // or "htaccess", "iis"
     "mappings": {
-      "enable_feature": "RewriteEngine On\nRewriteRule ^confidential/ - [F]"
+      "enable_feature": "add_header X-Frame-Options SAMEORIGIN always;" // Nginx syntax
     }
   }
 }
 ```
 
-**Common .htaccess Implementations:**
-*   **Security Headers**: `Header set X-Content-Type-Options "nosniff"`
-*   **Access Control**: `<FilesMatch ...> Deny from all </FilesMatch>`
-*   **Blocking Parameters**: `RewriteCond %{QUERY_STRING} ...`
+### 2. Manual Configuration (Cloudflare/Caddy/Node.js)
 
-> [!IMPORTANT]
-> **Safety Wrapping**: ALWAYS wrap sensitive Apache directives (like `Header`, `RewriteRule`, `RewriteEngine`) in `<IfModule>` blocks. This prevents the server from crashing if the required module is not enabled.
-> Example: `<IfModule mod_headers.c>\nHeader set X-XSS-Protection "1; mode=block"\n</IfModule>`
+For architectures without native plugin drivers, use `driver: "manual"` and provide the exact configuration code in `manual_steps`.
 
-### 2. Application Logic (WordPress Hooks)
-
-Use the `VAPT_Hook_Driver` only when PHP logic is required (e.g., user authentication, specific WP filters).
-
-**Schema Pattern:**
+**Schema Pattern (Manual):**
 ```json
 {
   "enforcement": {
-    "driver": "hook",
-    "mappings": {
-      "enable_protection": "block_xmlrpc" // Must match a method in VAPT_Hook_Driver
-    }
+    "driver": "manual",
+    "manual_steps": [
+      {
+        "platform": "cloudflare",
+        "description": "Create a WAF Custom Rule.",
+        "code": "(http.request.uri.path eq \"/xmlrpc.php\") action: block"
+      },
+      {
+        "platform": "caddy",
+        "description": "Add to Caddyfile",
+        "code": "@xmlrpc { path /xmlrpc.php } respond @xmlrpc 403"
+      }
+    ]
   }
 }
 ```
+
+### 3. Application Logic (WordPress Hooks)
+
+Use the `VAPT_Hook_Driver` only when PHP/WP logic is required.
 
 ## 📋 JSON Schema Reference
 
@@ -126,12 +136,14 @@ Always include `test_action` controls. The preferred logic is `universal_probe`.
 
 ## 🚀 Workflow
 
-1.  **Analyze**: Read the feature details from `VAPT-Complete-Risk-Catalog-99.json`.
-2.  **Strategy**: Can this be done in `.htaccess`?
-    *   **Yes**: Construct the Apache rules. Use `driver: "htaccess"`.
-    *   **No**: Identify the `VAPT_Hook_Driver` method. Use `driver: "hook"`.
-3.  **Generate**: Create the JSON schema with Controls + Enforcement.
-4.  **Verify**: Ensure `test_action` is configured to prove the protection works.
+1.  **Analyze**: Read the feature details.
+2.  **Determine Target**: Ask or infer the user's server stack (Apache, Nginx, IIS, etc.).
+3.  **Strategy**:
+    *   **Native Supported**: Use `htaccess`, `nginx`, or `iis` drivers.
+    *   **Manual Required**: Use `manual` driver for Cloudflare, Caddy, Node.
+    *   **WordPress Logic**: Use `hook` driver.
+4.  **Generate**: Create the JSON schema with Controls + Enforcement.
+5.  **Verify**: Ensure `test_action` is configured to prove the protection works.
 
 ## ⚠️ Critical Constraints
 

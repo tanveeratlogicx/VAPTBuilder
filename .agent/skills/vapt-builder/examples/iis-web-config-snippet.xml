@@ -1,0 +1,58 @@
+<!-- VAPT Builder - IIS web.config Example -->
+<!-- Place inside <system.webServer> -->
+
+<configuration>
+  <system.webServer>
+    
+    <!-- 1. Security Headers -->
+    <httpProtocol>
+      <customHeaders>
+        <add name="X-Content-Type-Options" value="nosniff" />
+        <add name="X-Frame-Options" value="SAMEORIGIN" />
+        <add name="X-XSS-Protection" value="1; mode=block" />
+        <remove name="X-Powered-By" />
+      </customHeaders>
+    </httpProtocol>
+
+    <!-- 2. Security Rules / Filtering -->
+    <security>
+      <requestFiltering>
+        
+        <!-- Block Hidden Segments (Sensitive Files) -->
+        <hiddenSegments>
+          <add segment="xmlrpc.php" />
+          <add segment=".env" />
+          <add segment=".git" />
+          <add segment="wp-config.php" />
+        </hiddenSegments>
+        
+        <!-- Block Query Strings (SQLi patterns) -->
+        <denyUrlSequences>
+          <add sequence=".." />
+          <add sequence="./" />
+        </denyUrlSequences>
+
+        <!-- Block HTTP Verbs -->
+        <verbs>
+          <add verb="TRACE" allowed="false" />
+          <add verb="TRACK" allowed="false" />
+        </verbs>
+
+      </requestFiltering>
+    </security>
+
+    <!-- 3. Disable Directory Browsing -->
+    <directoryBrowse enabled="false" />
+
+    <!-- 4. Rewrite Rules (Requires URL Rewrite Module) -->
+    <rewrite>
+      <rules>
+        <rule name="Block User Enumeration" stopProcessing="true">
+          <match url="^wp-json/wp/v2/users" />
+          <action type="CustomResponse" statusCode="403" statusReason="Forbidden" statusDescription="Access Denied" />
+        </rule>
+      </rules>
+    </rewrite>
+
+  </system.webServer>
+</configuration>
