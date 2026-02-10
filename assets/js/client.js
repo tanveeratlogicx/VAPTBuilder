@@ -242,7 +242,8 @@
                   const isEnforced = isHtaccess ? true : (f.is_enforced === undefined || f.is_enforced === null || f.is_enforced == 1);
                   const toggle = el(ToggleControl, {
                     checked: isEnforced,
-                    onChange: (val) => updateFeature(f.key, { is_enforced: val }),
+                    disabled: isHtaccess,
+                    onChange: isHtaccess ? null : (val) => updateFeature(f.key, { is_enforced: val }),
                     __nextHasNoMarginBottom: true,
                     style: { margin: 0 }
                   });

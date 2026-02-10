@@ -25,6 +25,7 @@ class VAPT_Hook_Driver
     'version' => 'hide_wp_version',
     'debug' => 'block_debug_exposure',
     'headers' => 'add_security_headers',
+    'hsts' => 'add_security_headers', // HSTS Implementation
     'xss' => 'add_security_headers', // XSS headers
     'clickjacking' => 'add_security_headers', // Frame options
     'null_byte' => 'block_null_byte_injection',
@@ -109,9 +110,19 @@ class VAPT_Hook_Driver
 
       $method = $mappings[$field_key];
       if (is_array($method)) $method = $method['method'] ?? ($method[0] ?? null);
+
+      // 🛡️ v3.8.4 Intelligence: If the "method" is actually a directive, resolve it!
+      if (!is_string($method) || !method_exists(__CLASS__, $method)) {
+        $resolved_method = self::resolve_dynamic_method($field_key, $key);
+        if ($resolved_method) {
+          $method = $resolved_method;
+        }
+      }
+
       if (!is_string($method) || in_array($method, $triggered_methods)) continue;
 
       $triggered_methods[] = $method;
+      file_put_contents($log_file, $log . "Triggering Method: $method for Feature: $key\n", FILE_APPEND);
 
       if (method_exists(__CLASS__, $method)) {
         try {
@@ -120,7 +131,7 @@ class VAPT_Hook_Driver
               self::block_xmlrpc($key);
               break;
             case 'add_security_headers':
-              self::add_security_headers($key);
+              self::add_security_headers($key, $resolved_data);
               break;
             case 'disable_directory_browsing':
               self::disable_directory_browsing($key);
@@ -622,17 +633,24 @@ class VAPT_Hook_Driver
   /**
    * Add Security Headers via PHP
    */
-  private static function add_security_headers($key = 'unknown')
+  private static function add_security_headers($key = 'unknown', $data = [])
   {
-    add_filter('wp_headers', function ($headers) use ($key) {
-      if (function_exists('wp_doing_ajax') && wp_doing_ajax()) return $headers; // VAPT: Skip for AJAX to prevent CORS/Heartbeat issues
+
+    add_filter('wp_headers', function ($headers) use ($key, $data) {
+      if (function_exists('wp_doing_ajax') && wp_doing_ajax()) return $headers;
 
       $headers['X-Frame-Options'] = 'SAMEORIGIN';
       $headers['X-Content-Type-Options'] = 'nosniff';
       $headers['X-XSS-Protection'] = '1; mode=block';
+
+      // 🛡️ v3.8.4 HSTS Implementation
+      if (!empty($data['hsts_enabled'])) {
+        $headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains';
+      }
+
       $headers['X-VAPT-Enforced'] = 'php-headers';
       $headers['X-VAPT-Feature'] = $key;
-      $headers['Access-Control-Expose-Headers'] = 'X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, X-VAPT-Enforced, X-VAPT-Feature';
+      $headers['Access-Control-Expose-Headers'] = 'X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Strict-Transport-Security, X-VAPT-Enforced, X-VAPT-Feature';
       return $headers;
     }, 999);
 
@@ -640,9 +658,14 @@ class VAPT_Hook_Driver
       header('X-Frame-Options: SAMEORIGIN');
       header('X-Content-Type-Options: nosniff');
       header('X-XSS-Protection: 1; mode=block');
+
+      if (!empty($data['hsts_enabled'])) {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+      }
+
       header('X-VAPT-Enforced: php-headers');
       header('X-VAPT-Feature: ' . $key);
-      header('Access-Control-Expose-Headers: X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, X-VAPT-Enforced, X-VAPT-Feature');
+      header('Access-Control-Expose-Headers: X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Strict-Transport-Security, X-VAPT-Enforced, X-VAPT-Feature');
     }
   }
 

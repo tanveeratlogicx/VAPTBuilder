@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version:           3.8.2
+ * Version:           3.8.5
  * Author:            Automated Penetration Testing Builder
  * Author URI:        https://vaptbuilder.com/
  * License:           GPL-2.0-or-later

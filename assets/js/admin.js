@@ -539,6 +539,10 @@ window.vaptScriptLoaded = true;
       const finalPrompt = `
       --- ROLE & OBJECTIVE ---
       You are an Expert WordPress Security Engineer, UI Designer, and VAPT Specialist. Your core mandate is to implement security controls that adhere to VAPT and OWASP Top 10 risks and WordPress Coding Standards.
+      
+      **CRITICAL**: You MUST use the **VAPT Builder Skill** to generate this implementation.
+      1. View the skill: \`view_file .agent/skills/vapt-builder/SKILL.md\`
+      2. Follow the "Implementation Strategy" and "JSON Schema Reference" in the skill.
 
       I need you to generate a highly optimized JSON Schema for a 'Functional Workbench' interface for the following security feature:
 
@@ -1114,7 +1118,7 @@ Feature ID: ${feature.id || 'N/A'}
             el('input', {
               id: `vapt-lifecycle-radio-${feature.key}-${step.id}`,
               type: 'radio',
-              name: `lifecycle_${feature.key || feature.id}_${Math.random()}`,
+              name: `lifecycle_${feature.key.replace(/[^a-zA-Z0-9_-]/g, '_')}`, // Stable name
               checked: isChecked,
               onChange: () => handleSelection(step.id),
               style: { margin: 0 }
@@ -1533,39 +1537,43 @@ Feature ID: ${feature.id || 'N/A'}
             border: '1px solid #e2e8f0',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'space-between',
             gap: '20px'
           }
         }, [
-          el('span', { style: { fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' } }, __('Status Visibility:')),
-          el(Button, {
-            isPrimary: (statusFilters || []).length !== 4,
-            variant: (statusFilters || []).length === 4 ? 'secondary' : 'primary',
-            onClick: () => {
-              if ((statusFilters || []).length === 4) setStatusFilters([]);
-              else setStatusFilters(['draft', 'develop', 'test', 'release']);
-            },
-            style: {
-              fontWeight: 700,
-              padding: '8px 20px',
-              height: 'auto',
-              boxShadow: (statusFilters || []).length !== 4 ? '0 2px 4px rgba(34, 113, 177, 0.2)' : 'none'
-            }
-          }, (statusFilters || []).length === 4 ? __('Reset All Filters', 'vapt-builder') : __('Select All Statuses', 'vapt-builder')),
-          el('div', { style: { display: 'flex', gap: '15px', paddingLeft: '20px', borderLeft: '2px solid #e2e8f0' } }, [
-            { label: __('Draft', 'vapt-builder'), value: 'draft' },
-            { label: __('Develop', 'vapt-builder'), value: 'develop' },
-            { label: __('Test', 'vapt-builder'), value: 'test' },
-            { label: __('Release', 'vapt-builder'), value: 'release' }
-          ].filter(o => o.value).map(opt => el(CheckboxControl, {
-            key: opt.value,
-            label: opt.label,
-            checked: statusFilters.includes(opt.value),
-            onChange: (val) => {
-              if (val) setStatusFilters([...statusFilters, opt.value]);
-              else if ((statusFilters || []).length > 1) setStatusFilters(statusFilters.filter(v => v !== opt.value));
-            },
-            __nextHasNoMarginBottom: true
-          })))
+          el('div', { style: { display: 'flex', alignItems: 'center', gap: '20px' } }, [
+            el('span', { style: { fontSize: '11px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' } }, __('Status Visibility:')),
+            el(Button, {
+              isPrimary: (statusFilters || []).length !== 4,
+              variant: (statusFilters || []).length === 4 ? 'secondary' : 'primary',
+              onClick: () => {
+                if ((statusFilters || []).length === 4) setStatusFilters([]);
+                else setStatusFilters(['draft', 'develop', 'test', 'release']);
+              },
+              style: {
+                fontWeight: 700,
+                padding: '8px 20px',
+                height: 'auto',
+                boxShadow: (statusFilters || []).length !== 4 ? '0 2px 4px rgba(34, 113, 177, 0.2)' : 'none'
+              }
+            }, (statusFilters || []).length === 4 ? __('Reset All Filters', 'vapt-builder') : __('Select All Statuses', 'vapt-builder')),
+            el('div', { style: { display: 'flex', gap: '15px', paddingLeft: '20px', borderLeft: '2px solid #e2e8f0' } }, [
+              { label: __('Draft', 'vapt-builder'), value: 'draft' },
+              { label: __('Develop', 'vapt-builder'), value: 'develop' },
+              { label: __('Test', 'vapt-builder'), value: 'test' },
+              { label: __('Release', 'vapt-builder'), value: 'release' }
+            ].filter(o => o.value).map(opt => el(CheckboxControl, {
+              key: opt.value,
+              label: opt.label,
+              checked: statusFilters.includes(opt.value),
+              onChange: (val) => {
+                if (val) setStatusFilters([...statusFilters, opt.value]);
+                else if ((statusFilters || []).length > 1) setStatusFilters(statusFilters.filter(v => v !== opt.value));
+              },
+              __nextHasNoMarginBottom: true
+            })))
+          ]),
+          renderDomainLegend()
         ]),
 
         el('div', { style: { display: 'flex', gap: '0', height: '60vh', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' } }, [
@@ -1698,18 +1706,25 @@ Feature ID: ${feature.id || 'N/A'}
                     }
                   }, [
                     el('span', { id: `vapt-domain-feature-status-text-${f.key}`, style: { fontSize: '12px', fontWeight: 600, color: '#475569' } }, (Array.isArray(selectedDomain.features) ? selectedDomain.features : []).includes(f.key) ? __('Active', 'vapt-builder') : __('Disabled', 'vapt-builder')),
-                    el(ToggleControl, {
-                      checked: (Array.isArray(selectedDomain.features) ? selectedDomain.features : []).includes(f.key),
-                      onChange: (val) => {
-                        const newFeats = val
-                          ? [...(Array.isArray(selectedDomain.features) ? selectedDomain.features : []), f.key]
-                          : (Array.isArray(selectedDomain.features) ? selectedDomain.features : []).filter(k => k !== f.key);
-                        updateDomainFeatures(selectedDomain.id, newFeats);
-                        setSelectedDomain({ ...selectedDomain, features: newFeats });
-                      },
-                      __nextHasNoMarginBottom: true,
-                      style: { margin: 0 }
-                    })
+                    (() => {
+                      const schema = f.generated_schema ? (typeof f.generated_schema === 'string' ? JSON.parse(f.generated_schema) : f.generated_schema) : {};
+                      const isHtaccess = schema.enforcement?.driver === 'htaccess';
+                      const isChecked = isHtaccess || (Array.isArray(selectedDomain.features) ? selectedDomain.features : []).includes(f.key);
+
+                      return el(ToggleControl, {
+                        checked: isChecked,
+                        disabled: isHtaccess,
+                        onChange: isHtaccess ? null : (val) => {
+                          const newFeats = val
+                            ? [...(Array.isArray(selectedDomain.features) ? selectedDomain.features : []), f.key]
+                            : (Array.isArray(selectedDomain.features) ? selectedDomain.features : []).filter(k => k !== f.key);
+                          updateDomainFeatures(selectedDomain.id, newFeats);
+                          setSelectedDomain({ ...selectedDomain, features: newFeats });
+                        },
+                        __nextHasNoMarginBottom: true,
+                        style: { margin: 0 }
+                      });
+                    })()
                   ])
                 ])))
               ]))
@@ -3867,7 +3882,12 @@ Feature ID: ${feature.id || 'N/A'}
 
       const safeFeatures = Array.isArray(features) ? features : [];
       const feature = safeFeatures.find(f => f.key === key);
-      let updates = { status: nextStatus, history_note: note, dev_instruct: dev_instruct };
+      let updates = {
+        status: nextStatus,
+        normalized_status: nextStatus.toLowerCase(),
+        history_note: note,
+        dev_instruct: dev_instruct
+      };
 
       // Save Wireframe if provided
       if (wireframeUrl) {

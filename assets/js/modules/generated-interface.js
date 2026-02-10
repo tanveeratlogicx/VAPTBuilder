@@ -842,6 +842,7 @@
             label: el('strong', { style: { fontSize: '12px', color: '#334155' } }, safeRender(label)),
             help: safeRender(help),
             checked: !!value,
+            disabled: control.disabled,
             onChange: (val) => handleChange(key, val)
           });
 

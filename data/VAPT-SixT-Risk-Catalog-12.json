@@ -2322,7 +2322,7 @@
           "implementation_steps": [
             {
               "step_number": 1,
-              "description": ".htaccess: <Files readme.html> Order allow,deny Deny from all </Files>. Delete file.",
+              "description": ".htaccess: `<Files readme.html> Order allow,deny Deny from all </Files>`. Delete file.",
               "file": "wp-config.php",
               "code": ".htaccess: <Files readme.html> Order allow,deny Deny from all </Files>. Delete file.",
               "backup_required": true
@@ -2341,8 +2341,17 @@
           "wp_config": {
             "constants": {}
           },
-          "htaccess_rules": [],
+          "htaccess_rules": [
+            "<Files readme.html>\nOrder allow,deny\nDeny from all\n</Files>"
+          ],
           "php_ini": {}
+        },
+        "enforcement": {
+          "driver": "htaccess",
+          "target": "root",
+          "mappings": {
+            "block_readme": "<Files readme.html>\nOrder allow,deny\nDeny from all\n</Files>"
+          }
         },
         "plugin_dependencies": []
       },
@@ -2374,9 +2383,11 @@
           {
             "component_id": "UI-information-disclosure-via-readme.html-001",
             "type": "toggle",
+            "key": "block_readme",
             "label": "Enable Information Disclosure via readme.html Protection",
             "description": "Activates protection against information disclosure via readme.html",
             "default_value": true,
+            "disabled": true,
             "options": [],
             "validation": {
               "required": false
@@ -2531,15 +2542,22 @@
         "remediation_effort": "low",
         "estimated_time": "1-4 hours",
         "priority": 6,
+        "enforcement": {
+          "driver": "htaccess",
+          "target": "root",
+          "mappings": {
+            "hsts_enabled": "Header always set Strict-Transport-Security \"max-age=31536000; includeSubDomains\""
+          }
+        },
         "automated_protection": {
           "available": true,
           "method": "plugin-configuration",
           "implementation_steps": [
             {
               "step_number": 1,
-              "description": "Add to .htaccess: Header always set Strict-Transport-Security 'max-age=31536000; includeSubDomains'. Use security plugins.",
-              "file": "wp-config.php",
-              "code": "Add to .htaccess: Header always set Strict-Transport-Security 'max-age=31536000; includeSubDomains'. Use security plugins.",
+              "description": "Add Header always set Strict-Transport-Security to .htaccess",
+              "file": ".htaccess",
+              "code": "Add to .htaccess: Header always set Strict-Transport-Security 'max-age=31536000; includeSubDomains'",
               "backup_required": true
             }
           ]
@@ -2556,7 +2574,9 @@
           "wp_config": {
             "constants": {}
           },
-          "htaccess_rules": [],
+          "htaccess_rules": [
+            "Header always set Strict-Transport-Security \"max-age=31536000; includeSubDomains\""
+          ],
           "php_ini": {}
         },
         "plugin_dependencies": []
@@ -2565,15 +2585,22 @@
         "automated_checks": [
           {
             "check_id": "CHECK-099-001",
-            "name": "HSTS Not Implemented Check",
-            "method": "endpoint-test",
-            "script": "check_12()",
-            "success_criteria": {
-              "condition": "equals",
-              "expected_value": "protected",
-              "actual_value_source": "security_scan"
+            "name": "HSTS Security Header Check",
+            "method": "universal_probe",
+            "test_config": {
+              "method": "GET",
+              "path": "/",
+              "force_https": true,
+              "expected_headers": {
+                "Strict-Transport-Security": "max-age="
+              }
             },
-            "failure_message": "HSTS Not Implemented vulnerability detected"
+            "success_criteria": {
+              "condition": "contains",
+              "expected_value": "max-age=",
+              "actual_value_source": "headers"
+            },
+            "failure_message": "Strict-Transport-Security header not found or missing max-age"
           }
         ],
         "manual_verification": [],
@@ -2589,8 +2616,9 @@
           {
             "component_id": "UI-hsts-not-implemented-001",
             "type": "toggle",
+            "key": "hsts_enabled",
             "label": "Enable HSTS Not Implemented Protection",
-            "description": "Activates protection against hsts not implemented",
+            "description": "Activates protection against hsts not implemented by adding Strict-Transport-Security header to .htaccess",
             "default_value": true,
             "options": [],
             "validation": {

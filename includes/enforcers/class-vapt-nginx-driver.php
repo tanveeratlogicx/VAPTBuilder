@@ -73,11 +73,11 @@ class VAPT_Nginx_Driver
   private static function translate_to_nginx($key, $directive)
   {
     // 1. Headers
-    // Apache: Header set X-Frame-Options "SAMEORIGIN"
+    // Apache: Header [always] set X-Frame-Options "SAMEORIGIN"
     // Nginx: add_header X-Frame-Options "SAMEORIGIN" always;
-    if (strpos($directive, 'Header set') !== false) {
-      $clean = str_replace(['Header set ', '"'], ['', ''], $directive);
-      $parts = explode(' ', $clean, 2);
+    if (strpos($directive, 'Header ') !== false && strpos($directive, 'set ') !== false) {
+      $clean = str_replace(['Header ', 'always ', 'set ', '"'], ['', '', '', ''], $directive);
+      $parts = explode(' ', trim($clean), 2);
       if (count($parts) == 2) {
         return 'add_header ' . $parts[0] . ' "' . $parts[1] . '" always;';
       }

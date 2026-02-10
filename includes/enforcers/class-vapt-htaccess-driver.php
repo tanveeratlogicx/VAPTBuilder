@@ -65,13 +65,32 @@ class VAPT_Htaccess_Driver
 
     // 1. Iterate mappings and bind data
     foreach ($mappings as $key => $directive) {
-      if (!empty($data[$key])) {
-        // Simple substitution? Or is the directive itself the rule?
-        // The current logic simply takes the directive string if the key is truthy in $data.
-        // It does NOT appear to do variable substitution (e.g. {{value}}) yet, 
-        // effectively treating the data as a "Toggle".
+      // v3.8.4: Use isset and non-empty check instead of empty() to allow '0' or false values in sub-controls
+      if (isset($data[$key]) && $data[$key] !== '') {
+        $processed_directive = $directive;
 
-        $processed_directive = self::prepare_directive($directive);
+        // Variable Substitution Logic (v3.7.0 / v3.8.4 enhanced)
+        if (strpos($directive, '{{') !== false) {
+          $processed_directive = preg_replace_callback('/\{\{([a-zA-Z0-9_\-]+)\}\}/', function ($matches) use ($data, $key) {
+            $placeholder = $matches[1];
+
+            // Case A: {{value}} refers to the main control's value
+            if ($placeholder === 'value') {
+              return $data[$key];
+            }
+
+            // Case B: Reference to another control
+            if (isset($data[$placeholder])) {
+              return $data[$placeholder];
+            }
+
+            return '';
+          }, $directive);
+        }
+
+        // Final sanitation for htaccess (ensure no malicious characters if dynamically injected)
+        // Note: prepare_directive handles IfModule wrapping
+        $processed_directive = self::prepare_directive($processed_directive);
         $validation = self::validate_htaccess_directive($processed_directive);
 
         if ($validation['valid']) {
@@ -93,7 +112,9 @@ class VAPT_Htaccess_Driver
       $enforcer_headers = array();
       $enforcer_headers[] = "<IfModule mod_headers.c>";
       $enforcer_headers[] = "  Header set X-VAPT-Enforced \"htaccess\"";
-      $enforcer_headers[] = "  Header append X-VAPT-Feature \"$feature_key\"";
+      // Sanitize feature_key for header
+      $safe_feature_key = preg_replace('/[^a-zA-Z0-9_\-]/', '', $feature_key);
+      $enforcer_headers[] = "  Header append X-VAPT-Feature \"$safe_feature_key\"";
       $enforcer_headers[] = "</IfModule>";
 
       // Prepend headers so they appear at the top of the feature block

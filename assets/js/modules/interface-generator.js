@@ -20,7 +20,7 @@
       const baseSchema = {
         controls: [
           { type: 'header', label: 'Implementation Status' },
-          { type: 'toggle', label: 'Enable Feature', key: 'feat_enabled', default: true }
+          { type: 'toggle', label: 'Enable Feature', key: 'feat_enabled', default: true, disabled: false }
         ],
         enforcement: {
           driver: 'manual', // Default to manual unless specific code is found
@@ -47,19 +47,27 @@
 
       // 2. Check for .htaccess modifications
       // Pattern: "Add `CODE` to .htaccess" or ".htaccess.*?:?\s*`([^`]+)`"
+      // v3.8.4 Robustness: Also check for raw Apache directives if .htaccess is mentioned or if they look like rules
       const htaccessMatch = remediationText.match(/\.htaccess.*?:?\s*`([^`]+)`/i) ||
-        remediationText.match(/Add\s*`([^`]+)`\s*to\s*\.htaccess/i);
+        remediationText.match(/Add\s*`([^`]+)`\s*to\s*\.htaccess/i) ||
+        (remediationText.match(/Header\s+always\s+set/i) && !remediationText.includes('<?php')) || // Common for security headers
+        (remediationText.match(/RewriteRule/i) && !remediationText.includes('<?php')); // Common for blocking
 
       if (htaccessMatch) {
-        const rule = htaccessMatch[1].trim();
+        // If it was a regex match with groups, take group 1, otherwise take the whole text
+        const rule = (Array.isArray(htaccessMatch) && htaccessMatch[1]) ? htaccessMatch[1].trim() : remediationText.trim();
+
         baseSchema.enforcement.driver = 'htaccess';
         baseSchema.enforcement.target = 'root';
         baseSchema.enforcement.mappings = {
           'feat_enabled': rule
         };
-        // Add a read-only view of the rule
+        // Revert: The inner toggle MUST be enabled. The "Enforce Rule" toggle in the header is what needs to be frozen.
+        // baseSchema.controls[1].disabled = true; 
+
         baseSchema.controls.push({
           type: 'code',
+          key: 'htaccess_rule_view',
           label: 'Generated .htaccess Rule',
           default: rule,
           readOnly: true
