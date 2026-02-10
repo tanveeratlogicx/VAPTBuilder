@@ -1,3 +1,5 @@
+/* eslint-env node */
+
 /**
  * Schema Validator for VAPTBuilder
  * Usage: node validate-schema.js <path-to-schema.json>

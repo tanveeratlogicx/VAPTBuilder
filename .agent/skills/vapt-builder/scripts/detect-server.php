@@ -27,15 +27,15 @@ if (stripos($detection['server_software'], 'apache') !== false) {
 } elseif (stripos($detection['server_software'], 'litespeed') !== false) {
   // Litespeed is generally Apache-compatible (.htaccess)
   $detection['is_litespeed'] = true;
-  $detection['is_apache'] = true; 
+  $detection['is_apache'] = true;
 }
 
 // 1b. Check for Config Files (Stronger Signal)
 if (file_exists(dirname(__DIR__ . '/../../../../') . '/web.config')) {
   $detection['has_web_config'] = true;
-  if (!$detection['is_iis']) { 
-     // Suggest IIS if web.config exists, even if PHP reports otherwise (e.g. proxied)
-     $detection['hints'][] = 'web.config found - likely IIS';
+  if (!$detection['is_iis']) {
+    // Suggest IIS if web.config exists, even if PHP reports otherwise (e.g. proxied)
+    $detection['hints'][] = 'web.config found - likely IIS';
   }
 }
 
@@ -46,17 +46,23 @@ if (function_exists('apache_get_modules')) {
   $detection['modules']['mod_headers'] = in_array('mod_headers', $dims);
 } else {
   // Heuristic fallback: Check if .htaccess exists and has RewriteEngine
-  if (file_exists(__DIR__ . '/../../../../.htaccess')) {
-    $content = file_get_contents(__DIR__ . '/../../../../.htaccess');
+  // Path: plugins/VAPTBuilder/.agent/skills/vapt-builder/scripts -> root
+  // Levels: scripts(1) -> vapt-builder(2) -> skills(3) -> .agent(4) -> VAPTBuilder(5) -> plugins(6) -> wp-content(7) -> root
+  $root_path = dirname(__DIR__, 6);
+  if (file_exists($root_path . '/.htaccess')) {
+    $content = file_get_contents($root_path . '/.htaccess');
     $detection['modules']['mod_rewrite'] = (stripos($content, 'RewriteEngine') !== false);
   }
 }
 
 // 3. Check Write Permissions
+// Re-calculate root path safely
+$root_path = $root_path ?? dirname(__DIR__, 6);
+
 $paths_to_check = [
-  'root_htaccess' => __DIR__ . '/../../../../.htaccess',
-  'wp_config'     => __DIR__ . '/../../../../wp-config.php',
-  'uploads_dir'   => __DIR__ . '/../../../../wp-content/uploads'
+  'root_htaccess' => $root_path . '/.htaccess',
+  'wp_config'     => $root_path . '/wp-config.php',
+  'uploads_dir'   => $root_path . '/wp-content/uploads'
 ];
 
 foreach ($paths_to_check as $key => $path) {
