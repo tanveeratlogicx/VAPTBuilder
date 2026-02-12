@@ -14,6 +14,69 @@ window.vaptScriptLoaded = true;
     Notice, Placeholder, Dropdown, CheckboxControl, BaseControl, Icon,
     TextareaControl, Card, CardHeader, CardBody, Tooltip
   } = wp.components || {};
+  // Global Settings from wp_localize_script (MOVED TO TOP v3.8.11)
+  const settings = window.vaptSettings || {};
+  const isSuper = settings.isSuper || false;
+
+  // 🛡️ GLOBAL REST HOTPATCH (v3.8.16)
+  // Replaces the global wp.apiFetch to catch 404s from any component (Core or Plugin)
+  if (wp.apiFetch && !wp.apiFetch.__vapt_patched) {
+    let localBroken = localStorage.getItem('vapt_rest_broken') === '1';
+    const originalApiFetch = wp.apiFetch;
+
+    const patchedApiFetch = (args) => {
+      const getFallbackUrl = (pathOrUrl) => {
+        if (!pathOrUrl) return null;
+        const path = typeof pathOrUrl === 'string' && pathOrUrl.includes('/wp-json/')
+          ? pathOrUrl.split('/wp-json/')[1]
+          : pathOrUrl;
+        const cleanHome = settings.homeUrl.replace(/\/$/, '');
+        const cleanPath = path.replace(/^\//, '').split('?')[0];
+        const queryParams = path.includes('?') ? '&' + path.split('?')[1] : '';
+        return cleanHome + '/?rest_route=/' + cleanPath + queryParams;
+      };
+
+      // 🛡️ Pre-emptive Fallback if we already know REST is broken
+      if (localBroken && (args.path || args.url) && settings.homeUrl) {
+        const fallbackUrl = getFallbackUrl(args.path || args.url);
+        if (fallbackUrl) {
+          const fallbackArgs = Object.assign({}, args, { url: fallbackUrl });
+          delete fallbackArgs.path;
+          return originalApiFetch(fallbackArgs);
+        }
+      }
+
+      return originalApiFetch(args).catch(err => {
+        const status = err.status || (err.data && err.data.status);
+        // 🛡️ Trigger fallback on 404 OR invalid_json (common when server returns HTML for 404)
+        const isFallbackTrigger = status === 404 || err.code === 'rest_no_route' || err.code === 'invalid_json';
+
+        if (isFallbackTrigger && (args.path || args.url) && settings.homeUrl) {
+          const fallbackUrl = getFallbackUrl(args.path || args.url);
+          if (!fallbackUrl) throw err;
+
+          if (!localBroken) {
+            console.warn('VAPT Builder: Switching to Pre-emptive Mode (Silent) for REST API.');
+            localBroken = true;
+            localStorage.setItem('vapt_rest_broken', '1');
+          }
+
+          const fallbackArgs = Object.assign({}, args, { url: fallbackUrl });
+          delete fallbackArgs.path;
+          return originalApiFetch(fallbackArgs);
+        }
+        throw err;
+      });
+    };
+
+    // Copy properties like .use, .createNonceMiddleware, etc.
+    Object.keys(originalApiFetch).forEach(key => {
+      patchedApiFetch[key] = originalApiFetch[key];
+    });
+    patchedApiFetch.__vapt_patched = true;
+    wp.apiFetch = patchedApiFetch;
+  }
+
   const apiFetch = wp.apiFetch;
   const { __, sprintf } = wp.i18n || {};
 
@@ -48,9 +111,8 @@ window.vaptScriptLoaded = true;
     }
   }
 
-  // Global Settings from wp_localize_script
-  const settings = window.vaptSettings || {};
-  const isSuper = settings.isSuper || false;
+  // Global Settings moved to top
+
   // Import Auto-Generator
   const Generator = window.VAPT_Generator;
   // Import Generated Interface UI
@@ -876,6 +938,43 @@ Feature ID: ${feature.id || 'N/A'}
 
   // Field Mapping Modal Component
   const FieldMappingModal = ({ isOpen, onClose, fieldMapping, setFieldMapping, allKeys }) => {
+    const handleAutoMap = () => {
+      const newMapping = { ...fieldMapping };
+      let mappedCount = 0;
+
+      const findBestMatch = (keywords) => {
+        for (const keyword of keywords) {
+          // Exact match first, then partial
+          const exact = allKeys.find(k => k.toLowerCase() === keyword);
+          if (exact) return exact;
+
+          const partial = allKeys.find(k => k.toLowerCase().includes(keyword));
+          if (partial) return partial;
+        }
+        return '';
+      };
+
+      if (!newMapping.test_method) {
+        const match = findBestMatch(['test_method', 'testmethod', 'testing_steps', 'method']);
+        if (match) { newMapping.test_method = match; mappedCount++; }
+      }
+
+      if (!newMapping.verification_steps) {
+        const match = findBestMatch(['verification_steps', 'verification', 'steps']);
+        if (match) { newMapping.verification_steps = match; mappedCount++; }
+      }
+
+      if (!newMapping.verification_engine) {
+        const match = findBestMatch(['verification_engine', 'verification_schema', 'json_schema', 'schema', 'engine']);
+        if (match) { newMapping.verification_engine = match; mappedCount++; }
+      }
+
+      setFieldMapping(newMapping);
+      if (mappedCount === 0) {
+        alert(__('No new matching fields found.', 'vapt-builder'));
+      }
+    };
+
     return el(Modal, {
       title: __('Field Smart-Mapping Configuration', 'vapt-builder'),
       onRequestClose: onClose,
@@ -907,7 +1006,8 @@ Feature ID: ${feature.id || 'N/A'}
           })
         ]),
 
-        el('div', { style: { marginTop: '25px', display: 'flex', justifyContent: 'flex-end' } }, [
+        el('div', { style: { marginTop: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
+          el(Button, { isSecondary: true, onClick: handleAutoMap }, __('Auto Map', 'vapt-builder')),
           el(Button, { isPrimary: true, onClick: onClose }, __('Done', 'vapt-builder'))
         ])
       ])
@@ -1157,7 +1257,7 @@ Feature ID: ${feature.id || 'N/A'}
     ]);
   };
 
-  const DomainFeatures = ({ domains = [], features = [], isDomainModalOpen, selectedDomain, setDomainModalOpen, setSelectedDomain, updateDomainFeatures, addDomain, deleteDomain, batchDeleteDomains, setConfirmState, selectedDomains = [], setSelectedDomains }) => {
+  const DomainFeatures = ({ domains = [], features = [], isDomainModalOpen, selectedDomain, setDomainModalOpen, setSelectedDomain, updateDomainFeatures, addDomain, deleteDomain, batchDeleteDomains, setConfirmState, selectedDomains = [], setSelectedDomains, dataFiles = [], selectedFile, onSelectFile }) => {
     const [newDomain, setNewDomain] = useState('');
     const [isWildcardNew, setIsWildcardNew] = useState(false);
     const [activeCategory, setActiveCategory] = useState('all');
@@ -1255,27 +1355,103 @@ Feature ID: ${feature.id || 'N/A'}
       return sortedResult;
     }, [displayFeatures]);
 
-    const renderDomainLegend = () => {
-      if (!isSuper) return null;
-      return el('div', { className: 'vapt-color-legend' }, [
-        el('div', { className: 'vapt-legend-items' }, [
-          el('div', { className: 'vapt-legend-item' }, [
-            el('div', { className: 'vapt-legend-color-box normal' }),
-            el('span', { className: 'vapt-legend-label' }, __('Active File Only', 'vapt-builder'))
-          ]),
-          el('div', { className: 'vapt-legend-item' }, [
-            el('div', { className: 'vapt-legend-color-box inactive-only' }),
-            el('span', { className: 'vapt-legend-label' }, __('Inactive File Only', 'vapt-builder'))
-          ]),
-          el('div', { className: 'vapt-legend-item' }, [
-            el('div', { className: 'vapt-legend-color-box multi-file' }),
-            el('span', { className: 'vapt-legend-label' }, __('Present in Both Files', 'vapt-builder'))
-          ])
-        ])
-      ]);
-    };
+
+    const domainStats = useMemo(() => {
+      const doms = Array.isArray(domains) ? domains : [];
+      return {
+        total: doms.length,
+        active: doms.filter(d => !(d.is_enabled === '0' || d.is_enabled === false || d.is_enabled === 0)).length,
+        disabled: doms.filter(d => (d.is_enabled === '0' || d.is_enabled === false || d.is_enabled === 0)).length
+      };
+    }, [domains]);
 
     return el(PanelBody, { className: 'vapt-feature-panel', title: __('Domain Specific Features', 'vapt-builder'), initialOpen: true }, [
+      // Summary Pill Row (Synced with Feature List)
+      el('div', {
+        style: {
+          display: 'flex',
+          gap: '15px',
+          padding: '6px 15px',
+          background: '#fff',
+          border: '1px solid #dcdcde',
+          borderRadius: '4px',
+          marginBottom: '10px',
+          alignItems: 'center',
+          fontSize: '11px',
+          color: '#333'
+        }
+      }, [
+        el('span', { style: { fontWeight: '700', textTransform: 'uppercase', fontSize: '10px', color: '#666' } }, __('Summary:', 'vapt-builder')),
+        el('span', { style: { fontWeight: '600', color: '#2271b1' } }, sprintf(__('Total Domains: %d', 'vapt-builder'), domainStats.total)),
+        el('span', { style: { color: '#46b450', fontWeight: '700' } }, sprintf(__('Active: %d', 'vapt-builder'), domainStats.active)),
+        el('span', { style: { color: '#d63638', fontWeight: '600' } }, sprintf(__('Disabled: %d', 'vapt-builder'), domainStats.disabled)),
+
+        el('div', {
+          style: {
+            marginLeft: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '2px 0'
+          }
+        }, [
+          el('span', { style: { fontWeight: '700', textTransform: 'uppercase', fontSize: '9px', color: '#64748b' } }, __('Data Sources:', 'vapt-builder')),
+          el('div', { style: { display: 'flex', gap: '12px', flexWrap: 'wrap' } }, [
+            // "All Data Files" Option (Only show for 3+ files)
+            dataFiles.length >= 3 && el('label', {
+              key: 'all-files',
+              style: {
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                cursor: 'pointer',
+                fontSize: '10px',
+                fontWeight: (selectedFile || '').split(',').includes('__all__') ? '700' : '500',
+                color: (selectedFile || '').split(',').includes('__all__') ? '#1e3a8a' : '#64748b'
+              }
+            }, [
+              el('input', {
+                type: 'checkbox',
+                checked: (selectedFile || '').split(',').includes('__all__'),
+                onChange: () => onSelectFile('__all__'),
+                style: { margin: 0, width: '12px', height: '12px' }
+              }),
+              __('All Data Files', 'vapt-builder')
+            ]),
+            // Individual Files
+            ...dataFiles.map(file => {
+              const BASELINE_FILE = 'VAPT-Complete-Risk-Catalog-99.json';
+              const isBaseline = file.value === BASELINE_FILE;
+              const isAllSelected = (selectedFile || '').split(',').includes('__all__');
+              const isChecked = isAllSelected || (selectedFile || '').split(',').includes(file.value) || isBaseline;
+
+              return el('label', {
+                key: file.value,
+                style: {
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  cursor: isBaseline ? 'default' : 'pointer',
+                  fontSize: '10px',
+                  fontWeight: isChecked ? '700' : '500',
+                  color: isChecked ? '#1e3a8a' : '#64748b',
+                  opacity: (isBaseline && !isAllSelected) ? 0.7 : 1
+                }
+              }, [
+                el('input', {
+                  type: 'checkbox',
+                  checked: isChecked,
+                  disabled: isAllSelected || isBaseline,
+                  onChange: () => onSelectFile(file.value),
+                  style: { margin: 0, width: '12px', height: '12px' }
+                }),
+                file.label
+              ]);
+            })
+          ])
+        ])
+      ]),
+
       el('div', {
         style: {
           display: 'flex',
@@ -1284,8 +1460,7 @@ Feature ID: ${feature.id || 'N/A'}
           marginBottom: '10px'
         }
       }, [
-        el('div', { key: 'add-domain-header', style: { fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Add New Domain', 'vapt-builder')),
-        renderDomainLegend()
+        el('div', { key: 'add-domain-header', style: { fontSize: '11px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' } }, __('Add New Domain', 'vapt-builder'))
       ]),
       el('div', {
         key: 'add-domain-row',
@@ -2889,7 +3064,8 @@ Feature ID: ${feature.id || 'N/A'}
 
   const FeatureList = ({
     features, schema, updateFeature, loading, dataFiles, selectedFile, onSelectFile, onUpload, allFiles, hiddenFiles, onUpdateHiddenFiles, manageSourcesStatus, isManageModalOpen, setIsManageModalOpen, onRemoveFile, designPromptConfig, setDesignPromptConfig,
-    historyFeature, setHistoryFeature, designFeature, setDesignFeature, transitioning, setTransitioning, isPromptConfigModalOpen, setIsPromptConfigModalOpen, isMappingModalOpen, setIsMappingModalOpen
+    historyFeature, setHistoryFeature, designFeature, setDesignFeature, transitioning, setTransitioning, isPromptConfigModalOpen, setIsPromptConfigModalOpen, isMappingModalOpen, setIsMappingModalOpen,
+    sortBySource, setSortBySource, sortSourceDirection, setSortSourceDirection
   }) => {
     const [confirmingFile, setConfirmingFile] = useState(null);
     const [columnOrder, setColumnOrder] = useState(() => {
@@ -3156,6 +3332,21 @@ Feature ID: ${feature.id || 'N/A'}
     }
 
     processedFeatures.sort((a, b) => {
+      // Primary Sort: Data Source
+      if (sortBySource) {
+        const getSourceWeight = (f) => {
+          if (f.exists_in_multiple_files) return 3;
+          if (f.is_from_active_file !== false) return 2;
+          return 1;
+        };
+        const wA = getSourceWeight(a);
+        const wB = getSourceWeight(b);
+        if (wA !== wB) {
+          return sortSourceDirection === 'asc' ? (wA - wB) : (wB - wA);
+        }
+      }
+
+      // Secondary Sort: Column Headers (Existing Logic)
       const nameA = (a.name || a.label || '').toLowerCase();
       const nameB = (b.name || b.label || '').toLowerCase();
       const catA = (a.category || '').toLowerCase();
@@ -3169,6 +3360,7 @@ Feature ID: ${feature.id || 'N/A'}
       if (sortBy === 'name' || sortBy === 'title') comparison = nameA.localeCompare(nameB);
       else if (sortBy === 'category') comparison = catA.localeCompare(catB);
       else if (sortBy === 'severity') comparison = sevA - sevB;
+
       else if (sortBy === 'status') {
         const priority = {
           'Release': 4,
@@ -3317,13 +3509,99 @@ Feature ID: ${feature.id || 'N/A'}
             }, __('Map Include Fields', 'vapt-builder')),
 
             // Feature Source Selection
-            el('div', { style: { flexGrow: 1, paddingLeft: '12px' } }, el(SelectControl, {
-              // Label removed per user request
-              value: selectedFile,
-              options: dataFiles,
-              onChange: (val) => onSelectFile(val),
-              style: { margin: 0, height: '30px', minHeight: '30px', fontSize: '13px', boxSizing: 'border-box' }
-            })),
+            // Feature Source Selection (Checkbox Style)
+            el('div', {
+              style: {
+                flexGrow: 1,
+                paddingLeft: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }
+            }, [
+              // Data Sources Label
+              // el('span', { style: { fontWeight: '700', textTransform: 'uppercase', fontSize: '9px', color: '#64748b' } }, __('Data Sources:', 'vapt-builder')),
+
+              // Checkbox Container
+              el('div', { style: { display: 'flex', gap: '12px', flexWrap: 'wrap' } }, [
+                // "All Data Files" Option (Only show for 3+ files)
+                dataFiles.length >= 3 && el('label', {
+                  key: 'all-files',
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    fontWeight: (selectedFile || '').split(',').includes('__all__') ? '700' : '500',
+                    color: (selectedFile || '').split(',').includes('__all__') ? '#1e3a8a' : '#64748b'
+                  }
+                }, [
+                  el('input', {
+                    type: 'checkbox',
+                    checked: (selectedFile || '').split(',').includes('__all__'),
+                    onChange: () => onSelectFile('__all__'),
+                    style: { margin: 0, width: '13px', height: '13px' }
+                  }),
+                  __('All Data Files', 'vapt-builder')
+                ]),
+                // Individual Files
+                ...dataFiles.map(file => {
+                  const isAllSelected = (selectedFile || '').split(',').includes('__all__');
+                  const currentFiles = (selectedFile || '').split(',').filter(f => f && f !== '__all__');
+                  const isChecked = isAllSelected || currentFiles.includes(file.value);
+                  const isLastSelected = isChecked && currentFiles.length === 1 && currentFiles.includes(file.value);
+                  const isDisabled = isAllSelected || isLastSelected;
+
+                  return el('label', {
+                    key: file.value,
+                    style: {
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      cursor: isDisabled ? 'default' : 'pointer',
+                      fontSize: '11px',
+                      fontWeight: isChecked ? '700' : '500',
+                      color: isChecked ? '#1e3a8a' : '#64748b',
+                      opacity: isDisabled ? 0.6 : 1
+                    }
+                  }, [
+                    el('input', {
+                      type: 'checkbox',
+                      checked: isChecked,
+                      disabled: isDisabled,
+                      onChange: () => !isDisabled && onSelectFile(file.value),
+                      style: {
+                        margin: 0,
+                        width: '13px',
+                        height: '13px',
+                        pointerEvents: isDisabled ? 'none' : 'auto',
+                        cursor: isDisabled ? 'default' : 'pointer'
+                      }
+                    }),
+                    file.label
+                  ]);
+                })
+              ])
+            ]),
+
+            // Sort Control
+            el('div', { style: { borderLeft: '1px solid #dcdcde', paddingLeft: '12px', display: 'flex', alignItems: 'center', gap: '8px' } }, [
+              el(CheckboxControl, {
+                label: __('Sort by Data Source', 'vapt-builder'),
+                checked: sortBySource,
+                onChange: (val) => setSortBySource(val),
+                className: 'vapt-sort-checkbox',
+                __nextHasNoMarginBottom: true,
+                style: { margin: 0 } // Explicitly remove margin for alignment
+              }),
+              sortBySource && el(Button, {
+                icon: sortSourceDirection === 'asc' ? 'arrow-up' : 'arrow-down',
+                label: sortSourceDirection === 'asc' ? __('Ascending', 'vapt-builder') : __('Descending', 'vapt-builder'),
+                onClick: () => setSortSourceDirection(sortSourceDirection === 'asc' ? 'desc' : 'asc'),
+                style: { minWidth: '24px', padding: 0, height: '24px', marginLeft: '-4px' }
+              })
+            ]),
 
             // Manage Sources Trigger
             el('div', { style: { borderLeft: '1px solid #dcdcde', paddingLeft: '12px', display: 'flex', alignItems: 'center' } }, [
@@ -3435,6 +3713,8 @@ Feature ID: ${feature.id || 'N/A'}
             el('span', { style: { color: '#d63638', fontWeight: '600' } }, sprintf(__('Develop: %d', 'vapt-builder'), stats.develop)),
             el('span', { style: { color: '#dba617', fontWeight: '600' } }, sprintf(__('Test: %d', 'vapt-builder'), stats.test)),
             el('span', { style: { color: '#46b450', fontWeight: '700' } }, sprintf(__('Release: %d', 'vapt-builder'), stats.release)),
+
+
             (stats.total < stats.unfilteredTotal || searchQuery || filterStatus !== 'all') && el(Button, {
               isLink: true,
               isSmall: true,
@@ -3568,23 +3848,6 @@ Feature ID: ${feature.id || 'N/A'}
       ]), // End Header PanelBody
 
       // 🛡️ SUPERADMIN: Visual Legend (v3.6.30)
-      isSuper && !loading && el('div', { className: 'vapt-color-legend' }, [
-        el('h4', null, __('Data Source Legend (Superadmin View)', 'vapt-builder')),
-        el('div', { className: 'vapt-legend-items' }, [
-          el('div', { className: 'vapt-legend-item' }, [
-            el('div', { className: 'vapt-legend-color-box normal' }),
-            el('span', { className: 'vapt-legend-label' }, __('Active File Only', 'vapt-builder'))
-          ]),
-          el('div', { className: 'vapt-legend-item' }, [
-            el('div', { className: 'vapt-legend-color-box inactive-only' }),
-            el('span', { className: 'vapt-legend-label' }, __('Inactive File Only', 'vapt-builder'))
-          ]),
-          el('div', { className: 'vapt-legend-item' }, [
-            el('div', { className: 'vapt-legend-color-box multi-file' }),
-            el('span', { className: 'vapt-legend-label' }, __('Present in Both Files', 'vapt-builder'))
-          ])
-        ])
-      ]),
 
       loading ? el(Spinner, { key: 'loader' }) : el('table', { id: 'vapt-main-feature-table', key: 'table', className: 'wp-list-table widefat striped vapt-feature-table' }, [
         el('thead', null, el('tr', null, [
@@ -3731,7 +3994,7 @@ Feature ID: ${feature.id || 'N/A'}
                       setDesignFeature(f);
                     },
                     title: isCustom ? __('Open Workbench Design Bench (Custom)', 'vapt-builder') : __('Open Workbench Design Bench (Default)', 'vapt-builder')
-                  }, __('Workbench Design Hub', 'vapt-builder'));
+                  }, __('Workbench Design', 'vapt-builder'));
                 })()
               ])
             ])
@@ -3746,7 +4009,7 @@ Feature ID: ${feature.id || 'N/A'}
     const [schema, setSchema] = useState({ item_fields: [] });
     const [domains, setDomains] = useState([]);
     const [dataFiles, setDataFiles] = useState([]);
-    const [selectedFile, setSelectedFile] = useState('features-with-test-methods.json');
+    const [selectedFile, setSelectedFile] = useState('VAPT-Complete-Risk-Catalog-99.json');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isDomainModalOpen, setDomainModalOpen] = useState(false);
@@ -3762,7 +4025,27 @@ Feature ID: ${feature.id || 'N/A'}
     const [confirmState, setConfirmState] = useState(null);
     const [selectedDomains, setSelectedDomains] = useState([]);
     const [alertState, setAlertState] = useState(null);
+
     const [catalogInfo, setCatalogInfo] = useState({ file: '', count: 0 }); // v3.6.29
+    const [sortBySource, setSortBySource] = useState(false); // Primary Sort
+    const [sortSourceDirection, setSortSourceDirection] = useState('desc'); // Primary Sort Direction
+
+    // Field Mapping State
+    const [fieldMapping, setFieldMapping] = useState(() => {
+      const saved = localStorage.getItem('vapt_field_mapping');
+      return saved ? JSON.parse(saved) : {};
+    });
+
+    useEffect(() => {
+      localStorage.setItem('vapt_field_mapping', JSON.stringify(fieldMapping));
+    }, [fieldMapping]);
+
+    const allKeys = useMemo(() => {
+      if (!features || features.length === 0) return [];
+      const keys = new Set();
+      features.forEach(f => Object.keys(f).forEach(k => keys.add(k)));
+      return Array.from(keys).sort();
+    }, [features]);
 
     // Status Auto-clear helper
     useEffect(() => {
@@ -3824,20 +4107,37 @@ Feature ID: ${feature.id || 'N/A'}
     }, []);
 
     const onSelectFile = (file) => {
-      setConfirmState({
-        message: __('Changing the feature source will override the current list. Previously implemented features with matching keys will retain their status. Proceed?', 'vapt-builder'),
-        onConfirm: () => {
-          setConfirmState(null);
-          setSelectedFile(file);
-          fetchData(file);
-          // Persist to backend
-          apiFetch({
-            path: 'vapt/v1/active-file',
-            method: 'POST',
-            data: { file }
-          }).catch(err => console.error('Failed to sync active file:', err));
+      const BASELINE_FILE = 'VAPT-Complete-Risk-Catalog-99.json';
+      let nextFiles = [];
+      const currentFiles = (selectedFile || '').split(',').filter(Boolean);
+
+      if (file === '__all__') {
+        // If "All" is selected, it clears others or toggles
+        nextFiles = currentFiles.includes('__all__') ? [BASELINE_FILE] : ['__all__'];
+      } else {
+        const realFiles = currentFiles.filter(f => f !== '__all__');
+
+        if (currentFiles.includes(file)) {
+          // Deselect this file
+          // Prevent deselecting if it is the last remaining file
+          if (realFiles.length <= 1) return;
+
+          nextFiles = currentFiles.filter(f => f !== file && f !== '__all__');
+        } else {
+          // Add this file to selection
+          nextFiles = [...realFiles, file];
         }
-      });
+      }
+
+      const nextFileStr = nextFiles.join(',') || 'VAPT-Complete-Risk-Catalog-99.json'; // Fallback to default if empty
+      setSelectedFile(nextFileStr);
+      fetchData(nextFileStr);
+      // Persist to backend
+      apiFetch({
+        path: 'vapt/v1/active-file',
+        method: 'POST',
+        data: { file: nextFileStr }
+      }).catch(err => console.error('Failed to sync active file:', err));
     };
 
     const updateFeature = (key, data) => {
@@ -3998,7 +4298,8 @@ Feature ID: ${feature.id || 'N/A'}
         });
       }).catch(err => {
         console.error('VAPT Builder: Upload error:', err);
-        setAlertState({ message: __('Error uploading JSON', 'vapt-builder') });
+        const errMsg = err.message || (err.data && err.data.message) || err.error || __('Error uploading JSON', 'vapt-builder');
+        setAlertState({ message: errMsg });
         setLoading(false);
       });
     };
@@ -4171,10 +4472,14 @@ Feature ID: ${feature.id || 'N/A'}
             designFeature,
             setDesignFeature,
             transitioning,
-            setTransitioning
+            setTransitioning,
+            sortBySource,
+            setSortBySource,
+            sortSourceDirection,
+            setSortSourceDirection
           });
           case 'license': return el(LicenseManager, { domains, fetchData, isSuper, loading });
-          case 'domains': return el(DomainFeatures, { domains, features, isDomainModalOpen, selectedDomain, setDomainModalOpen, setSelectedDomain, updateDomainFeatures, addDomain, deleteDomain, batchDeleteDomains, setConfirmState, selectedDomains, setSelectedDomains });
+          case 'domains': return el(DomainFeatures, { domains, features, isDomainModalOpen, selectedDomain, setDomainModalOpen, setSelectedDomain, updateDomainFeatures, addDomain, deleteDomain, batchDeleteDomains, setConfirmState, selectedDomains, setSelectedDomains, dataFiles, selectedFile, onSelectFile });
           case 'build': return el(BuildGenerator, { domains, features, activeFile: selectedFile, setAlertState });
           default: return null;
         }
@@ -4211,7 +4516,10 @@ Feature ID: ${feature.id || 'N/A'}
 
       isMappingModalOpen && el(FieldMappingModal, {
         isOpen: isMappingModalOpen,
-        onClose: () => setIsMappingModalOpen(false)
+        onClose: () => setIsMappingModalOpen(false),
+        fieldMapping: fieldMapping,
+        setFieldMapping: setFieldMapping,
+        allKeys: allKeys
       }),
 
       alertState && el(VAPT_AlertModal, {

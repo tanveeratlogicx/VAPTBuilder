@@ -3,7 +3,7 @@
 /**
  * Plugin Name: VAPT Builder
  * Description: Ultimate VAPT and OWASP Security Plugin Builder.
- * Version:           3.8.6
+ * Version:           3.9.17
  * Author:            Automated Penetration Testing Builder
  * Author URI:        https://vaptbuilder.com/
  * License:           GPL-2.0-or-later
@@ -25,7 +25,7 @@ if (! defined('ABSPATH')) {
  * The current version of the plugin.
  */
 if (! defined('VAPT_VERSION')) {
-  define('VAPT_VERSION', '3.8.6');
+  define('VAPT_VERSION', '3.9.17');
 }
 if (! defined('VAPT_AUDITOR_VERSION')) {
   define('VAPT_AUDITOR_VERSION', '2.8.0');
@@ -669,8 +669,74 @@ function vapt_enqueue_admin_assets($hook)
       VAPT_VERSION,
       true
     );
+
+    // 🛡️ GLOBAL REST HOTPATCH (v3.8.16) - Inline for maximum priority
+    $home_url = esc_url_raw(home_url());
+    $inline_patch = "
+      (function() {
+        if (typeof wp === 'undefined' || !wp.apiFetch) return;
+        if (wp.apiFetch.__vapt_patched) return;
+        
+        let localBroken = localStorage.getItem('vapt_rest_broken') === '1';
+        const originalApiFetch = wp.apiFetch;
+
+        const patchedApiFetch = (args) => {
+          const home = '{$home_url}';
+          
+          const getFallbackUrl = (pathOrUrl) => {
+            if (!pathOrUrl) return null;
+            const path = typeof pathOrUrl === 'string' && pathOrUrl.includes('/wp-json/') 
+              ? pathOrUrl.split('/wp-json/')[1] 
+              : pathOrUrl;
+            const cleanHome = home.replace(/\/$/, '');
+            const cleanPath = path.replace(/^\//, '').split('?')[0];
+            const queryParams = path.includes('?') ? '&' + path.split('?')[1] : '';
+            return cleanHome + '/?rest_route=/' + cleanPath + queryParams;
+          };
+
+          // 🛡️ INSTANT Pre-emptive Fallback if we already know REST is broken
+          if (localBroken && (args.path || args.url) && home) {
+            const fallbackUrl = getFallbackUrl(args.path || args.url);
+            if (fallbackUrl) {
+              const fallbackArgs = Object.assign({}, args, { url: fallbackUrl });
+              delete fallbackArgs.path;
+              return originalApiFetch(fallbackArgs);
+            }
+          }
+
+          return originalApiFetch(args).catch(err => {
+            const status = err.status || (err.data && err.data.status);
+            const isFallbackTrigger = status === 404 || err.code === 'rest_no_route' || err.code === 'invalid_json';
+
+            if (isFallbackTrigger && (args.path || args.url) && home) {
+              const fallbackUrl = getFallbackUrl(args.path || args.url);
+              if (!fallbackUrl) throw err;
+
+              // 🛡️ Switch to Silent Mode closure-wide and storage-wide
+              if (!localBroken) {
+                console.warn('VAPT Builder: Switching to Pre-emptive Mode (Silent) for REST API.');
+                localBroken = true;
+                localStorage.setItem('vapt_rest_broken', '1');
+              }
+              
+              const fallbackArgs = Object.assign({}, args, { url: fallbackUrl });
+              delete fallbackArgs.path;
+              return originalApiFetch(fallbackArgs);
+            }
+            throw err;
+          });
+        };
+
+        Object.keys(originalApiFetch).forEach(key => { patchedApiFetch[key] = originalApiFetch[key]; });
+        patchedApiFetch.__vapt_patched = true;
+        wp.apiFetch = patchedApiFetch;
+        console.log('VAPT Builder: Persistent Global REST Hotpatch Active (v3.8.16)');
+      })();
+    ";
+    wp_add_inline_script('wp-api-fetch', $inline_patch);
     wp_localize_script('vapt-admin-js', 'vaptSettings', array(
       'root' => esc_url_raw(rest_url()),
+      'homeUrl' => esc_url_raw(home_url()),
       'nonce' => wp_create_nonce('wp_rest'),
       'isSuper' => $is_superadmin,
       'pluginVersion' => VAPT_VERSION
@@ -696,6 +762,7 @@ function vapt_enqueue_admin_assets($hook)
     );
     wp_localize_script('vapt-client-js', 'vaptSettings', array(
       'root' => esc_url_raw(rest_url()),
+      'homeUrl' => esc_url_raw(home_url()),
       'nonce' => wp_create_nonce('wp_rest'),
       'isSuper' => $is_superadmin,
       'pluginVersion' => VAPT_VERSION

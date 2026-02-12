@@ -1,0 +1,881 @@
+{
+  "ai_agent_instructions": {
+    "schema_version": "3.1.0",
+    "ui_builder_context": {
+      "feature_profile": {
+        "risk_id": "{risk_id}",
+        "title": "{title}",
+        "category": "{category}",
+        "severity_level": "{severity.level}",
+        "cvss_score": "{severity.cvss_score}",
+        "cvss_vector": "{severity.cvss_vector}",
+        "business_impact": "{severity.business_impact}",
+        "implementation_complexity": "{protection.remediation_effort}",
+        "estimated_duration": "{protection.estimated_time}",
+        "priority_rank": "{protection.priority}",
+        "has_automated_protection": "{protection.automated_protection.available}",
+        "has_manual_steps": "{protection.manual_steps.length} > 0",
+        "has_test_payloads": "{testing.test_payloads.length} > 0",
+        "owasp_category": "{owasp_mapping.owasp_top_10_2021}"
+      },
+      
+      "conditional_ui_logic": {
+        "severity_based_rules": {
+          "critical_severity": {
+            "condition": "{severity.level} === 'critical'",
+            "apply_to": ["RISK-003", "RISK-008", "RISK-011", "RISK-015"],
+            "add_fields": [
+              {
+                "type": "critical_banner",
+                "component_id": "BANNER-{risk_id}-CRITICAL",
+                "style": "critical_alert",
+                "icon": "alert-triangle",
+                "message": "🚨 CRITICAL SEVERITY (CVSS {severity.cvss_score}): Immediate action required. This vulnerability could lead to complete system compromise.",
+                "actions": [
+                  {
+                    "type": "button",
+                    "label": "View Exploit Details",
+                    "modal": true,
+                    "content": "{description.attack_scenario}"
+                  },
+                  {
+                    "type": "button", 
+                    "label": "Emergency Contact",
+                    "action": "open_support_chat"
+                  }
+                ],
+                "dismissible": false,
+                "persistent": true
+              },
+              {
+                "type": "multi_checkbox",
+                "component_id": "SAFETY-{risk_id}-CHECKLIST",
+                "label": "Pre-Enable Safety Checklist",
+                "required": true,
+                "options": [
+                  {
+                    "id": "backup_created",
+                    "label": "✓ Full site backup created within last 24 hours",
+                    "required": true
+                  },
+                  {
+                    "id": "staging_tested",
+                    "label": "✓ Tested on staging environment",
+                    "required": true
+                  },
+                  {
+                    "id": "maintenance_mode",
+                    "label": "✓ Maintenance mode ready (for high-traffic sites)",
+                    "required": false
+                  },
+                  {
+                    "id": "rollback_plan",
+                    "label": "✓ Rollback procedure documented",
+                    "required": true
+                  }
+                ],
+                "validation_message": "Critical protections require all mandatory safety checks"
+              },
+              {
+                "type": "datetime_picker",
+                "component_id": "SCHEDULE-{risk_id}-DEPLOY",
+                "label": "Schedule Deployment",
+                "description": "Critical fixes should be deployed during low-traffic periods",
+                "min_date": "now",
+                "max_date": "+7 days",
+                "default": "+1 hour",
+                "help_text": "Current server time: {server_time}. Recommended: 2-6 AM local time."
+              }
+            ],
+            "modify_actions": {
+              "confirmation_required": true,
+              "confirmation_title": "⚠️ CRITICAL SECURITY FIX DEPLOYMENT",
+              "confirmation_message": "You are about to enable CRITICAL protection for: {title}\n\nCVSS Score: {severity.cvss_score}\nBusiness Impact: {severity.business_impact}\nEstimated Fix Time: {protection.estimated_time}\n\nThis change requires:\n- Mandatory backup verification\n- Staging environment testing\n- Potential brief maintenance window\n\nAre you absolutely certain you want to proceed?",
+              "require_admin_password": true,
+              "require_second_approval": true,
+              "send_notification": ["admin", "security_team"]
+            }
+          },
+          
+          "high_severity": {
+            "condition": "{severity.level} === 'high'",
+            "add_fields": [
+              {
+                "type": "alert",
+                "component_id": "ALERT-{risk_id}-HIGH",
+                "severity": "high",
+                "icon": "shield-alert",
+                "message": "⚠️ HIGH PRIORITY: {title} (CVSS {severity.cvss_score})",
+                "description": "{description.summary}",
+                "actions": [
+                  {
+                    "type": "link",
+                    "label": "Learn More",
+                    "href": "{references[0].url}"
+                  }
+                ],
+                "dismissible": true,
+                "dismiss_after_days": 7
+              },
+              {
+                "type": "checkbox",
+                "component_id": "BACKUP-{risk_id}-CONFIRM",
+                "label": "✓ I confirm a backup exists before enabling this protection",
+                "required": true,
+                "validation_message": "Backup confirmation is mandatory for high-severity protections"
+              }
+            ],
+            "enhance_existing": {
+              "component_id": "UI-{title_slug}-001",
+              "add_badge": {
+                "text": "HIGH PRIORITY",
+                "color": "red",
+                "pulse": true
+              },
+              "add_tooltip": "{description.attack_scenario}",
+              "style_override": {
+                "border_left": "4px solid #dc2626",
+                "background": "rgba(220, 38, 38, 0.05)"
+              }
+            }
+          },
+          
+          "medium_severity": {
+            "condition": "{severity.level} === 'medium'",
+            "add_fields": [
+              {
+                "type": "info_card",
+                "component_id": "INFO-{risk_id}-MED",
+                "icon": "info",
+                "title": "Medium Severity Risk",
+                "message": "{description.summary}",
+                "recommendation": "Review impact on your specific use case before enabling",
+                "style": "callout_blue"
+              }
+            ],
+            "enhance_existing": {
+              "add_badge": {
+                "text": "MEDIUM",
+                "color": "orange"
+              }
+            }
+          },
+          
+          "low_severity": {
+            "condition": "{severity.level} === 'low'",
+            "skip_fields": [
+              "backup_confirmation",
+              "safety_checklist",
+              "priority_banner",
+              "urgency_indicator"
+            ],
+            "add_fields": [
+              {
+                "type": "compact_indicator",
+                "component_id": "INDICATOR-{risk_id}-LOW",
+                "style": "subtle",
+                "icon": "check-circle",
+                "message": "Recommended security enhancement"
+              }
+            ],
+            "layout_override": {
+              "section": "General",
+              "default_collapsed": true,
+              "show_in_quick_list": true
+            }
+          }
+        },
+        
+        "category_based_rules": {
+          "authentication_risks": {
+            "condition": "{category} === 'Authentication'",
+            "apply_to": ["RISK-002", "RISK-004", "RISK-006", "RISK-091", "RISK-094", "RISK-095"],
+            "add_fields": [
+              {
+                "type": "select",
+                "component_id": "AUTH-{risk_id}-METHOD",
+                "label": "Authentication Protection Method",
+                "description": "Choose how aggressively to protect authentication endpoints",
+                "options": [
+                  {
+                    "value": "standard",
+                    "label": "Standard",
+                    "description": "Basic protection with normal user experience",
+                    "recommended_for": "small_sites"
+                  },
+                  {
+                    "value": "enhanced", 
+                    "label": "Enhanced with Logging",
+                    "description": "Adds detailed audit logging of all auth attempts",
+                    "recommended_for": "business_sites"
+                  },
+                  {
+                    "value": "strict",
+                    "label": "Strict Mode",
+                    "description": "Maximum security - may occasionally block legitimate users",
+                    "warning": "Use for high-security environments only",
+                    "recommended_for": "enterprise_government"
+                  }
+                ],
+                "default": "enhanced",
+                "help_text": "This setting affects login, password reset, and user registration endpoints"
+              },
+              {
+                "type": "number_input",
+                "component_id": "AUTH-{risk_id}-THRESHOLD",
+                "label": "Failed Login Threshold",
+                "description": "Number of failed attempts before protection activates",
+                "min": 3,
+                "max": 10,
+                "default": 5,
+                "unit": "attempts",
+                "depends_on": "AUTH-{risk_id}-METHOD"
+              },
+              {
+                "type": "duration_picker",
+                "component_id": "AUTH-{risk_id}-LOCKOUT",
+                "label": "Lockout Duration",
+                "default": "30m",
+                "options": ["15m", "30m", "1h", "6h", "24h"],
+                "depends_on": "AUTH-{risk_id}-METHOD"
+              }
+            ],
+            "modify_existing": {
+              "component_id": "UI-{title_slug}-001",
+              "override_label": "Enable Authentication Protection",
+              "override_description": "Secures login, registration, and password reset endpoints",
+              "icon": "lock"
+            }
+          },
+          
+          "injection_risks": {
+            "condition": "{category} === 'Injection'",
+            "apply_to": ["RISK-003", "RISK-004", "RISK-005", "RISK-008", "RISK-011", "RISK-045"],
+            "add_fields": [
+              {
+                "type": "multi_select",
+                "component_id": "INJECT-{risk_id}-TYPES",
+                "label": "Protected Input Types",
+                "description": "Select which input vectors to protect",
+                "options": [
+                  {"value": "get_params", "label": "URL Parameters (GET)"},
+                  {"value": "post_data", "label": "Form Submissions (POST)"},
+                  {"value": "cookies", "label": "Cookies"},
+                  {"value": "headers", "label": "HTTP Headers"},
+                  {"value": "files", "label": "File Uploads"},
+                  {"value": "json_api", "label": "REST API JSON"}
+                ],
+                "default": ["get_params", "post_data", "json_api"],
+                "validation": {
+                  "min_selected": 1,
+                  "message": "At least one input type must be protected"
+                }
+              },
+              {
+                "type": "toggle",
+                "component_id": "INJECT-{risk_id}-SANITIZE",
+                "label": "Enable Input Sanitization",
+                "description": "Automatically sanitize all incoming data",
+                "default": true,
+                "warning_when_disabled": "⚠️ Disabling sanitization significantly increases risk"
+              },
+              {
+                "type": "test_panel",
+                "component_id": "INJECT-{risk_id}-TEST",
+                "label": "Test Protection",
+                "description": "Verify injection protection is working",
+                "test_types": ["sql_injection", "xss", "xxe", "command_injection"],
+                "payloads_source": "{testing.test_payloads}",
+                "run_button": "Run Security Test",
+                "results_display": "inline"
+              }
+            ],
+            "icon_mapping": "shield-code"
+          },
+          
+          "configuration_risks": {
+            "condition": "{category} === 'Configuration'",
+            "apply_to": ["RISK-007", "RISK-042", "RISK-044", "RISK-088", "RISK-096", "RISK-099"],
+            "add_fields": [
+              {
+                "type": "server_type_selector",
+                "component_id": "CONFIG-{risk_id}-SERVER",
+                "label": "Web Server Type",
+                "description": "Configuration varies by server - select yours for accurate instructions",
+                "options": [
+                  {"value": "apache", "label": "Apache", "icon": "apache"},
+                  {"value": "nginx", "label": "Nginx", "icon": "nginx"},
+                  {"value": "iis", "label": "IIS", "icon": "microsoft"},
+                  {"value": "litespeed", "label": "LiteSpeed", "icon": "litespeed"},
+                  {"value": "unknown", "label": "Not Sure / Other", "icon": "help"}
+                ],
+                "affects": [
+                  "protection.automated_protection.implementation_steps",
+                  "code_examples[0].code",
+                  "configuration_changes.htaccess_rules"
+                ]
+              },
+              {
+                "type": "file_editor_preview",
+                "component_id": "CONFIG-{risk_id}-PREVIEW",
+                "label": "Configuration Preview",
+                "file_type": "apache|nginx|iis",
+                "dynamic_content": true,
+                "source_field": "protection.automated_protection.implementation_steps[0].code",
+                "server_dependent": true,
+                "highlight_syntax": true,
+                "copy_button": true,
+                "download_button": true
+              }
+            ],
+            "modify_existing": {
+              "icon": "settings"
+            }
+          },
+          
+          "information_disclosure": {
+            "condition": "{category} === 'Information Disclosure'",
+            "apply_to": ["RISK-001", "RISK-009", "RISK-089", "RISK-092", "RISK-097", "RISK-098"],
+            "add_fields": [
+              {
+                "type": "scanner_preview",
+                "component_id": "INFO-{risk_id}-SCAN",
+                "label": "Information Currently Exposed",
+                "description": "Preview of what information attackers can currently see",
+                "scan_button": "Check Current Exposure",
+                "scan_types": ["version_detection", "header_analysis", "file_exposure"],
+                "results_format": "table",
+                "columns": ["information_type", "current_value", "risk_level", "remediation"]
+              }
+            ],
+            "icon_mapping": "eye-off"
+          },
+          
+          "access_control": {
+            "condition": "{category} === 'Access Control'",
+            "apply_to": ["RISK-006", "RISK-043"],
+            "add_fields": [
+              {
+                "type": "role_matrix",
+                "component_id": "ACCESS-{risk_id}-ROLES",
+                "label": "Role-Based Access Control",
+                "description": "Configure which user roles are protected",
+                "roles_source": "wordpress_roles",
+                "default_protected": ["administrator", "editor"],
+                "help_text": "Higher roles get stronger protection"
+              }
+            ]
+          },
+          
+          "cryptography_risks": {
+            "condition": "{category} === 'Cryptography'",
+            "apply_to": ["RISK-062", "RISK-063"],
+            "add_fields": [
+              {
+                "type": "algorithm_selector",
+                "component_id": "CRYPTO-{risk_id}-ALGO",
+                "label": "Cryptographic Algorithm",
+                "description": "Select hashing/encryption algorithm",
+                "options": [
+                  {"value": "bcrypt", "label": "bcrypt (Recommended)", "strength": "high"},
+                  {"value": "argon2", "label": "Argon2id (Maximum Security)", "strength": "very_high"},
+                  {"value": "sha256", "label": "SHA-256 (Legacy compatibility)", "strength": "medium", "deprecated": true}
+                ],
+                "recommendation_engine": true
+              }
+            ]
+          }
+        },
+        
+        "component_based_rules": {
+          "has_dropdown_options": {
+            "condition": "{ui_configuration.components[?type=='dropdown'].length} > 0",
+            "add_fields": [
+              {
+                "type": "accordion",
+                "component_id": "LEVELS-{risk_id}-INFO",
+                "title": "📊 Protection Level Guide",
+                "expandable": true,
+                "default_expanded": false,
+                "content_sections": {
+                  "permissive": {
+                    "title": "Permissive",
+                    "icon": "unlock",
+                    "description": "Allows normal usage with minimal restrictions",
+                    "best_for": ["Development sites", "Internal testing", "Trusted user bases"],
+                    "security_rating": "★★☆☆☆",
+                    "warnings": "May not stop determined attackers"
+                  },
+                  "moderate": {
+                    "title": "Moderate",
+                    "icon": "shield",
+                    "description": "Balanced security with occasional validation prompts",
+                    "best_for": ["Small business sites", "Blogs", "Portfolio sites"],
+                    "security_rating": "★★★☆☆",
+                    "warnings": "Some legitimate users may see occasional CAPTCHA"
+                  },
+                  "strict": {
+                    "title": "Strict",
+                    "icon": "shield-check",
+                    "description": "Maximum security with comprehensive validation",
+                    "best_for": ["E-commerce", "Enterprise", "Government", "Healthcare"],
+                    "security_rating": "★★★★★",
+                    "warnings": "May require additional configuration for complex plugins"
+                  }
+                }
+              }
+            ]
+          },
+          
+          "has_test_payloads": {
+            "condition": "{testing.test_payloads.length} > 0",
+            "add_fields": [
+              {
+                "type": "security_test_panel",
+                "component_id": "TEST-{risk_id}-PANEL",
+                "title": "🧪 Live Security Testing",
+                "description": "Test protection using real attack payloads",
+                "test_payloads_source": "{testing.test_payloads}",
+                "test_button": "Run Penetration Test",
+                "results_display": "real_time",
+                "show_mitigation": true,
+                "safe_testing_note": "Tests run safely without affecting your site"
+              }
+            ]
+          },
+          
+          "has_dependencies": {
+            "condition": "{ui_configuration.components[?dependencies.length > 0].length} > 0",
+            "add_fields": [
+              {
+                "type": "dependency_graph",
+                "component_id": "DEPS-{risk_id}-GRAPH",
+                "title": "Feature Dependencies",
+                "description": "This protection requires or enables other features",
+                "visualization_type": "tree",
+                "interactive": true,
+                "auto_enable_chain": true,
+                "show_breadcrumbs": true
+              }
+            ]
+          },
+          
+          "simple_toggle_only": {
+            "condition": "{ui_configuration.components.length} === 1 && {ui_configuration.components[0].type} === 'toggle'",
+            "skip_fields": [
+              "advanced_configuration_panel",
+              "dependency_visualization",
+              "multi_select_options"
+            ],
+            "add_fields": [
+              {
+                "type": "quick_enable_card",
+                "component_id": "QUICK-{risk_id}",
+                "style": "compact",
+                "show_description": true,
+                "enable_button_prominent": true
+              }
+            ],
+            "layout_override": {
+              "card_style": "horizontal",
+              "show_icon": true,
+              "compact_mode": true
+            }
+          }
+        },
+        
+        "implementation_based_rules": {
+          "requires_plugin": {
+            "condition": "{protection.automated_protection.method} === 'plugin-configuration'",
+            "add_fields": [
+              {
+                "type": "plugin_card",
+                "component_id": "PLUGIN-{risk_id}-INFO",
+                "style": "info",
+                "icon": "puzzle-piece",
+                "title": "Plugin-Based Protection",
+                "message": "This protection is implemented via WordPress plugin configuration. No coding required.",
+                "auto_install_available": true,
+                "recommended_plugins": [
+                  {
+                    "name": "Wordfence",
+                    "compatibility": "high",
+                    "free_available": true
+                  },
+                  {
+                    "name": "Sucuri",
+                    "compatibility": "high",
+                    "free_available": true
+                  }
+                ]
+              }
+            ]
+          },
+          
+          "requires_server_config": {
+            "condition": "{protection.automated_protection.method} === 'server-configuration'",
+            "add_fields": [
+              {
+                "type": "server_config_notice",
+                "component_id": "SERVER-{risk_id}-NOTICE",
+                "severity": "warning",
+                "icon": "server",
+                "title": "Server-Level Configuration Required",
+                "message": "This protection requires changes to your web server configuration (Apache/Nginx).",
+                "requirements": [
+                  "FTP/SFTP or SSH access to server",
+                  "Ability to edit .htaccess, nginx.conf, or web.config",
+                  "Server restart may be required for some changes"
+                ],
+                "actions": [
+                  {
+                    "type": "button",
+                    "label": "Download Configuration Snippet",
+                    "action": "download_config",
+                    "formats": ["apache", "nginx", "iis"]
+                  },
+                  {
+                    "type": "link",
+                    "label": "View Setup Guide",
+                    "href": "#server-setup-guide"
+                  }
+                ]
+              }
+            ]
+          },
+          
+          "manual_steps_exist": {
+            "condition": "{protection.manual_steps.length} > 0",
+            "add_fields": [
+              {
+                "type": "verification_checklist",
+                "component_id": "VERIFY-{risk_id}-CHECKLIST",
+                "title": "✅ Post-Enable Verification",
+                "description": "Complete these steps after enabling protection",
+                "steps_source": "{protection.manual_steps}",
+                "checkable": true,
+                "progress_tracking": true,
+                "completion_badge": true
+              }
+            ]
+          }
+        }
+      },
+      
+      "dynamic_validation_rules": {
+        "cross_field_validation": [
+          {
+            "rule_id": "backup_before_critical",
+            "trigger": "{severity.level} === 'critical' || {severity.level} === 'high'",
+            "condition": "user_must_confirm_backup",
+            "error_message": "⚠️ {severity.level} severity protections require backup confirmation",
+            "blocking": true,
+            "suggested_action": "create_backup_first"
+          },
+          {
+            "rule_id": "staging_test_critical",
+            "trigger": "{severity.level} === 'critical'",
+            "condition": "staging_environment_tested",
+            "warning_message": "🧪 Critical fixes should be tested in staging before production",
+            "blocking": false,
+            "acknowledgment_required": true
+          },
+          {
+            "rule_id": "method_threshold_alignment",
+            "trigger": "{category} === 'Authentication'",
+            "condition": "if method == 'strict' then threshold <= 3",
+            "error_message": "Strict authentication mode requires threshold ≤ 3 attempts",
+            "auto_adjust": true
+          }
+        ],
+        
+        "dependency_chain": {
+          "auto_enable_dependencies": "{ui_configuration.components[?dependencies.length > 0].dependencies}",
+          "cascade_notifications": true,
+          "show_dependency_tree": true,
+          "allow_opt_out": "{severity.level} !== 'critical'"
+        },
+        
+        "conditional_visibility": {
+          "show_protection_level_only_when_enabled": {
+            "target": "UI-{title_slug}-002",
+            "show_when": "UI-{title_slug}-001 === true",
+            "animated_transition": true
+          }
+        }
+      },
+      
+      "action_customization": {
+        "enable_button": {
+          "label_override": {
+            "critical": "🚨 Deploy Critical Fix",
+            "high": "Enable High-Priority Protection",
+            "medium": "Enable Protection",
+            "low": "Enable Enhancement",
+            "default": "Enable Protection"
+          },
+          "color_override": {
+            "critical": "critical_red",
+            "high": "danger",
+            "medium": "warning",
+            "low": "primary",
+            "default": "primary"
+          },
+          "icon_override": {
+            "critical": "alert-triangle",
+            "high": "shield-alert",
+            "authentication": "lock",
+            "injection": "shield-code",
+            "configuration": "settings",
+            "default": "shield"
+          },
+          "size_override": {
+            "critical": "large",
+            "high": "large",
+            "default": "default"
+          },
+          "loading_states": {
+            "processing": "{processing_message}",
+            "success": "✅ {success_message}",
+            "error": "❌ {error_message}"
+          }
+        },
+        
+        "confirmation_dialog": {
+          "enhance_when": "{severity.level} === 'critical' || {severity.level} === 'high' || {protection.automated_protection.method} === 'server-configuration'",
+          "dialog_config": {
+            "title": "Confirm {title} Protection",
+            "content_sections": [
+              {
+                "type": "summary",
+                "label": "Protection Summary",
+                "content": "{description.summary}"
+              },
+              {
+                "type": "impact",
+                "label": "Security Impact",
+                "content": "{severity.business_impact}",
+                "severity_indicator": "{severity.level}"
+              },
+              {
+                "type": "implementation",
+                "label": "Implementation Details",
+                "content": "{protection.estimated_time} | {protection.remediation_effort} effort",
+                "method": "{protection.automated_protection.method}"
+              },
+              {
+                "type": "verification",
+                "label": "Post-Enable Verification",
+                "content": "{protection.manual_steps[0].verification}"
+              }
+            ],
+            "primary_action": "Enable Protection",
+            "secondary_action": "Review Documentation",
+            "cancel_action": "Cancel"
+          }
+        }
+      },
+      
+      "layout_intelligence": {
+        "section_assignment": {
+          "critical_risks": {
+            "condition": "{severity.level} === 'critical'",
+            "section": "Critical-Security",
+            "pinned": true,
+            "order": 1,
+            "separate_page": true
+          },
+          "high_severity_advanced": {
+            "condition": "{severity.level} === 'high' && {protection.remediation_effort} !== 'low'",
+            "section": "Advanced-Security",
+            "order": "{protection.priority}",
+            "highlighted": true
+          },
+          "medium_severity": {
+            "condition": "{severity.level} === 'medium'",
+            "section": "General-Security",
+            "order": "{protection.priority}",
+            "default_expanded": false
+          },
+          "low_severity": {
+            "condition": "{severity.level} === 'low'",
+            "section": "Recommended-Enhancements",
+            "order": "{protection.priority}",
+            "collapsible": true,
+            "default_collapsed": true
+          }
+        },
+        
+        "ordering_algorithm": {
+          "primary_sort": {
+            "field": "severity.level",
+            "order": ["critical", "high", "medium", "low"]
+          },
+          "secondary_sort": {
+            "field": "protection.priority",
+            "direction": "desc"
+          },
+          "tertiary_sort": {
+            "field": "severity.cvss_score",
+            "direction": "desc"
+          },
+          "quaternary_sort": {
+            "field": "metadata.created_at",
+            "direction": "asc"
+          }
+        },
+        
+        "grouping_rules": {
+          "by_category": {
+            "enabled": true,
+            "group_headers": true,
+            "category_icons": {
+              "Authentication": "lock",
+              "Injection": "shield-code",
+              "Configuration": "settings",
+              "Information Disclosure": "eye-off",
+              "Access Control": "user-check",
+              "Cryptography": "key",
+              "API Security": "api",
+              "Availability": "activity",
+              "Business Logic": "briefcase",
+              "Concurrency": "clock",
+              "Dependencies": "package",
+              "Input Validation": "check-square"
+            }
+          },
+          "by_severity": {
+            "enabled": true,
+            "visual_separators": true,
+            "color_coding": true
+          }
+        }
+      },
+      
+      "context_aware_help": {
+        "feature_summary_card": {
+          "enabled": true,
+          "components": [
+            {
+              "type": "header",
+              "title": "{title}",
+              "risk_id": "{risk_id}",
+              "category_badge": "{category}",
+              "severity_badge": {
+                "level": "{severity.level}",
+                "cvss": "{severity.cvss_score}",
+                "colors": {
+                  "critical": "#7f1d1d",
+                  "high": "#dc2626",
+                  "medium": "#ea580c",
+                  "low": "#16a34a"
+                }
+              }
+            },
+            {
+              "type": "quick_stats",
+              "items": [
+                {"label": "Priority", "value": "{protection.priority}/10"},
+                {"label": "Effort", "value": "{protection.remediation_effort}"},
+                {"label": "Time", "value": "{protection.estimated_time}"},
+                {"label": "Method", "value": "{protection.automated_protection.method}"}
+              ]
+            },
+            {
+              "type": "expandable_section",
+              "title": "Attack Scenario",
+              "content": "{description.attack_scenario}",
+              "icon": "alert-circle"
+            },
+            {
+              "type": "action_buttons",
+              "actions": [
+                {
+                  "type": "test",
+                  "label": "Test Current Status",
+                  "action": "run_check_{verification_engine.automated_checks[0].script}"
+                },
+                {
+                  "type": "docs",
+                  "label": "View Documentation",
+                  "content": "{references}"
+                }
+              ]
+            }
+          ]
+        },
+        
+        "owasp_integration": {
+          "show_mapping_badge": true,
+          "clickable_links": true,
+          "base_url": "https://owasp.org/Top10/",
+          "category_mapping": "{owasp_mapping.owasp_top_10_2021}",
+          "pci_dss_links": true,
+          "gdpr_links": true
+        },
+        
+        "testing_guide_panel": {
+          "enabled": true,
+          "title": "🧪 Security Testing Guide",
+          "difficulty_indicator": "{testing.difficulty}",
+          "tools_list": "{testing.tools_required}",
+          "steps_expandable": true,
+          "automated_tests_highlighted": true,
+          "command_copy_buttons": true
+        }
+      },
+      
+      "notification_rules": {
+        "on_enable": {
+          "critical": {
+            "channels": ["email", "slack", "dashboard"],
+            "recipients": ["admin", "security_team", "devops"],
+            "urgency": "immediate",
+            "include_details": true
+          },
+          "high": {
+            "channels": ["email", "dashboard"],
+            "recipients": ["admin"],
+            "urgency": "high"
+          },
+          "default": {
+            "channels": ["dashboard"],
+            "recipients": ["admin"]
+          }
+        },
+        "on_failure": {
+          "alert_severity": "{severity.level}",
+          "escalation_rules": {
+            "critical": "immediate_page",
+            "high": "email_within_5min",
+            "medium": "dashboard_alert"
+          }
+        }
+      }
+    },
+    
+    "ui_framework_hints": {
+      "react_components": {
+        "card_component": "SecurityFeatureCard",
+        "toggle_component": "ProtectedToggle",
+        "dropdown_component": "LevelSelector",
+        "alert_component": "SeverityAlert",
+        "modal_component": "ConfirmationModal",
+        "accordion_component": "ExpandableGuide"
+      },
+      "styling_tokens": {
+        "severity_colors": {
+          "critical": "red.900",
+          "high": "red.600", 
+          "medium": "orange.500",
+          "low": "green.600"
+        },
+        "animation_defaults": {
+          "expand_duration": "300ms",
+          "slide_duration": "200ms",
+          "fade_duration": "150ms"
+        }
+      }
+    }
+  }
+}

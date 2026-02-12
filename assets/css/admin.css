@@ -1512,75 +1512,33 @@
     border-left: 4px solid #f59e0b !important;
 }
 
-/* Blue-Teal: Features present in multiple files */
+/* Golden-Yellowish: Features present in multiple files (Common) */
 .vapt-feature-multi-file {
-    background: #dbeafe !important;
-    border-left: 4px solid #3b82f6 !important;
+    background-color: #fefce8 !important;
+    /* Very light yellow */
+    border-left: 4px solid #facc15 !important;
+    /* Gold border */
+    font-weight: 600 !important;
 }
 
-/* Color Legend for Superadmin */
-.vapt-color-legend {
-    background: #f6f7f7 !important;
-    border: 1px solid #dcdcde !important;
-    border-radius: 4px;
-    height: 33px !important;
-    box-sizing: border-box !important;
-    padding: 0 15px !important;
-    margin-bottom: 15px !important;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
+.vapt-sort-checkbox {
+    margin-bottom: 0 !important;
+}
+
+.vapt-feature-multi-file td,
+.vapt-feature-multi-file td strong,
+.vapt-feature-multi-file td span,
+.vapt-feature-multi-file td .vapt-severity-badge {
+    color: #854d0e !important;
+    /* Dark golden brown for readability */
+}
+
+.vapt-feature-table tbody tr.vapt-feature-multi-file:hover {
+    background-color: #fef9c3 !important;
+    /* Slightly darker yellow on hover */
 }
 
 
-
-.vapt-color-legend h4 {
-    margin: 0 !important;
-    font-size: 11px;
-    font-weight: 600;
-    color: #1d2327;
-    line-height: normal;
-}
-
-.vapt-legend-items {
-    display: flex;
-    gap: 20px;
-    flex-wrap: nowrap;
-    align-items: center;
-}
-
-.vapt-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.vapt-legend-color-box {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-    border: 1px solid #cbd5e1;
-}
-
-.vapt-legend-color-box.normal {
-    background: #ffffff;
-}
-
-.vapt-legend-color-box.inactive-only {
-    background: #fef3c7;
-    border-color: #f59e0b;
-}
-
-.vapt-legend-color-box.multi-file {
-    background: #dbeafe;
-    border-color: #3b82f6;
-}
-
-.vapt-legend-label {
-    color: #475569;
-    font-weight: 500;
-}
 
 /* Panel Header Height Reduction */
 .vapt-feature-panel .components-panel__body-title,

@@ -6,11 +6,68 @@
 
   const { render, useState, useEffect, useMemo, Fragment, createElement: el } = wp.element || {};
   const { Button, ToggleControl, Spinner, Notice, Card, CardBody, CardHeader, CardFooter, Icon, Tooltip, Modal } = wp.components || {};
+  const settings = window.vaptSettings || window.vaptSettings || {};
+  const isSuper = settings.isSuper || false;
+
+  // 🛡️ GLOBAL REST HOTPATCH (v3.8.16)
+  if (wp.apiFetch && !wp.apiFetch.__vapt_patched) {
+    let localBroken = localStorage.getItem('vapt_rest_broken') === '1';
+    const originalApiFetch = wp.apiFetch;
+    const patchedApiFetch = (args) => {
+      const getFallbackUrl = (pathOrUrl) => {
+        if (!pathOrUrl) return null;
+        const path = typeof pathOrUrl === 'string' && pathOrUrl.includes('/wp-json/')
+          ? pathOrUrl.split('/wp-json/')[1]
+          : pathOrUrl;
+        const cleanHome = settings.homeUrl.replace(/\/$/, '');
+        const cleanPath = path.replace(/^\//, '').split('?')[0];
+        const queryParams = path.includes('?') ? '&' + path.split('?')[1] : '';
+        return cleanHome + '/?rest_route=/' + cleanPath + queryParams;
+      };
+
+      // 🛡️ Pre-emptive Fallback if we already know REST is broken
+      if (localBroken && (args.path || args.url) && settings.homeUrl) {
+        const fallbackUrl = getFallbackUrl(args.path || args.url);
+        if (fallbackUrl) {
+          const fallbackArgs = Object.assign({}, args, { url: fallbackUrl });
+          delete fallbackArgs.path;
+          return originalApiFetch(fallbackArgs);
+        }
+      }
+
+      return originalApiFetch(args).catch(err => {
+        const status = err.status || (err.data && err.data.status);
+        // 🛡️ Trigger fallback on 404 OR invalid_json (common when server returns HTML for 404)
+        const isFallbackTrigger = status === 404 || err.code === 'rest_no_route' || err.code === 'invalid_json';
+
+        if (isFallbackTrigger && (args.path || args.url) && settings.homeUrl) {
+          const fallbackUrl = getFallbackUrl(args.path || args.url);
+          if (!fallbackUrl) throw err;
+
+          if (!localBroken) {
+            console.warn('VAPT Builder: Switching to Pre-emptive Mode (Silent) for REST API.');
+            localBroken = true;
+            localStorage.setItem('vapt_rest_broken', '1');
+          }
+
+          const fallbackArgs = Object.assign({}, args, { url: fallbackUrl });
+          delete fallbackArgs.path;
+          return originalApiFetch(fallbackArgs);
+        }
+        throw err;
+      });
+    };
+
+    Object.keys(originalApiFetch).forEach(key => { patchedApiFetch[key] = originalApiFetch[key]; });
+    patchedApiFetch.__vapt_patched = true;
+    wp.apiFetch = patchedApiFetch;
+  }
+
   const apiFetch = wp.apiFetch;
   const { __, sprintf } = wp.i18n || {};
 
-  const settings = window.vaptSettings || window.vaptSettings || {};
-  const isSuper = settings.isSuper || false;
+  // Settings moved to top
+
   const GeneratedInterface = window.VAPT_GeneratedInterface || window.vapt_GeneratedInterface;
 
   const STATUS_LABELS = {
@@ -431,22 +488,6 @@
 
         // Pane 2: Feature List (Middle)
         el('div', { className: 'vapt-workbench-list', style: { width: '320px', borderRight: '1px solid #e5e7eb', background: '#fcfcfd', overflowY: 'auto', flexShrink: 0 } }, [
-          isSuper && el('div', { className: 'vapt-color-legend', style: { padding: '10px 20px', borderBottom: '1px solid #f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'space-between' } }, [
-            el('div', { className: 'vapt-legend-items', style: { display: 'flex', gap: '15px', alignItems: 'center' } }, [
-              el('div', { className: 'vapt-legend-item', style: { display: 'flex', alignItems: 'center', gap: '6px' } }, [
-                el('div', { className: 'vapt-legend-color-box normal', style: { width: '12px', height: '12px', borderRadius: '2px', border: '1px solid #cbd5e1', background: '#fff' } }),
-                el('span', { className: 'vapt-legend-label', style: { fontSize: '11px', fontWeight: 500, color: '#64748b' } }, __('Active', 'vapt-builder'))
-              ]),
-              el('div', { className: 'vapt-legend-item', style: { display: 'flex', alignItems: 'center', gap: '6px' } }, [
-                el('div', { className: 'vapt-legend-color-box inactive-only', style: { width: '12px', height: '12px', borderRadius: '2px', border: '1px solid #f59e0b', background: '#fef3c7' } }),
-                el('span', { className: 'vapt-legend-label', style: { fontSize: '11px', fontWeight: 500, color: '#64748b' } }, __('Inactive', 'vapt-builder'))
-              ]),
-              el('div', { className: 'vapt-legend-item', style: { display: 'flex', alignItems: 'center', gap: '6px' } }, [
-                el('div', { className: 'vapt-legend-color-box multi-file', style: { width: '12px', height: '12px', borderRadius: '2px', border: '1px solid #3b82f6', background: '#dbeafe' } }),
-                el('span', { className: 'vapt-legend-label', style: { fontSize: '11px', fontWeight: 500, color: '#64748b' } }, __('Both', 'vapt-builder'))
-              ])
-            ])
-          ]),
           el('div', { style: { padding: '20px', fontSize: '11px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', borderBottom: '1px solid #f3f4f6' } },
             activeCategory === 'all' ? __('All Features', 'vapt-builder') : sprintf(__('%s Features', 'vapt-builder'), activeCategory)
           ),
