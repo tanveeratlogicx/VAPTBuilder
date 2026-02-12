@@ -413,30 +413,28 @@ class VAPT_REST
     $hidden_files  = get_option('vapt_hidden_json_files', array());
     $removed_files = get_option('vapt_removed_json_files', array());
     $active_option = get_option('vapt_active_feature_file');
-    $active_files = $active_option ? explode(',', $active_option) : (defined('VAPT_ACTIVE_DATA_FILE') ? [VAPT_ACTIVE_DATA_FILE] : ['VAPT-Complete-Risk-Catalog-99.json']);
+    $current_active = $active_option ? explode(',', $active_option) : array();
 
     $hidden_normalized  = array_map('sanitize_file_name', $hidden_files);
     $removed_normalized = array_map('sanitize_file_name', $removed_files);
-    $active_normalized  = array_map('sanitize_file_name', $active_files);
+    $active_normalized  = array_map('sanitize_file_name', $current_active);
 
     foreach ($files as $file) {
-      if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'json') {
-        $normalized_current = sanitize_file_name($file);
+      if (is_dir($data_dir . '/' . $file)) continue;
+      $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+      if ($ext !== 'json') continue;
 
-        // Skip removed files
-        if (in_array($normalized_current, $removed_normalized) || in_array($file, $removed_files)) {
-          continue;
-        }
+      $normalized = sanitize_file_name($file);
+      if (in_array($normalized, $removed_normalized)) continue;
 
-        $is_active = in_array($normalized_current, $active_normalized) || in_array($file, $active_files);
-        $is_hidden = in_array($normalized_current, $hidden_normalized) || in_array($file, $hidden_files);
+      $is_hidden = in_array($normalized, $hidden_normalized);
+      $is_active = in_array($normalized, $active_normalized);
 
-        if ($is_active || !$is_hidden) {
-          $json_files[] = array(
-            'label' => $file,
-            'value' => $file
-          );
-        }
+      if ($is_active || !$is_hidden) {
+        $json_files[] = array(
+          'label' => $file,
+          'value' => $file
+        );
       }
     }
 
@@ -746,16 +744,39 @@ class VAPT_REST
     }
 
     $json_path = VAPT_PATH . 'data/' . $filename;
-    error_log('VAPT Builder: Saving to ' . $json_path);
+    $data_dir = VAPT_PATH . 'data/';
 
-    $saved = file_put_contents($json_path, $content);
+    require_once(ABSPATH . 'wp-admin/includes/file.php');
+    WP_Filesystem();
+    global $wp_filesystem;
 
-    if ($saved === false) {
-      error_log('VAPT Builder: Failed to write to disk. Check permissions.');
-      return new WP_REST_Response(array('error' => 'Failed to write file to disk. Check permissions.'), 500);
+    if (!$wp_filesystem->is_dir($data_dir)) {
+      if (!$wp_filesystem->mkdir($data_dir)) {
+        return new WP_REST_Response(array('error' => 'Data directory missing and could not be created: ' . $data_dir), 500);
+      }
     }
 
-    error_log('VAPT Builder: Upload successful.');
+    // Proactively attempt to fix permissions if not writable
+    if (!$wp_filesystem->is_writable($data_dir)) {
+      $wp_filesystem->chmod($data_dir, 0755);
+    }
+
+    if (!$wp_filesystem->is_writable($data_dir)) {
+      $method = $wp_filesystem->method;
+      return new WP_REST_Response(array(
+        'error' => "Data directory is not writable via standard WordPress API ($method method). Please check folder permissions for: " . $data_dir
+      ), 500);
+    }
+
+    $saved = $wp_filesystem->put_contents($json_path, $content, FS_CHMOD_FILE);
+
+    if (!$saved) {
+      return new WP_REST_Response(array('error' => 'WP_Filesystem failed to write file to: ' . $json_path), 500);
+    }
+
+    error_log('VAPT Builder: Upload successful to ' . $json_path);
+
+    // ... rest of the logic remains same ...
 
     // Auto-unhide if it was hidden
     $hidden_files = get_option('vapt_hidden_json_files', array());

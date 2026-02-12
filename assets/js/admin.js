@@ -3555,6 +3555,7 @@ Feature ID: ${feature.id || 'N/A'}
 
                   return el('label', {
                     key: file.value,
+                    title: isDisabled ? (isLastSelected ? __('At least one source must be selected.', 'vapt-builder') : '') : '',
                     style: {
                       display: 'flex',
                       alignItems: 'center',
@@ -4112,8 +4113,7 @@ Feature ID: ${feature.id || 'N/A'}
       const currentFiles = (selectedFile || '').split(',').filter(Boolean);
 
       if (file === '__all__') {
-        // If "All" is selected, it clears others or toggles
-        nextFiles = currentFiles.includes('__all__') ? [BASELINE_FILE] : ['__all__'];
+        nextFiles = ['__all__'];
       } else {
         const realFiles = currentFiles.filter(f => f !== '__all__');
 
@@ -4297,7 +4297,9 @@ Feature ID: ${feature.id || 'N/A'}
           setSelectedFile(res.filename);
         });
       }).catch(err => {
-        console.error('VAPT Builder: Upload error:', err);
+        console.error('VAPT Builder: Upload error full object:', JSON.stringify(err));
+        console.error('VAPT Builder: Upload error raw:', err);
+        console.error('VAPT Builder: Upload error keys:', Object.keys(err));
         const errMsg = err.message || (err.data && err.data.message) || err.error || __('Error uploading JSON', 'vapt-builder');
         setAlertState({ message: errMsg });
         setLoading(false);
@@ -4424,7 +4426,21 @@ Feature ID: ${feature.id || 'N/A'}
             fontWeight: '600',
             verticalAlign: 'middle'
           }
-        }, `${__('Source:', 'vapt-builder')} ${catalogInfo.file} (${catalogInfo.count} ${__('items', 'vapt-builder')})`)
+        }, (() => {
+          const files = catalogInfo.file.split(',');
+          const mainFile = 'VAPT-Complete-Risk-Catalog-99.json';
+          let label = '';
+          if (files.includes('__all__')) {
+            label = __('All Data Sources', 'vapt-builder');
+          } else if (files.length === 1) {
+            label = files[0] === mainFile ? __('Main Catalog', 'vapt-builder') : files[0].replace(/_/g, ' ');
+          } else {
+            const hasMain = files.includes(mainFile);
+            const othersCount = files.length - (hasMain ? 1 : 0);
+            label = hasMain ? `${__('Main Catalog', 'vapt-builder')} + ${othersCount} ${othersCount === 1 ? __('other', 'vapt-builder') : __('others', 'vapt-builder')}` : `${files.length} ${__('Sources', 'vapt-builder')}`;
+          }
+          return `${__('Source:', 'vapt-builder')} ${label} (${catalogInfo.count} ${__('items', 'vapt-builder')})`;
+        })())
       ]),
       saveStatus && el('div', {
         id: 'vapt-global-status-toast',

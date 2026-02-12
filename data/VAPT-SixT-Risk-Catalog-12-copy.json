@@ -34,26 +34,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A04:2021 - Insecure Design",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "Direct endpoint access",
         "difficulty": "medium",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -186,11 +175,7 @@
             "message": "wp-cron.php Enabled Leads to DoS Attack protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -219,11 +204,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "configuration",
-          "high",
-          "1"
-        ]
+        "tags": ["configuration", "high", "1"]
       }
     },
     {
@@ -249,26 +230,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021 - Security Misconfiguration",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "XML-RPC pingback test",
         "difficulty": "medium",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -401,11 +371,7 @@
             "message": "Xmlrpc enabled Leads to Ping back attack protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -434,11 +400,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "information disclosure",
-          "high",
-          "2"
-        ]
+        "tags": ["information disclosure", "high", "2"]
       }
     },
     {
@@ -464,26 +426,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A01:2021 - Broken Access Control",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "REST API enumeration",
         "difficulty": "easy",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -594,11 +545,7 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": [
-              "permissive",
-              "moderate",
-              "strict"
-            ],
+            "options": ["permissive", "moderate", "strict"],
             "validation": {
               "required": true
             },
@@ -635,11 +582,7 @@
             "message": "Username Enumeration via WordPress REST API protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -668,11 +611,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "authentication",
-          "medium",
-          "3"
-        ]
+        "tags": ["authentication", "medium", "3"]
       }
     },
     {
@@ -698,26 +637,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A07:2021 - Identification and Authentication Failures",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "Password reset spam",
         "difficulty": "easy",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -828,18 +756,12 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": [
-              "permissive",
-              "moderate",
-              "strict"
-            ],
+            "options": ["permissive", "moderate", "strict"],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": [
-              "UI-email-flooding-via-password-reset-001"
-            ]
+            "dependencies": ["UI-email-flooding-via-password-reset-001"]
           }
         ],
         "layout": {
@@ -869,11 +791,7 @@
             "message": "Email Flooding via Password Reset protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -902,11 +820,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "authentication",
-          "medium",
-          "4"
-        ]
+        "tags": ["authentication", "medium", "4"]
       }
     },
     {
@@ -932,26 +846,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A01:2021 - Broken Access Control",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "Author ID enumeration",
         "difficulty": "easy",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -1084,11 +987,7 @@
             "message": "Exposed WordPress Admin Username via Author Query protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -1117,11 +1016,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "information disclosure",
-          "medium",
-          "5"
-        ]
+        "tags": ["information disclosure", "medium", "5"]
       }
     },
     {
@@ -1147,26 +1042,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021 - Security Misconfiguration",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "REST API discovery",
         "difficulty": "easy",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -1299,11 +1183,7 @@
             "message": "Endpoint Disclosure (auto-generated WP REST routes) protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -1332,11 +1212,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "api security",
-          "low",
-          "6"
-        ]
+        "tags": ["api security", "low", "6"]
       }
     },
     {
@@ -1362,26 +1238,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A07:2021 - Identification and Authentication Failures",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "Brute-force simulation",
         "difficulty": "medium",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -1492,18 +1357,12 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": [
-              "permissive",
-              "moderate",
-              "strict"
-            ],
+            "options": ["permissive", "moderate", "strict"],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": [
-              "UI-lack-of-rate-limiting-on-wordpress-login-001"
-            ]
+            "dependencies": ["UI-lack-of-rate-limiting-on-wordpress-login-001"]
           }
         ],
         "layout": {
@@ -1533,11 +1392,7 @@
             "message": "Lack of Rate Limiting on WordPress Login protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -1566,11 +1421,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "authentication",
-          "high",
-          "7"
-        ]
+        "tags": ["authentication", "high", "7"]
       }
     },
     {
@@ -1596,26 +1447,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A07:2021 - Identification and Authentication Failures",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "Login error analysis",
         "difficulty": "easy",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -1726,18 +1566,12 @@
             "label": "Protection Level",
             "description": "Select the strictness of protection",
             "default_value": "strict",
-            "options": [
-              "permissive",
-              "moderate",
-              "strict"
-            ],
+            "options": ["permissive", "moderate", "strict"],
             "validation": {
               "required": true
             },
             "on_change": "updateProtectionLevel",
-            "dependencies": [
-              "UI-username-enumeration-via-wp-login.php-001"
-            ]
+            "dependencies": ["UI-username-enumeration-via-wp-login.php-001"]
           }
         ],
         "layout": {
@@ -1767,11 +1601,7 @@
             "message": "Username Enumeration via wp-login.php protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -1800,11 +1630,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "authentication",
-          "medium",
-          "8"
-        ]
+        "tags": ["authentication", "medium", "8"]
       }
     },
     {
@@ -1830,26 +1656,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A04:2021 - Insecure Design",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "Form spam test",
         "difficulty": "easy",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -1982,11 +1797,7 @@
             "message": "Lack of Rate Limiting on Contact and Registration Forms protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -2015,11 +1826,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "configuration",
-          "medium",
-          "9"
-        ]
+        "tags": ["configuration", "medium", "9"]
       }
     },
     {
@@ -2045,26 +1852,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021 - Security Misconfiguration",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "Header inspection",
         "difficulty": "easy",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -2197,11 +1993,7 @@
             "message": "Server Banner Grabbing protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -2230,11 +2022,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "information disclosure",
-          "low",
-          "10"
-        ]
+        "tags": ["information disclosure", "low", "10"]
       }
     },
     {
@@ -2260,26 +2048,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021 - Security Misconfiguration",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "Static file access",
         "difficulty": "easy",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -2412,11 +2189,7 @@
             "message": "Information Disclosure via readme.html protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -2445,11 +2218,7 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "information disclosure",
-          "medium",
-          "11"
-        ]
+        "tags": ["information disclosure", "medium", "11"]
       }
     },
     {
@@ -2475,26 +2244,15 @@
       },
       "owasp_mapping": {
         "owasp_top_10_2021": "A05:2021 - Security Misconfiguration",
-        "pci_dss": [
-          "Requirement-6.5"
-        ],
-        "gdpr": [
-          "Article-32"
-        ],
-        "nist_csf": [
-          "PR.DS-5"
-        ],
-        "cwe": [
-          "CWE-000"
-        ]
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
       },
       "testing": {
         "test_method": "Header scan",
         "difficulty": "easy",
-        "tools_required": [
-          "Manual testing",
-          "Browser DevTools"
-        ],
+        "tools_required": ["Manual testing", "Browser DevTools"],
         "verification_steps": [
           {
             "step_number": 1,
@@ -2627,11 +2385,7 @@
             "message": "HSTS Not Implemented protection active"
           }
         ],
-        "export_formats": [
-          "pdf",
-          "json",
-          "csv"
-        ],
+        "export_formats": ["pdf", "json", "csv"],
         "share_capability": true
       },
       "code_examples": [
@@ -2660,530 +2414,35 @@
         "version": "1.0.0",
         "author": "Security Team",
         "review_status": "approved",
-        "tags": [
-          "configuration",
-          "medium",
-          "12"
-        ]
+        "tags": ["configuration", "medium", "12"]
       }
     }
   ],
-  {
-    "ai_agent_instructions": {
-      "schema_version": "3.1.0",
-      "metadata": {
-        "compatible_frameworks": ["React", "Vue", "Angular", "WordPress-Admin"],
-        "ui_library": "Tailwind CSS",
-        "component_library": "Headless UI / Radix UI",
-        "generated_at": "2026-02-12"
-      },
-
-      "prompt_engine": {
-        "base_template": "Generate a {framework} component for {risk_id} with conditional UI elements based on severity={severity.level}, category={category}, and complexity={protection.remediation_effort}.",
-
-        "contextual_enhancements": {
-          "critical_high_severity": {
-            "condition": "{severity.level} === 'critical' || {severity.level} === 'high'",
-            "add_to_prompt": "Include critical safety checklist, backup confirmation, and emergency contact options. Use red color scheme with alert badges."
-          },
-          "authentication_category": {
-            "condition": "{category} === 'Authentication'",
-            "add_to_prompt": "Add protection method selector (standard/enhanced/strict), threshold inputs, and lockout duration settings."
-          },
-          "has_dropdown": {
-            "condition": "{ui_configuration.components[?type=='dropdown'].length} > 0",
-            "add_to_prompt": "Include protection level accordion explaining permissive/moderate/strict options."
-          },
-          "has_test_payloads": {
-            "condition": "{testing.test_payloads.length} > 0",
-            "add_to_prompt": "Add live security testing panel with test payloads."
-          }
-        },
-
-        "dynamic_context_fields": {
-          "always_include": [
-            "risk_id",
-            "title",
-            "category",
-            "severity.level",
-            "severity.cvss_score",
-            "description.summary",
-            "description.attack_scenario",
-            "ui_configuration.components",
-            "ui_configuration.actions",
-            "protection.automated_protection.method",
-            "protection.remediation_effort",
-            "protection.estimated_time",
-            "protection.priority"
-          ],
-
-          "conditional_include": {
-            "dropdown_options": {
-              "condition": "{ui_configuration.components[?type=='dropdown'].length} > 0",
-              "fields": [
-                "ui_configuration.components[?type=='dropdown'].options",
-                "ui_configuration.components[?type=='dropdown'].default_value"
-              ]
-            },
-            "test_payloads": {
-              "condition": "{testing.test_payloads.length} > 0",
-              "fields": [
-                "testing.test_payloads",
-                "testing.difficulty"
-              ]
-            },
-            "manual_steps": {
-              "condition": "{protection.manual_steps.length} > 0",
-              "fields": [
-                "protection.manual_steps",
-                "protection.manual_steps[0].verification"
-              ]
-            },
-            "dependencies": {
-              "condition": "{ui_configuration.components[?dependencies.length > 0].length} > 0",
-              "fields": [
-                "ui_configuration.components[?dependencies.length > 0].dependencies"
-              ]
-            }
-          }
-        },
-
-        "output_specifications": {
-          "format": "React JSX component with Tailwind CSS",
-          "component_structure": {
-            "imports": [
-              "React hooks (useState, useEffect)",
-              "Tailwind classes",
-              "Lucide icons",
-              "Internal components (Toggle, Alert, Modal)"
-            ],
-            "props_interface": {
-              "riskData": "Complete risk object",
-              "onEnable": "Callback function",
-              "onTest": "Callback function",
-              "userRole": "Current user role"
-            },
-            "main_sections": [
-              "Header (title, badges, severity indicator)",
-              "Alert/Banner (conditional on severity)",
-              "Description (summary, attack scenario)",
-              "Configuration Panel (dynamic components)",
-              "Testing Section (if payloads available)",
-              "Actions (enable button, confirmation)",
-              "Status Indicator (current protection state)"
-            ]
-          },
-
-          "styling_requirements": {
-            "severity_colors": {
-              "critical": {
-                "bg": "bg-red-50",
-                "border": "border-red-500",
-                "text": "text-red-900",
-                "badge": "bg-red-600 text-white",
-                "icon": "text-red-600"
-              },
-              "high": {
-                "bg": "bg-orange-50",
-                "border": "border-orange-500",
-                "text": "text-orange-900",
-                "badge": "bg-orange-500 text-white",
-                "icon": "text-orange-500"
-              },
-              "medium": {
-                "bg": "bg-yellow-50",
-                "border": "border-yellow-400",
-                "text": "text-yellow-900",
-                "badge": "bg-yellow-400 text-black",
-                "icon": "text-yellow-500"
-              },
-              "low": {
-                "bg": "bg-blue-50",
-                "border": "border-blue-300",
-                "text": "text-blue-900",
-                "badge": "bg-blue-500 text-white",
-                "icon": "text-blue-500"
-              }
-            },
-
-            "component_specific": {
-              "toggle": {
-                "enabled": "bg-green-600",
-                "disabled": "bg-gray-300",
-                "critical_enabled": "bg-red-600 animate-pulse"
-              },
-              "alert": {
-                "critical": "border-l-4 border-red-600 bg-red-50 p-4 rounded",
-                "high": "border-l-4 border-orange-500 bg-orange-50 p-4 rounded",
-                "info": "border-l-4 border-blue-400 bg-blue-50 p-4 rounded"
-              },
-              "button": {
-                "critical": "bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg",
-                "primary": "bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded",
-                "secondary": "bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded"
-              }
-            }
-          }
-        }
-      },
-
-      "conditional_ui_logic": {
-        "severity_based_rules": {
-          "critical": {
-            "condition": "{severity.level} === 'critical'",
-            "add_components": [
-              {
-                "type": "CriticalAlert",
-                "id": "ALERT-{risk_id}-CRITICAL",
-                "props": {
-                  "title": "🚨 Critical Security Vulnerability",
-                  "message": "{description.summary}",
-                  "cvss": "{severity.cvss_score}",
-                  "dismissible": false
-                }
-              },
-              {
-                "type": "SafetyChecklist",
-                "id": "SAFETY-{risk_id}",
-                "props": {
-                  "items": [
-                    "Full site backup created",
-                    "Staging environment tested",
-                    "Rollback plan documented"
-                  ],
-                  "required": true
-                }
-              },
-              {
-                "type": "BackupConfirm",
-                "id": "BACKUP-{risk_id}",
-                "props": {
-                  "label": "✓ I confirm backup exists (required for critical)",
-                  "required": true
-                }
-              }
-            ],
-            "modify_actions": {
-              "confirmation_dialog": {
-                "title": "⚠️ Deploy Critical Fix: {title}",
-                "require_password": true,
-                "require_reason": true,
-                "notify_team": true
-              },
-              "button_style": "critical"
-            }
-          },
-
-          "high": {
-            "condition": "{severity.level} === 'high'",
-            "add_components": [
-              {
-                "type": "Alert",
-                "id": "ALERT-{risk_id}-HIGH",
-                "props": {
-                  "severity": "high",
-                  "message": "⚠️ High Priority: {title}",
-                  "show_exploit_scenario": true,
-                  "exploit_content": "{description.attack_scenario}"
-                }
-              },
-              {
-                "type": "Checkbox",
-                "id": "BACKUP-{risk_id}",
-                "props": {
-                  "label": "✓ Backup confirmed",
-                  "required": true
-                }
-              }
-            ],
-            "modify_actions": {
-              "button_style": "danger",
-              "confirmation_required": true
-            }
-          },
-
-          "medium": {
-            "condition": "{severity.level} === 'medium'",
-            "add_components": [
-              {
-                "type": "InfoCard",
-                "id": "INFO-{risk_id}",
-                "props": {
-                  "title": "Medium Severity Risk",
-                  "message": "{description.summary}",
-                  "recommendation": "Review impact before enabling"
-                }
-              }
-            ]
-          },
-
-          "low": {
-            "condition": "{severity.level} === 'low'",
-            "skip_components": [
-              "BackupConfirm",
-              "SafetyChecklist",
-              "CriticalAlert"
-            ],
-            "layout": "compact"
-          }
-        },
-
-        "category_based_rules": {
-          "authentication": {
-            "condition": "{category} === 'Authentication'",
-            "add_components": [
-              {
-                "type": "Select",
-                "id": "AUTH-METHOD-{risk_id}",
-                "label": "Protection Method",
-                "options": [
-                  {"value": "standard", "label": "Standard"},
-                  {"value": "enhanced", "label": "Enhanced with Logging"},
-                  {"value": "strict", "label": "Strict Mode"}
-                ]
-              },
-              {
-                "type": "NumberInput",
-                "id": "AUTH-THRESHOLD-{risk_id}",
-                "label": "Failed Attempt Threshold",
-                "min": 3,
-                "max": 10,
-                "default": 5
-              }
-            ],
-            "icon": "Lock"
-          },
-
-          "injection": {
-            "condition": "{category} === 'Injection'",
-            "add_components": [
-              {
-                "type": "MultiSelect",
-                "id": "INJECT-TYPES-{risk_id}",
-                "label": "Protected Input Types",
-                "options": [
-                  "GET Parameters",
-                  "POST Data",
-                  "Cookies",
-                  "File Uploads",
-                  "JSON API"
-                ]
-              },
-              {
-                "type": "TestPanel",
-                "id": "TEST-{risk_id}",
-                "label": "🧪 Security Test",
-                "payloads": "{testing.test_payloads}",
-                "enabled": "{testing.test_payloads.length} > 0"
-              }
-            ],
-            "icon": "ShieldCode"
-          },
-
-          "configuration": {
-            "condition": "{category} === 'Configuration'",
-            "add_components": [
-              {
-                "type": "ServerSelector",
-                "id": "SERVER-TYPE-{risk_id}",
-                "label": "Web Server Type",
-                "affects_config": true
-              },
-              {
-                "type": "CodePreview",
-                "id": "CONFIG-PREVIEW-{risk_id}",
-                "file_type": "{server_type}",
-                "content_source": "protection.automated_protection.implementation_steps[0].code"
-              }
-            ],
-            "icon": "Settings"
-          }
-        },
-
-        "component_based_rules": {
-          "has_dropdown": {
-            "condition": "{ui_configuration.components[?type=='dropdown'].length} > 0",
-            "add_components": [
-              {
-                "type": "Accordion",
-                "id": "LEVEL-GUIDE-{risk_id}",
-                "title": "Protection Level Guide",
-                "content": {
-                  "permissive": "Minimal restrictions, best for development",
-                  "moderate": "Balanced security for most sites",
-                  "strict": "Maximum security, may block some legitimate users"
-                }
-              }
-            ]
-          },
-
-          "has_dependencies": {
-            "condition": "{ui_configuration.components[?dependencies.length > 0].length} > 0",
-            "add_components": [
-              {
-                "type": "DependencyTree",
-                "id": "DEPS-{risk_id}",
-                "show_chain": true,
-                "auto_enable": true
-              }
-            ]
-          },
-
-          "simple_toggle_only": {
-            "condition": "{ui_configuration.components.length} === 1 && {ui_configuration.components[0].type} === 'toggle'",
-            "layout": "compact_horizontal",
-            "skip_components": [
-              "Accordion",
-              "DependencyTree",
-              "AdvancedConfig"
-            ]
-          }
-        }
-      },
-
-      "validation_rules": {
-        "field_validation": [
-          {
-            "field": "ui_configuration.components",
-            "rule": "required",
-            "message": "At least one UI component must be defined"
-          },
-          {
-            "field": "severity.level",
-            "rule": "enum",
-            "values": ["critical", "high", "medium", "low"],
-            "message": "Severity must be critical, high, medium, or low"
-          }
-        ],
-
-        "cross_field_validation": [
-          {
-            "rule_id": "backup_for_high_severity",
-            "condition": "{severity.level} === 'critical' || {severity.level} === 'high'",
-            "required_field": "BACKUP-{risk_id}",
-            "error_message": "⚠️ Backup confirmation required for {severity.level} severity protections",
-            "blocking": true
-          },
-          {
-            "rule_id": "test_payloads_for_injection",
-            "condition": "{category} === 'Injection'",
-            "required_field": "testing.test_payloads",
-            "warning_message": "Injection risks should include test payloads",
-            "blocking": false
-          }
-        ],
-
-        "ui_specific": [
-          {
-            "rule": "Severity badges must use appropriate colors",
-            "critical": "bg-red-600 text-white",
-            "high": "bg-orange-500 text-white",
-            "medium": "bg-yellow-400 text-black",
-            "low": "bg-blue-500 text-white"
-          },
-          {
-            "rule": "Actions must include confirmation dialogs where specified",
-            "condition": "{ui_configuration.actions[0].confirmation_required} === true"
-          },
-          {
-            "rule": "Form validation must match schema requirements",
-            "source": "ui_configuration.components[*].validation"
-          },
-          {
-            "rule": "All verification steps must be executable",
-            "source": "testing.verification_steps",
-            "render_as": "checklist_with_actions"
-          }
-        ]
-      },
-
-      "component_library_mapping": {
-        "react_components": {
-          "toggle": "ProtectedToggle",
-          "dropdown": "LevelSelector",
-          "alert": "SeverityAlert",
-          "checkbox": "ConfirmCheckbox",
-          "modal": "ConfirmationModal",
-          "accordion": "ExpandableSection",
-          "test_panel": "SecurityTestPanel",
-          "dependency_tree": "DependencyVisualizer",
-          "code_preview": "ConfigCodeBlock",
-          "safety_checklist": "PreEnableChecklist"
-        },
-
-        "icon_mapping": {
-          "Authentication": "Lock",
-          "Injection": "ShieldCode",
-          "Configuration": "Settings",
-          "Information Disclosure": "EyeOff",
-          "Access Control": "UserCheck",
-          "Critical": "AlertTriangle",
-          "High": "ShieldAlert",
-          "Test": "FlaskConical",
-          "Protection": "Shield",
-          "Backup": "Database"
-        }
-      },
-
-      "examples": [
-        {
-          "name": "Critical Injection Risk (SQLi)",
-          "input_risk_id": "RISK-003",
-          "risk_context": {
-            "severity": {"level": "critical", "cvss_score": 9.5},
-            "category": "Injection",
-            "testing": {"test_payloads": [{"type": "SQLi", "payload": "' OR '1'='1"}]}
-          },
-          "expected_components": [
-            "CriticalAlert (red, non-dismissible)",
-            "SafetyChecklist (backup, staging, rollback)",
-            "ProtectedToggle (pulsing red when enabled)",
-            "MultiSelect (input types to protect)",
-            "TestPanel (with SQLi payloads)",
-            "EnableButton (large, red, 'Deploy Critical Fix')",
-            "ConfirmationModal (requires password)"
-          ],
-          "conditional_logic_applied": [
-            "critical_severity → Added safety checklist",
-            "injection_category → Added test panel",
-            "has_test_payloads → Showed security test section"
-          ]
-        },
-        {
-          "name": "Simple Low Severity Config",
-          "input_risk_id": "RISK-097",
-          "risk_context": {
-            "severity": {"level": "low", "cvss_score": 3.7},
-            "category": "Information Disclosure",
-            "ui_configuration": {
-              "components": [{"type": "toggle"}]
-            }
-          },
-          "expected_components": [
-            "CompactCard (horizontal layout)",
-            "ProtectedToggle (normal size)",
-            "No backup confirmation",
-            "No safety checklist",
-            "Info badge (blue)",
-            "Collapsed by default"
-          ],
-          "conditional_logic_applied": [
-            "low_severity → Skipped backup requirements",
-            "simple_toggle_only → Used compact layout",
-            "no_test_payloads → No test panel"
-          ]
-        }
-      ],
-
-      "generation_settings": {
-        "include_comments": true,
-        "comment_template": "// {risk_id}: {title} | Severity: {severity.level} | Category: {category}",
-        "error_handling": "include_try_catch",
-        "accessibility": "aria_labels_included",
-        "responsive": "mobile_first_approach",
-        "prop_types": "TypeScript_interfaces"
+  "ai_agent_instructions": {
+    "prompt_template": "Generate a React component for risk ID {risk_id} with UI elements defined in ui_configuration section. Include all verification steps, protection methods, and status indicators.",
+    "context_fields": [
+      "risk_id",
+      "title",
+      "severity",
+      "description",
+      "verification_steps",
+      "protection",
+      "ui_configuration"
+    ],
+    "output_format": "React JSX component with Tailwind CSS styling",
+    "validation_rules": [
+      "All required components must be rendered",
+      "Severity badges must use appropriate colors (red=critical, orange=high, yellow=medium, blue=low)",
+      "Actions must include confirmation dialogs where specified",
+      "Form validation must match schema requirements",
+      "All verification steps must be executable"
+    ],
+    "examples": [
+      {
+        "input_risk_id": "RISK-B01",
+        "expected_output": "React component with toggle for version removal, scan button, and status badge"
       }
-    }
+    ]
   },
   "global_settings": {
     "backup_before_changes": true,
