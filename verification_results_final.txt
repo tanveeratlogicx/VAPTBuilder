@@ -1,0 +1,5 @@
+Test 1: HTAccess as Active
+XML-RPC: source=VAPT-HTAccess-Risk-Catalog-18.json, active=Y, multi=Y
+
+Test 2: Complete-99 as Active
+XML-RPC: source=VAPT-Complete-Risk-Catalog-99.json, active=Y, multi=Y

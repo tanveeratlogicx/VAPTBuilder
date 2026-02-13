@@ -4335,8 +4335,17 @@ Feature ID: ${feature.id || 'N/A'}
         method: 'POST',
         data: { hidden_files: newHidden }
       }).then(() => {
-        // Only refresh dropdown list, not features
-        apiFetch({ path: 'vapt/v1/data-files' }).then(res => setDataFiles(res));
+        // v3.12.1: Refresh both dropdown AND active selection
+        Promise.all([
+          apiFetch({ path: 'vapt/v1/data-files' }),
+          apiFetch({ path: 'vapt/v1/active-file' })
+        ]).then(([files, activeRes]) => {
+          setDataFiles(files);
+          if (activeRes.active_file) {
+            setSelectedFile(activeRes.active_file);
+            fetchData(activeRes.active_file);
+          }
+        });
         setManageSourcesStatus('saved');
         setTimeout(() => setManageSourcesStatus(null), 2000);
       }).catch(() => setManageSourcesStatus('error'));
@@ -4350,8 +4359,17 @@ Feature ID: ${feature.id || 'N/A'}
         data: { filename }
       }).then(() => {
         fetchAllFiles(); // Refresh management list
-        // Only refresh dropdown list, not features
-        apiFetch({ path: 'vapt/v1/data-files' }).then(res => setDataFiles(res));
+        // v3.12.1: Refresh both dropdown AND active selection
+        Promise.all([
+          apiFetch({ path: 'vapt/v1/data-files' }),
+          apiFetch({ path: 'vapt/v1/active-file' })
+        ]).then(([files, activeRes]) => {
+          setDataFiles(files);
+          if (activeRes.active_file) {
+            setSelectedFile(activeRes.active_file);
+            fetchData(activeRes.active_file);
+          }
+        });
         setManageSourcesStatus('saved');
         setTimeout(() => setManageSourcesStatus(null), 2000);
       }).catch(() => {

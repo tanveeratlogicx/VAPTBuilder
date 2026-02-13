@@ -175,7 +175,16 @@ class VAPT_Enforcer
    */
   private static function rebuild_htaccess()
   {
+    error_log('VAPT DEBUG rebuild_htaccess - Function called');
     $enforced_features = self::get_enforced_features();
+
+    // [ENHANCEMENT] Filter by Active Data Files (v3.12.0)
+    $active_keys = self::get_active_file_keys();
+    $enforced_features = array_filter($enforced_features, function ($feat) use ($active_keys) {
+      return in_array($feat['feature_key'], $active_keys);
+    });
+
+    error_log('VAPT DEBUG rebuild_htaccess - Found ' . count($enforced_features) . ' enforced features after filtering');
 
     if (empty($enforced_features)) {
       require_once VAPT_PATH . 'includes/enforcers/class-vapt-htaccess-driver.php';
@@ -195,7 +204,13 @@ class VAPT_Enforcer
       $impl_data = self::resolve_impl($meta);
       $driver = isset($schema['enforcement']['driver']) ? $schema['enforcement']['driver'] : '';
 
+      error_log('VAPT DEBUG - Processing feature: ' . ($meta['feature_key'] ?? 'unknown'));
+      error_log('VAPT DEBUG - Driver detected: ' . ($driver ?: 'NONE'));
+      error_log('VAPT DEBUG - Has schema: ' . (empty($schema) ? 'NO' : 'YES'));
+      error_log('VAPT DEBUG - Has impl_data: ' . (empty($impl_data) ? 'NO' : 'YES'));
+
       if ($driver === 'htaccess') {
+        error_log('VAPT DEBUG - Calling generate_rules for htaccess driver');
         $feature_rules = VAPT_Htaccess_Driver::generate_rules($impl_data, $schema);
         if (!empty($feature_rules)) {
           $all_rules[] = "# Rule for: " . ($meta['feature_key']);
@@ -215,6 +230,13 @@ class VAPT_Enforcer
     require_once VAPT_PATH . 'includes/enforcers/class-vapt-config-driver.php';
 
     $enforced_features = self::get_enforced_features();
+
+    // [ENHANCEMENT] Filter by Active Data Files (v3.12.0)
+    $active_keys = self::get_active_file_keys();
+    $enforced_features = array_filter($enforced_features, function ($feat) use ($active_keys) {
+      return in_array($feat['feature_key'], $active_keys);
+    });
+
     $all_rules = array();
 
     if (!empty($enforced_features)) {
@@ -246,5 +268,30 @@ class VAPT_Enforcer
     self::rebuild_nginx();
     self::rebuild_iis();
     delete_transient('vapt_active_enforcements');
+  }
+
+  /**
+   * Helper to fetch all feature keys present in the currently active data files.
+   */
+  private static function get_active_file_keys()
+  {
+    $active_files_raw = defined('VAPT_ACTIVE_DATA_FILE') ? VAPT_ACTIVE_DATA_FILE : get_option('vapt_active_feature_file', '');
+    $files = array_filter(explode(',', $active_files_raw));
+    $keys = [];
+
+    foreach ($files as $file) {
+      $path = VAPT_PATH . 'data/' . sanitize_file_name(trim($file));
+      if (file_exists($path)) {
+        $content = file_get_contents($path);
+        $data = json_decode($content, true);
+        if ($data) {
+          $features = $data['risk_catalog'] ?? $data['features'] ?? $data['wordpress_vapt'] ?? [];
+          foreach ($features as $f) {
+            $keys[] = $f['risk_id'] ?? $f['id'] ?? $f['key'] ?? '';
+          }
+        }
+      }
+    }
+    return array_unique(array_filter($keys));
   }
 }

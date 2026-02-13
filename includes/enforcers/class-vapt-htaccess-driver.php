@@ -63,13 +63,16 @@ class VAPT_Htaccess_Driver
     $rules = array();
     $mappings = isset($enf_config['mappings']) ? $enf_config['mappings'] : array();
 
+    // DEBUG: Log what we're receiving
+    error_log('VAPT DEBUG generate_rules - Data received: ' . print_r($data, true));
+    error_log('VAPT DEBUG generate_rules - Mappings: ' . print_r(array_keys($mappings), true));
+
+
     // 1. Iterate mappings and bind data
     foreach ($mappings as $key => $directive) {
       if (!empty($data[$key])) {
-        // Simple substitution? Or is the directive itself the rule?
-        // The current logic simply takes the directive string if the key is truthy in $data.
-        // It does NOT appear to do variable substitution (e.g. {{value}}) yet, 
-        // effectively treating the data as a "Toggle".
+        // [ENHANCEMENT] Variable Substitution (v3.12.0)
+        $directive = self::substitute_variables($directive);
 
         $processed_directive = self::prepare_directive($directive);
         $validation = self::validate_htaccess_directive($processed_directive);
@@ -260,6 +263,25 @@ class VAPT_Htaccess_Driver
     }
 
     return $directive;
+  }
+
+  /**
+   * Substitutes template variables like {{site_url}} with actual values.
+   */
+  private static function substitute_variables($directive)
+  {
+    $site_url = get_site_url();
+    $home_url = get_home_url();
+    $admin_url = get_admin_url();
+
+    $replacements = [
+      '{{site_url}}' => $site_url,
+      '{{home_url}}' => $home_url,
+      '{{admin_url}}' => $admin_url,
+      '{{domain}}'   => parse_url($site_url, PHP_URL_HOST),
+    ];
+
+    return str_replace(array_keys($replacements), array_values($replacements), $directive);
   }
 
   private static function validate_htaccess_directive($directive)

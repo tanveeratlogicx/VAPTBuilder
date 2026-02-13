@@ -54,45 +54,47 @@ class VAPT_Scanner
    */
   private function load_vulnerabilities()
   {
-    // Use the active data file configured in the workbench
-    $active_file = VAPT_ACTIVE_DATA_FILE;
-    $file_path = VAPT_PATH . 'data/' . sanitize_file_name($active_file);
+    // Use the active data file(s) configured in the workbench
+    $active_files_raw = VAPT_ACTIVE_DATA_FILE;
+    $files_to_load = array_filter(explode(',', $active_files_raw));
 
-    if (file_exists($file_path)) {
-      $content = file_get_contents($file_path);
-      $data = json_decode($content, true);
+    $this->vulnerabilities = [];
 
-      if (json_last_error() === JSON_ERROR_NONE && $data) {
-        $raw_vulns = [];
-        if (isset($data['risk_catalog'])) {
-          $raw_vulns = $data['risk_catalog'];
-        } elseif (isset($data['features'])) {
-          $raw_vulns = $data['features'];
-        } elseif (isset($data['wordpress_vapt'])) {
-          $raw_vulns = $data['wordpress_vapt'];
+    foreach ($files_to_load as $active_file) {
+      $file_path = VAPT_PATH . 'data/' . sanitize_file_name(trim($active_file));
+
+      if (file_exists($file_path)) {
+        $content = file_get_contents($file_path);
+        $data = json_decode($content, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && $data) {
+          $raw_vulns = [];
+          if (isset($data['risk_catalog'])) {
+            $raw_vulns = $data['risk_catalog'];
+          } elseif (isset($data['features'])) {
+            $raw_vulns = $data['features'];
+          } elseif (isset($data['wordpress_vapt'])) {
+            $raw_vulns = $data['wordpress_vapt'];
+          }
+
+          // Normalize vulnerabilities
+          foreach ($raw_vulns as $vuln) {
+            $normalized = [
+              'id' => $vuln['risk_id'] ?? $vuln['id'] ?? '',
+              'name' => $vuln['title'] ?? $vuln['name'] ?? '',
+              'category' => $vuln['category'] ?? 'General',
+              'severity' => is_array($vuln['severity'] ?? null) ? ($vuln['severity']['level'] ?? 'medium') : ($vuln['severity'] ?? 'medium'),
+              'description' => is_array($vuln['description'] ?? null) ? ($vuln['description']['summary'] ?? '') : ($vuln['description'] ?? ''),
+              'remediation' => $vuln['remediation'] ?? (isset($vuln['protection']) ? ($vuln['protection']['automated_protection']['method'] ?? '') : ''),
+              'owasp' => is_array($vuln['owasp_mapping'] ?? null) ? ($vuln['owasp_mapping']['owasp_top_10_2021'] ?? '') : ($vuln['owasp_mapping'] ?? ''),
+              'cvss' => $vuln['severity']['cvss_score'] ?? null,
+            ];
+            $this->vulnerabilities[] = $normalized;
+          }
+        } else {
+          error_log('VAPT Scanner: Failed to load vulnerabilities from ' . $active_file . '. JSON Error: ' . json_last_error_msg());
         }
-
-        // Normalize vulnerabilities
-        $this->vulnerabilities = [];
-        foreach ($raw_vulns as $vuln) {
-          $normalized = [
-            'id' => $vuln['risk_id'] ?? $vuln['id'] ?? '',
-            'name' => $vuln['title'] ?? $vuln['name'] ?? '',
-            'category' => $vuln['category'] ?? 'General',
-            'severity' => is_array($vuln['severity'] ?? null) ? ($vuln['severity']['level'] ?? 'medium') : ($vuln['severity'] ?? 'medium'),
-            'description' => is_array($vuln['description'] ?? null) ? ($vuln['description']['summary'] ?? '') : ($vuln['description'] ?? ''),
-            'remediation' => $vuln['remediation'] ?? (isset($vuln['protection']) ? ($vuln['protection']['automated_protection']['method'] ?? '') : ''),
-            'owasp' => is_array($vuln['owasp_mapping'] ?? null) ? ($vuln['owasp_mapping']['owasp_top_10_2021'] ?? '') : ($vuln['owasp_mapping'] ?? ''),
-            'cvss' => $vuln['severity']['cvss_score'] ?? null,
-          ];
-          $this->vulnerabilities[] = $normalized;
-        }
-      } else {
-        error_log('VAPT Scanner: Failed to load vulnerabilities. JSON Error: ' . json_last_error_msg());
       }
-    } else {
-      error_log('VAPT Scanner: Vulnerability definitions file not found at ' . $file_path);
-      $this->vulnerabilities = [];
     }
   }
 

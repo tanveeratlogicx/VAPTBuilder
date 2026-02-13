@@ -1,0 +1,6 @@
+Number of features in 99-item catalog with htaccess-related method: 0
+All methods found:
+Array
+(
+    [plugin-configuration] => 99
+)

@@ -237,6 +237,11 @@ class VAPT_REST
       $files_to_load = array_filter(explode(',', $requested_file));
     }
 
+    // v3.12.1: Final filter against existence to prevent stale entries
+    $files_to_load = array_filter($files_to_load, function ($f) {
+      return file_exists(VAPT_PATH . 'data/' . sanitize_file_name($f));
+    });
+
     // 2. Pre-fetch global state (Status map and History counts)
     $statuses = VAPT_DB::get_feature_statuses_full();
     $status_map = [];
@@ -813,6 +818,7 @@ class VAPT_REST
     $hidden_files = array_map('sanitize_file_name', $hidden_files);
 
     update_option('vapt_hidden_json_files', $hidden_files);
+    $this->sanitize_active_file();
 
     return new WP_REST_Response(array('success' => true, 'hidden_files' => $hidden_files), 200);
   }
@@ -833,6 +839,7 @@ class VAPT_REST
     if (!in_array($filename, $removed_files)) {
       $removed_files[] = $filename;
       update_option('vapt_removed_json_files', $removed_files);
+      $this->sanitize_active_file();
     }
 
     return new WP_REST_Response(array('success' => true), 200);
@@ -1590,8 +1597,20 @@ class VAPT_REST
 
       $files = array_filter(explode(',', $file));
       $sanitized_files = array_map('sanitize_file_name', $files);
-      $filename = implode(',', $sanitized_files);
 
+      // v3.12.1: Strict existence check
+      $valid_files = [];
+      foreach ($sanitized_files as $f) {
+        if (file_exists(VAPT_PATH . 'data/' . $f)) {
+          $valid_files[] = $f;
+        }
+      }
+
+      if (empty($valid_files)) {
+        return new WP_REST_Response(array('error' => 'None of the specified files exist on the server'), 400);
+      }
+
+      $filename = implode(',', $valid_files);
       update_option('vapt_active_feature_file', $filename);
       return new WP_REST_Response(array('success' => true, 'active_file' => $filename), 200);
     }
@@ -1604,8 +1623,34 @@ class VAPT_REST
       $active = 'VAPT-Complete-Risk-Catalog-99.json';
     }
 
+
     return new WP_REST_Response(array(
       'active_file' => $active
     ), 200);
+  }
+
+  /**
+   * v3.12.1: Strictly sanitize the active file option against existence
+   */
+  private function sanitize_active_file()
+  {
+    $active = get_option('vapt_active_feature_file');
+    if (!$active) return;
+
+    $files = array_filter(explode(',', $active));
+    $valid_files = [];
+    foreach ($files as $f) {
+      if (file_exists(VAPT_PATH . 'data/' . sanitize_file_name($f))) {
+        $valid_files[] = $f;
+      }
+    }
+
+    if (count($valid_files) !== count($files)) {
+      if (empty($valid_files)) {
+        update_option('vapt_active_feature_file', 'VAPT-Complete-Risk-Catalog-99.json');
+      } else {
+        update_option('vapt_active_feature_file', implode(',', $valid_files));
+      }
+    }
   }
 }
