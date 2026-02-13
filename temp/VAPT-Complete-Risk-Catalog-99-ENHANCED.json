@@ -1,14 +1,16 @@
 {
   "metadata": {
-    "schema_version": "3.1.0",
+    "schema_version": "3.2.0",
     "plugin_name": "WordPress VAPT Protection Suite",
-    "generated_at": "2026-01-28T18:23:59.202637Z",
+    "generated_at": "2026-02-12T12:00:00.000000Z",
     "total_risks": 99,
     "ai_agent_compatible": true,
     "ui_framework": "React/WordPress-Admin",
-    "source_version": "3.0.0",
+    "source_version": "3.1.0",
     "source_document": "Feature-List-99.json",
-    "source_generated_at": "2026-01-20"
+    "source_generated_at": "2026-01-28",
+    "enhancement_version": "1.0.0",
+    "enhancement_focus": "AI Agent Instructions & UI Builder Integration"
   },
   "risk_catalog": [
     {
@@ -1268,7 +1270,7 @@
         "verification_steps": [
           {
             "step_number": 1,
-            "action": "1. Test IDOR by changing numeric IDs in URLs: /user/123 \u00e2\u2020\u2019 /user/124",
+            "action": "1. Test IDOR by changing numeric IDs in URLs: /user/123 â†’ /user/124",
             "expected_result": "Should be protected/blocked",
             "command": "/user/123",
             "automated": true
@@ -17748,7 +17750,7 @@
         "verification_steps": [
           {
             "step_number": 1,
-            "action": "1. Test numeric IDs in URLs (user/123 \u00e2\u2020\u2019 user/124)",
+            "action": "1. Test numeric IDs in URLs (user/123 â†’ user/124)",
             "expected_result": "Should be protected/blocked",
             "command": null,
             "automated": false
@@ -20021,8 +20023,14 @@
             "description": "Choose how to enforce this rule.",
             "default_value": "wp-config",
             "options": [
-              { "label": "WP-Config Constant (Recommended)", "value": "wp-config" },
-              { "label": "Htaccess Block", "value": "htaccess" }
+              {
+                "label": "WP-Config Constant (Recommended)",
+                "value": "wp-config"
+              },
+              {
+                "label": "Htaccess Block",
+                "value": "htaccess"
+              }
             ]
           },
           {
@@ -23760,42 +23768,1999 @@
     }
   ],
   "ai_agent_instructions": {
-    "prompt_template": "Generate a React component for risk ID {risk_id} with UI elements defined in ui_configuration section. Include all verification steps, protection methods, and status indicators.",
-    "context_fields": [
-      "risk_id",
-      "title",
-      "severity",
-      "description",
-      "verification_steps",
-      "protection",
-      "ui_configuration"
-    ],
-    "output_format": "React JSX component with Tailwind CSS styling",
-    "validation_rules": [
-      "All required components must be rendered",
-      "Severity badges must use appropriate colors (red=critical, orange=high, yellow=medium, blue=low)",
-      "Actions must include confirmation dialogs where specified",
-      "Form validation must match schema requirements",
-      "All verification steps must be executable"
-    ],
+    "version": "3.2.0",
+    "ui_builder_integration": {
+      "framework": "React 18+ with WordPress Admin Integration",
+      "component_library": "@wordpress/components + Custom VAPT Components",
+      "styling": "Tailwind CSS + WordPress Admin Colors",
+      "state_management": "WordPress REST API + React Query",
+      "form_handling": "React Hook Form + Zod Validation"
+    },
+    "feature_categories": {
+      "information_disclosure": {
+        "risk_ids": [
+          "RISK-001",
+          "RISK-092",
+          "RISK-097",
+          "RISK-098"
+        ],
+        "ui_patterns": [
+          "toggle",
+          "severity_badge",
+          "info_panel"
+        ],
+        "conditional_fields": {
+          "skip_when_disabled": [
+            "scan_options",
+            "notification_settings"
+          ],
+          "add_when_enabled": [
+            "exposure_level_selector",
+            "auto_cleanup_toggle"
+          ]
+        },
+        "component_template": "InformationDisclosurePanel"
+      },
+      "authentication": {
+        "risk_ids": [
+          "RISK-002",
+          "RISK-015",
+          "RISK-094",
+          "RISK-095"
+        ],
+        "ui_patterns": [
+          "toggle",
+          "dropdown",
+          "input_field",
+          "button_group"
+        ],
+        "conditional_fields": {
+          "skip_when_disabled": [
+            "password_policy_settings",
+            "2fa_options",
+            "rate_limit_config"
+          ],
+          "add_when_enabled": [
+            "password_complexity_slider",
+            "login_attempt_limiter",
+            "session_timeout_selector"
+          ]
+        },
+        "component_template": "AuthenticationSecurityPanel"
+      },
+      "injection_protection": {
+        "risk_ids": [
+          "RISK-003",
+          "RISK-004",
+          "RISK-005",
+          "RISK-008",
+          "RISK-012"
+        ],
+        "ui_patterns": [
+          "toggle",
+          "code_editor",
+          "test_panel",
+          "severity_alert"
+        ],
+        "conditional_fields": {
+          "skip_when_disabled": [
+            "firewall_rules",
+            "input_validation_settings",
+            "sanitization_options"
+          ],
+          "add_when_enabled": [
+            "sql_xss_test_panel",
+            "payload_tester",
+            "firewall_rule_editor",
+            "whitelist_manager"
+          ]
+        },
+        "component_template": "InjectionProtectionPanel"
+      },
+      "access_control": {
+        "risk_ids": [
+          "RISK-006",
+          "RISK-011",
+          "RISK-014"
+        ],
+        "ui_patterns": [
+          "toggle",
+          "permission_matrix",
+          "role_selector",
+          "access_log"
+        ],
+        "conditional_fields": {
+          "skip_when_disabled": [
+            "capability_settings",
+            "role_permissions",
+            "access_logs"
+          ],
+          "add_when_enabled": [
+            "rbac_configurator",
+            "capability_manager",
+            "access_audit_panel",
+            "csrf_token_viewer"
+          ]
+        },
+        "component_template": "AccessControlPanel"
+      },
+      "configuration_security": {
+        "risk_ids": [
+          "RISK-007",
+          "RISK-096",
+          "RISK-099"
+        ],
+        "ui_patterns": [
+          "toggle",
+          "config_editor",
+          "checkbox_group",
+          "file_browser"
+        ],
+        "conditional_fields": {
+          "skip_when_disabled": [
+            "wp_config_settings",
+            "htaccess_rules",
+            "security_headers"
+          ],
+          "add_when_enabled": [
+            "wp_config_visual_editor",
+            "htaccess_generator",
+            "security_headers_validator",
+            "file_permission_checker"
+          ]
+        },
+        "component_template": "ConfigurationSecurityPanel"
+      },
+      "dependency_security": {
+        "risk_ids": [
+          "RISK-009"
+        ],
+        "ui_patterns": [
+          "toggle",
+          "version_table",
+          "update_button",
+          "vulnerability_scanner"
+        ],
+        "conditional_fields": {
+          "skip_when_disabled": [
+            "update_settings",
+            "vulnerability_db",
+            "compatibility_check"
+          ],
+          "add_when_enabled": [
+            "component_version_table",
+            "cve_scanner",
+            "auto_update_scheduler",
+            "rollback_manager"
+          ]
+        },
+        "component_template": "DependencySecurityPanel"
+      },
+      "logging_monitoring": {
+        "risk_ids": [
+          "RISK-010"
+        ],
+        "ui_patterns": [
+          "toggle",
+          "log_viewer",
+          "chart",
+          "alert_config"
+        ],
+        "conditional_fields": {
+          "skip_when_disabled": [
+            "log_settings",
+            "alert_rules",
+            "retention_policy"
+          ],
+          "add_when_enabled": [
+            "realtime_log_stream",
+            "security_dashboard",
+            "alert_rule_builder",
+            "log_exporter"
+          ]
+        },
+        "component_template": "LoggingMonitoringPanel"
+      },
+      "api_security": {
+        "risk_ids": [
+          "RISK-016",
+          "RISK-017",
+          "RISK-093"
+        ],
+        "ui_patterns": [
+          "toggle",
+          "endpoint_list",
+          "auth_method_selector",
+          "rate_limit_config"
+        ],
+        "conditional_fields": {
+          "skip_when_disabled": [
+            "api_endpoints",
+            "auth_settings",
+            "cors_config"
+          ],
+          "add_when_enabled": [
+            "endpoint_discovery_scanner",
+            "api_auth_configurator",
+            "cors_policy_editor",
+            "api_rate_limiter"
+          ]
+        },
+        "component_template": "APISecurityPanel"
+      },
+      "file_security": {
+        "risk_ids": [
+          "RISK-013"
+        ],
+        "ui_patterns": [
+          "toggle",
+          "upload_validator",
+          "file_tree",
+          "permission_viewer"
+        ],
+        "conditional_fields": {
+          "skip_when_disabled": [
+            "upload_settings",
+            "file_type_rules",
+            "storage_config"
+          ],
+          "add_when_enabled": [
+            "mime_type_validator",
+            "file_content_scanner",
+            "upload_directory_browser",
+            "malware_scanner"
+          ]
+        },
+        "component_template": "FileSecurityPanel"
+      }
+    },
+    "prompt_templates": {
+      "ui_component_generation": {
+        "base_template": "You are a WordPress VAPT UI Builder expert. Generate a React component for risk ID {risk_id} titled '{title}'.",
+        "feature_specific_rules": {
+          "information_disclosure": {
+            "when_enabled": [
+              "Render exposure level badge with severity color",
+              "Add 'Auto-Remove Exposed Data' toggle",
+              "Include 'Scan for Exposures' button with progress indicator",
+              "Display list of exposed information in accordion panels",
+              "Add 'Remediation Guide' expandable section"
+            ],
+            "when_disabled": [
+              "Show disabled state with educational tooltip",
+              "Display risk summary in compact view",
+              "Provide 'Quick Enable' button with default settings"
+            ]
+          },
+          "authentication": {
+            "when_enabled": [
+              "Render password complexity meter with visual indicator",
+              "Add 2FA configuration panel with QR code placeholder",
+              "Include login attempt chart (last 24 hours)",
+              "Show session management table with kill buttons",
+              "Add 'Test Authentication' simulation button"
+            ],
+            "when_disabled": [
+              "Show security score impact (reduced percentage)",
+              "Display login vulnerability warning",
+              "Provide 'Recommended Settings' preset button"
+            ]
+          },
+          "injection_protection": {
+            "when_enabled": [
+              "Render live firewall rule count badge",
+              "Add 'Test Injection Protection' panel with payload selector",
+              "Include blocked attempts counter with reset button",
+              "Show sanitization method dropdown per input type",
+              "Add 'View Blocked Requests' log viewer"
+            ],
+            "when_disabled": [
+              "Display injection vulnerability warning with OWASP reference",
+              "Show example payloads that would succeed",
+              "Provide 'Emergency Enable' button with high security preset"
+            ]
+          },
+          "access_control": {
+            "when_enabled": [
+              "Render role-permission matrix with checkboxes",
+              "Add 'Simulate User Access' tester with role selector",
+              "Include CSRF token viewer for developers",
+              "Show recent access violations in alert panel",
+              "Add 'Audit Trail' date range picker"
+            ],
+            "when_disabled": [
+              "Display IDOR vulnerability explanation",
+              "Show default WordPress role capabilities table",
+              "Provide 'Basic Protection' vs 'Advanced Protection' options"
+            ]
+          },
+          "configuration_security": {
+            "when_enabled": [
+              "Render wp-config.php visual editor with syntax highlighting",
+              "Add .htaccess rule builder with common presets",
+              "Include security headers validator with grade display",
+              "Show file permission checker with fix buttons",
+              "Add 'Configuration Backup/Restore' panel"
+            ],
+            "when_disabled": [
+              "Display misconfiguration risk indicators",
+              "Show quick security hardening checklist",
+              "Provide 'One-Click Harden' button"
+            ]
+          },
+          "api_security": {
+            "when_enabled": [
+              "Render API endpoint explorer with method badges",
+              "Add authentication method configurator (JWT/OAuth/API Key)",
+              "Include rate limit graph with throttle settings",
+              "Show CORS policy editor with origin tester",
+              "Add 'API Security Score' circular progress indicator"
+            ],
+            "when_disabled": [
+              "Display REST API exposure warning",
+              "Show endpoint enumeration risk",
+              "Provide 'Disable Public API' vs 'Secure API' options"
+            ]
+          },
+          "file_security": {
+            "when_enabled": [
+              "Render file upload validator with MIME type tester",
+              "Add 'Scan Uploads' button with progress",
+              "Include malicious file pattern database version",
+              "Show upload directory browser with permission colors",
+              "Add 'File Extension Blacklist' editor"
+            ],
+            "when_disabled": [
+              "Display file upload exploit examples",
+              "Show dangerous file type warning list",
+              "Provide 'Strict Upload Policy' quick enable"
+            ]
+          }
+        }
+      },
+      "conditional_rendering_logic": {
+        "field_visibility_rules": [
+          {
+            "condition": "feature_enabled === true",
+            "action": "SHOW",
+            "fields": [
+              "advanced_settings",
+              "test_panel",
+              "live_monitoring",
+              "custom_rules"
+            ]
+          },
+          {
+            "condition": "feature_enabled === false",
+            "action": "SHOW",
+            "fields": [
+              "enable_prompt",
+              "risk_summary",
+              "quick_enable_button"
+            ]
+          },
+          {
+            "condition": "severity === 'critical' || severity === 'high'",
+            "action": "SHOW",
+            "fields": [
+              "urgent_warning_banner",
+              "priority_indicator",
+              "immediate_action_required"
+            ]
+          },
+          {
+            "condition": "automated_protection.available === true",
+            "action": "SHOW",
+            "fields": [
+              "auto_fix_button",
+              "implementation_steps_accordion"
+            ]
+          },
+          {
+            "condition": "protection.remediation_effort === 'high'",
+            "action": "SHOW",
+            "fields": [
+              "expert_mode_toggle",
+              "developer_documentation_link"
+            ]
+          },
+          {
+            "condition": "test_payloads.length > 0",
+            "action": "SHOW",
+            "fields": [
+              "payload_tester_panel",
+              "security_scan_button"
+            ]
+          }
+        ],
+        "dynamic_component_injection": {
+          "injection_protection": {
+            "trigger": "feature_enabled AND has_test_payloads",
+            "components": [
+              "PayloadTesterWidget",
+              "SQLInjectionSimulator",
+              "XSSPayloadLibrary"
+            ]
+          },
+          "authentication": {
+            "trigger": "feature_enabled AND has_2fa_support",
+            "components": [
+              "TwoFactorSetupWizard",
+              "BackupCodesManager",
+              "TOTPValidator"
+            ]
+          },
+          "logging_monitoring": {
+            "trigger": "feature_enabled AND logs_available",
+            "components": [
+              "LiveLogStream",
+              "SecurityEventChart",
+              "AlertRuleBuilder"
+            ]
+          }
+        }
+      }
+    },
+    "component_generation_rules": {
+      "core_requirements": [
+        "All components must use WordPress admin color scheme (--wp-admin-theme-color)",
+        "Support RTL layouts for internationalization",
+        "Implement keyboard navigation (WCAG 2.1 AA compliant)",
+        "Include loading states for all async operations",
+        "Provide error boundaries with recovery options",
+        "Use WordPress i18n functions for all strings"
+      ],
+      "risk_specific_components": {
+        "severity_badge": {
+          "props": [
+            "level: 'critical'|'high'|'medium'|'low'",
+            "show_score: boolean",
+            "cvss_score: number"
+          ],
+          "render_rules": [
+            "critical: red background, white text, pulse animation",
+            "high: orange background, white text",
+            "medium: yellow background, dark text",
+            "low: blue background, white text"
+          ]
+        },
+        "protection_toggle": {
+          "props": [
+            "risk_id: string",
+            "initial_state: boolean",
+            "confirmation_required: boolean"
+          ],
+          "behaviors": [
+            "Show confirmation dialog if confirmation_required",
+            "Display processing spinner during API call",
+            "Update status badge on success",
+            "Show error toast on failure with retry option"
+          ]
+        },
+        "verification_steps_panel": {
+          "props": [
+            "steps: VerificationStep[]",
+            "risk_id: string",
+            "auto_test_available: boolean"
+          ],
+          "features": [
+            "Collapsible step groups by category",
+            "Progress indicator (X of Y completed)",
+            "'Run Automated Tests' button if available",
+            "Manual verification checkbox with timestamp",
+            "Export verification report button"
+          ]
+        },
+        "code_example_viewer": {
+          "props": [
+            "examples: CodeExample[]",
+            "language: string",
+            "editable: boolean"
+          ],
+          "features": [
+            "Syntax highlighting with PrismJS",
+            "Copy to clipboard button",
+            "Download as file option",
+            "Line numbers toggle",
+            "Full-screen expand mode"
+          ]
+        },
+        "owasp_mapping_display": {
+          "props": [
+            "mappings: OWASPMapping",
+            "show_details: boolean"
+          ],
+          "features": [
+            "Link to OWASP reference pages",
+            "PCI DSS requirement badges",
+            "GDPR article references",
+            "CWE ID links to MITRE",
+            "Expandable compliance details"
+          ]
+        }
+      },
+      "wordpress_integration": {
+        "rest_api_endpoints": {
+          "required": [
+            "GET /wp-json/vapt/v1/risk/{risk_id}/status",
+            "POST /wp-json/vapt/v1/risk/{risk_id}/enable",
+            "POST /wp-json/vapt/v1/risk/{risk_id}/disable",
+            "POST /wp-json/vapt/v1/risk/{risk_id}/test",
+            "GET /wp-json/vapt/v1/risk/{risk_id}/verification-status",
+            "POST /wp-json/vapt/v1/risk/{risk_id}/verify-step/{step_number}"
+          ],
+          "optional": [
+            "GET /wp-json/vapt/v1/global/settings",
+            "POST /wp-json/vapt/v1/global/settings",
+            "GET /wp-json/vapt/v1/reports/summary",
+            "POST /wp-json/vapt/v1/backup/create",
+            "POST /wp-json/vapt/v1/backup/restore"
+          ]
+        },
+        "wordpress_hooks": {
+          "actions": [
+            "vapt_before_protection_enable",
+            "vapt_after_protection_enable",
+            "vapt_before_protection_disable",
+            "vapt_after_protection_disable",
+            "vapt_verification_step_complete",
+            "vapt_security_test_start",
+            "vapt_security_test_complete"
+          ],
+          "filters": [
+            "vapt_component_props",
+            "vapt_ui_configuration",
+            "vapt_render_conditional_fields",
+            "vapt_risk_card_content"
+          ]
+        },
+        "capability_checks": {
+          "view_risks": "vapt_view_risks",
+          "enable_protection": "vapt_enable_protection",
+          "disable_protection": "vapt_disable_protection",
+          "run_tests": "vapt_run_tests",
+          "view_logs": "vapt_view_logs",
+          "manage_settings": "vapt_manage_settings",
+          "export_reports": "vapt_export_reports"
+        }
+      }
+    },
+    "context_fields": {
+      "required": [
+        "risk_id",
+        "title",
+        "severity.level",
+        "severity.cvss_score",
+        "description.summary",
+        "description.detailed",
+        "testing.verification_steps",
+        "protection.automated_protection.available",
+        "protection.remediation_effort",
+        "ui_configuration.components",
+        "ui_configuration.layout",
+        "ui_configuration.actions"
+      ],
+      "conditional_required": {
+        "when_protection_automated": [
+          "protection.automated_protection.implementation_steps",
+          "protection.automated_protection.method"
+        ],
+        "when_has_payloads": [
+          "testing.test_payloads"
+        ],
+        "when_manual_steps_exist": [
+          "protection.manual_steps"
+        ],
+        "when_code_examples_exist": [
+          "code_examples"
+        ]
+      },
+      "enrichment_fields": [
+        "owasp_mapping.owasp_top_10_2021",
+        "owasp_mapping.pci_dss",
+        "owasp_mapping.cwe",
+        "metadata.tags",
+        "references",
+        "verification_engine.automated_checks"
+      ]
+    },
+    "output_format_specifications": {
+      "react_component": {
+        "file_extension": ".jsx",
+        "imports": [
+          "import { useState, useEffect } from 'react';",
+          "import { useSelect, useDispatch } from '@wordpress/data';",
+          "import { Panel, PanelBody, PanelRow, ToggleControl, SelectControl, Button, Spinner, Notice, TabPanel, Modal, Tooltip } from '@wordpress/components';",
+          "import { __ } from '@wordpress/i18n';",
+          "import { apiFetch } from '@wordpress/api-fetch';"
+        ],
+        "component_structure": {
+          "props_interface": "RiskComponentProps",
+          "main_component": "Risk{id}ProtectionPanel",
+          "sub_components": [
+            "RiskHeader",
+            "SeverityBadge",
+            "ProtectionToggle",
+            "VerificationPanel",
+            "CodeExamples",
+            "ReferencesList"
+          ]
+        },
+        "styling_requirements": [
+          "Use Tailwind CSS utility classes",
+          "Respect WordPress admin color scheme variables",
+          "Support dark mode via .wp-dark-mode class",
+          "Mobile responsive (breakpoint: 782px)"
+        ]
+      },
+      "wordpress_php_integration": {
+        "file_locations": [
+          "includes/class-risk-{risk_id}-handler.php",
+          "admin/js/risk-{risk_id}-component.js",
+          "admin/css/risk-{risk_id}-styles.css"
+        ],
+        "rest_endpoint_registration": "register_rest_route('vapt/v1', '/risk/{risk_id}/', array(...))",
+        "capability_integration": "current_user_can('vapt_manage_{risk_id}')"
+      }
+    },
+    "validation_rules": {
+      "ui_validation": [
+        "All component IDs must be unique within the feature",
+        "Dependency chains must not create circular references",
+        "Required fields must have validation schema defined",
+        "Dropdown options must have at least 2 choices",
+        "Toggle components must have boolean default_value"
+      ],
+      "data_validation": [
+        "Risk IDs must follow RISK-XXX format",
+        "Severity levels must be one of: critical, high, medium, low",
+        "CVSS scores must be between 0.0 and 10.0",
+        "All verification steps must have non-empty action text",
+        "Implementation steps must include file path or code snippet"
+      ],
+      "accessibility_validation": [
+        "All interactive elements must have aria-label or visible text",
+        "Color contrast must meet WCAG AA standards (4.5:1 for text)",
+        "Focus states must be clearly visible",
+        "Form errors must be announced to screen readers"
+      ],
+      "security_validation": [
+        "No hardcoded secrets in component code",
+        "All API calls must use WordPress nonce verification",
+        "User input must be sanitized before display (esc_html, esc_attr)",
+        "Capability checks required for all state-changing actions"
+      ]
+    },
     "examples": [
       {
-        "input_risk_id": "RISK-001",
-        "expected_output": "React component with toggle for version removal, scan button, and status badge"
+        "input": {
+          "risk_id": "RISK-001",
+          "feature_enabled": true,
+          "feature_category": "information_disclosure"
+        },
+        "expected_output": {
+          "component_name": "Risk001WordPressVersionDisclosurePanel",
+          "rendered_elements": [
+            "Severity badge (low - blue)",
+            "Protection toggle (default: ON)",
+            "Info disclosure summary card",
+            "Generator tag removal toggle",
+            "Readme.html deletion button",
+            "Scan for version exposure button",
+            "Verification steps accordion",
+            "OWASP A6:2021 reference link"
+          ],
+          "conditional_fields_added": [
+            "exposure_scanner",
+            "auto_cleanup_toggle"
+          ],
+          "conditional_fields_skipped": []
+        }
+      },
+      {
+        "input": {
+          "risk_id": "RISK-002",
+          "feature_enabled": false,
+          "feature_category": "authentication"
+        },
+        "expected_output": {
+          "component_name": "Risk002WeakPasswordPolicyPanel",
+          "rendered_elements": [
+            "Disabled state overlay",
+            "Risk summary with security score impact",
+            "Vulnerability warning banner",
+            "Quick enable button with presets"
+          ],
+          "conditional_fields_added": [],
+          "conditional_fields_skipped": [
+            "password_complexity_slider",
+            "2fa_configuration",
+            "login_attempt_chart",
+            "session_manager"
+          ]
+        }
+      },
+      {
+        "input": {
+          "risk_id": "RISK-003",
+          "feature_enabled": true,
+          "severity": "critical",
+          "has_test_payloads": true
+        },
+        "expected_output": {
+          "component_name": "Risk003SQLInjectionProtectionPanel",
+          "rendered_elements": [
+            "URGENT warning banner (critical severity)",
+            "Protection toggle with confirmation",
+            "Payload tester widget with SQL payloads",
+            "Firewall rule count badge",
+            "Blocked attempts counter",
+            "Input sanitization method selector",
+            "$wpdb->prepare() code example",
+            "Test protection button"
+          ],
+          "conditional_fields_added": [
+            "urgent_warning_banner",
+            "payload_tester_panel",
+            "firewall_rule_editor",
+            "blocked_attempts_counter"
+          ],
+          "conditional_fields_skipped": []
+        }
+      }
+    ],
+    "feature_selection_workflow": {
+      "step_1_category_selection": {
+        "instruction": "User selects a security category from: {information_disclosure, authentication, injection_protection, access_control, configuration_security, dependency_security, logging_monitoring, api_security, file_security}",
+        "ui_action": "Display category cards with icon, risk count, and overall security score",
+        "ai_response": "Filter risks to selected category, load category-specific prompt template"
+      },
+      "step_2_feature_selection": {
+        "instruction": "User selects specific risk from category list",
+        "ui_action": "Display risk cards with title, severity badge, and quick-enable toggle",
+        "ai_response": "Load risk-specific data, determine conditional field visibility"
+      },
+      "step_3_configuration": {
+        "instruction": "User enables protection or adjusts settings",
+        "ui_action": "Render conditional fields based on enabled state and severity",
+        "ai_response": "Generate appropriate UI components with validation rules",
+        "conditional_logic": "IF feature_enabled=true THEN show advanced_settings ELSE show quick_enable_prompt"
+      },
+      "step_4_verification": {
+        "instruction": "User runs verification tests",
+        "ui_action": "Display verification steps panel with test buttons",
+        "ai_response": "Generate test execution interface with progress tracking"
+      },
+      "step_5_deployment": {
+        "instruction": "User applies protection settings",
+        "ui_action": "Show deployment progress, backup creation, and success/failure states",
+        "ai_response": "Generate deployment workflow with rollback capabilities"
+      }
+    }
+  },
+  "global_settings": {
+    "version": "3.2.0",
+    "wordpress_plugin_settings": {
+      "plugin_name": "VAPT Protection Suite",
+      "plugin_version": "3.2.0",
+      "minimum_wordpress_version": "5.8",
+      "minimum_php_version": "7.4",
+      "recommended_php_version": "8.1",
+      "text_domain": "vapt-protection",
+      "namespace": "VAPTProtection",
+      "capability_prefix": "vapt",
+      "database_table_prefix": "vapt_",
+      "option_prefix": "vapt_"
+    },
+    "security_settings": {
+      "backup_before_changes": {
+        "enabled": true,
+        "backup_retention_count": 10,
+        "backup_location": "wp-content/uploads/vapt/backups",
+        "auto_backup_on": [
+          "protection_enable",
+          "protection_disable",
+          "configuration_change"
+        ],
+        "backup_contents": [
+          "wp_config",
+          "htaccess",
+          "plugin_settings",
+          "custom_rules"
+        ]
+      },
+      "rollback_capability": {
+        "enabled": true,
+        "rollback_triggers": [
+          "protection_failure",
+          "user_request",
+          "compatibility_issue"
+        ],
+        "max_rollback_history": 30,
+        "emergency_rollback": true,
+        "rollback_verification": true
+      },
+      "logging_level": {
+        "current": "info",
+        "available_levels": [
+          "debug",
+          "info",
+          "warning",
+          "error",
+          "critical"
+        ],
+        "log_rotation": "daily",
+        "log_retention_days": 90,
+        "log_location": "wp-content/uploads/vapt/logs",
+        "log_separate_by": [
+          "risk_id",
+          "severity",
+          "action_type"
+        ]
+      },
+      "nonce_verification": {
+        "enabled": true,
+        "nonce_lifetime": 86400,
+        "actions_require_nonce": [
+          "enable_protection",
+          "disable_protection",
+          "run_test",
+          "apply_settings",
+          "create_backup",
+          "restore_backup"
+        ]
+      },
+      "capability_system": {
+        "default_admin_caps": [
+          "vapt_view_risks",
+          "vapt_enable_protection",
+          "vapt_disable_protection",
+          "vapt_run_tests",
+          "vapt_view_logs",
+          "vapt_manage_settings",
+          "vapt_export_reports"
+        ],
+        "default_editor_caps": [
+          "vapt_view_risks",
+          "vapt_view_logs"
+        ],
+        "role_hierarchy": {
+          "administrator": "all",
+          "editor": [
+            "view",
+            "export"
+          ],
+          "author": [
+            "view"
+          ],
+          "subscriber": []
+        }
+      }
+    },
+    "ui_builder_settings": {
+      "component_library": {
+        "framework": "React 18+",
+        "build_tool": "wp-scripts (WordPress official)",
+        "css_framework": "Tailwind CSS 3.x",
+        "component_source": [
+          "@wordpress/components",
+          "@wordpress/icons",
+          "custom-vapt-components"
+        ],
+        "state_management": {
+          "global": "WordPress Data (Redux-like)",
+          "local": "React Hooks",
+          "server": "React Query / SWR"
+        }
+      },
+      "ui_configuration": {
+        "admin_menu": {
+          "parent_slug": "vapt-dashboard",
+          "page_title": "VAPT Protection Suite",
+          "menu_title": "VAPT Security",
+          "capability": "vapt_view_risks",
+          "icon_url": "dashicons-shield-alt",
+          "position": 30
+        },
+        "submenu_pages": [
+          {
+            "slug": "vapt-dashboard",
+            "title": "Dashboard",
+            "capability": "vapt_view_risks",
+            "component": "DashboardOverview"
+          },
+          {
+            "slug": "vapt-risks",
+            "title": "Risk Catalog",
+            "capability": "vapt_view_risks",
+            "component": "RiskCatalogGrid"
+          },
+          {
+            "slug": "vapt-scanner",
+            "title": "Security Scanner",
+            "capability": "vapt_run_tests",
+            "component": "SecurityScanner"
+          },
+          {
+            "slug": "vapt-logs",
+            "title": "Security Logs",
+            "capability": "vapt_view_logs",
+            "component": "SecurityLogViewer"
+          },
+          {
+            "slug": "vapt-reports",
+            "title": "Reports",
+            "capability": "vapt_export_reports",
+            "component": "ReportGenerator"
+          },
+          {
+            "slug": "vapt-settings",
+            "title": "Settings",
+            "capability": "vapt_manage_settings",
+            "component": "PluginSettings"
+          }
+        ]
+      },
+      "dashboard_widgets": {
+        "security_score_card": {
+          "enabled": true,
+          "position": "normal",
+          "priority": "high",
+          "refresh_interval": 300
+        },
+        "recent_threats": {
+          "enabled": true,
+          "position": "side",
+          "priority": "default",
+          "max_items": 5
+        },
+        "quick_actions": {
+          "enabled": true,
+          "position": "normal",
+          "priority": "high",
+          "actions": [
+            "run_full_scan",
+            "backup_now",
+            "view_critical_risks"
+          ]
+        }
+      },
+      "notification_system": {
+        "notification_types": {
+          "email": {
+            "enabled": true,
+            "recipients": [
+              "admin_email"
+            ],
+            "triggers": [
+              "critical_risk_detected",
+              "protection_failure",
+              "backup_complete"
+            ],
+            "template_format": "HTML with plain text fallback"
+          },
+          "dashboard": {
+            "enabled": true,
+            "display_location": [
+              "vapt pages",
+              "wp dashboard"
+            ],
+            "toast_duration": 5000,
+            "max_concurrent": 3
+          },
+          "slack": {
+            "enabled": false,
+            "webhook_url_setting": "vapt_slack_webhook",
+            "triggers": [
+              "critical_only"
+            ],
+            "username": "VAPT Security Bot"
+          },
+          "push": {
+            "enabled": false,
+            "requires_service_worker": true,
+            "browser_support": [
+              "Chrome",
+              "Firefox",
+              "Edge"
+            ]
+          }
+        }
+      },
+      "accessibility_settings": {
+        "wcag_compliance_target": "2.1 AA",
+        "keyboard_navigation": true,
+        "screen_reader_optimized": true,
+        "high_contrast_mode": true,
+        "font_size_options": [
+          "small",
+          "normal",
+          "large"
+        ],
+        "animation_reduced_motion": true,
+        "focus_indicators": {
+          "style": "outline",
+          "color": "#007cba",
+          "width": "2px"
+        }
+      },
+      "theme_integration": {
+        "color_scheme": {
+          "primary": "#007cba",
+          "secondary": "#23282d",
+          "success": "#46b450",
+          "warning": "#ffb900",
+          "error": "#dc3232",
+          "critical": "#dc3232",
+          "info": "#00a0d2"
+        },
+        "severity_colors": {
+          "critical": {
+            "bg": "#dc3232",
+            "text": "#ffffff"
+          },
+          "high": {
+            "bg": "#f56e28",
+            "text": "#ffffff"
+          },
+          "medium": {
+            "bg": "#ffb900",
+            "text": "#000000"
+          },
+          "low": {
+            "bg": "#00a0d2",
+            "text": "#ffffff"
+          }
+        },
+        "dark_mode_support": {
+          "enabled": true,
+          "auto_detect": true,
+          "toggle_available": true,
+          "css_variables": [
+            "--vapt-bg-primary",
+            "--vapt-text-primary",
+            "--vapt-border-color"
+          ]
+        }
+      }
+    },
+    "scanning_settings": {
+      "auto_update_rules": {
+        "enabled": true,
+        "update_source": "https://api.vapt-security.com/v1/rules",
+        "update_frequency": "daily",
+        "update_time": "03:00",
+        "backup_before_update": true,
+        "notification_on_update": true
+      },
+      "scheduled_scans": {
+        "enabled": true,
+        "scan_types": [
+          "full",
+          "quick",
+          "custom"
+        ],
+        "default_frequency": "daily",
+        "available_frequencies": [
+          "hourly",
+          "daily",
+          "weekly",
+          "monthly"
+        ],
+        "scan_time": "02:00",
+        "timezone": "America/New_York",
+        "max_scan_duration": 3600,
+        "parallel_scans": 3,
+        "scan_queue_enabled": true
+      },
+      "scan_configuration": {
+        "full_scan": {
+          "description": "Complete scan of all 99 risk categories",
+          "estimated_duration": "15-30 minutes",
+          "risks_scanned": 99,
+          "system_load": "high",
+          "recommended_frequency": "weekly"
+        },
+        "quick_scan": {
+          "description": "Scan critical and high severity risks only",
+          "estimated_duration": "2-5 minutes",
+          "risks_scanned": "~30",
+          "system_load": "medium",
+          "recommended_frequency": "daily"
+        },
+        "custom_scan": {
+          "description": "User-selected risk categories",
+          "estimated_duration": "Variable",
+          "system_load": "configurable",
+          "risk_selection": "multi-select"
+        }
+      },
+      "threat_intelligence": {
+        "enabled": true,
+        "feed_sources": [
+          "CVE Database",
+          "WPScan",
+          "Sucuri",
+          "WordFence"
+        ],
+        "update_frequency": "hourly",
+        "local_cache_duration": 86400,
+        "alert_on_new_cve": true
+      }
+    },
+    "reporting_settings": {
+      "export_formats": [
+        "pdf",
+        "json",
+        "csv",
+        "html",
+        "xml"
+      ],
+      "pdf_settings": {
+        "template": "vapt-security-report",
+        "include_logo": true,
+        "include_charts": true,
+        "include_remediation_steps": true,
+        "page_size": "A4",
+        "orientation": "portrait"
+      },
+      "report_scheduling": {
+        "enabled": true,
+        "available_frequencies": [
+          "daily",
+          "weekly",
+          "monthly",
+          "quarterly"
+        ],
+        "default_recipients": [
+          "admin_email"
+        ],
+        "include_attachments": true,
+        "max_attachment_size": "10MB"
+      },
+      "compliance_reporting": {
+        "frameworks": [
+          "OWASP Top 10",
+          "PCI DSS",
+          "GDPR",
+          "NIST CSF",
+          "ISO 27001"
+        ],
+        "compliance_mapping": true,
+        "gap_analysis": true,
+        "remediation_timeline": true
+      }
+    },
+    "integration_settings": {
+      "third_party_plugins": {
+        "wordfence": {
+          "enabled": false,
+          "integration_type": "data_sync",
+          "shared_data": [
+            "scan_results",
+            "threat_data"
+          ]
+        },
+        "sucuri": {
+          "enabled": false,
+          "integration_type": "api",
+          "requires_api_key": true
+        },
+        "wp_rocket": {
+          "enabled": false,
+          "integration_type": "compatibility",
+          "notes": "Security headers may conflict with cache"
+        },
+        "yoast_seo": {
+          "enabled": false,
+          "integration_type": "data_sync",
+          "shared_data": [
+            "security_score"
+          ]
+        }
+      },
+      "external_services": {
+        "ssl_labs": {
+          "enabled": true,
+          "api_endpoint": "https://api.ssllabs.com/api/v3/",
+          "rate_limit": "25 per hour"
+        },
+        "security_headers": {
+          "enabled": true,
+          "api_endpoint": "https://securityheaders.com/",
+          "check_on_demand": true
+        },
+        "google_safe_browsing": {
+          "enabled": false,
+          "requires_api_key": true,
+          "api_endpoint": "https://safebrowsing.googleapis.com/"
+        }
+      }
+    },
+    "performance_settings": {
+      "caching": {
+        "enabled": true,
+        "cache_duration": 3600,
+        "cache_locations": [
+          "risk_catalog",
+          "scan_results",
+          "security_score"
+        ],
+        "cache_invalidation_triggers": [
+          "protection_change",
+          "scan_complete",
+          "settings_update"
+        ]
+      },
+      "optimization": {
+        "lazy_load_components": true,
+        "code_splitting": true,
+        "asset_minification": true,
+        "gzip_compression": true
+      },
+      "resource_limits": {
+        "max_memory_usage": "256M",
+        "max_execution_time": 300,
+        "max_concurrent_scans": 3,
+        "background_processing": true
+      }
+    },
+    "developer_settings": {
+      "debug_mode": {
+        "enabled": false,
+        "log_api_calls": true,
+        "log_render_performance": true,
+        "expose_component_props": true,
+        "verbose_error_messages": false
+      },
+      "hooks_and_filters": {
+        "documented_actions": [
+          "vapt_before_protection_enable",
+          "vapt_after_protection_enable",
+          "vapt_before_protection_disable",
+          "vapt_after_protection_disable",
+          "vapt_scan_start",
+          "vapt_scan_complete",
+          "vapt_risk_status_change"
+        ],
+        "documented_filters": [
+          "vapt_risk_card_content",
+          "vapt_ui_configuration",
+          "vapt_component_props",
+          "vapt_conditional_fields"
+        ]
+      },
+      "api_documentation": {
+        "rest_api_explorer": true,
+        "openapi_spec": "/wp-json/vapt/v1/schema",
+        "authentication": "WordPress cookie or Application Password",
+        "rate_limiting": {
+          "enabled": true,
+          "requests_per_minute": 60,
+          "authenticated_multiplier": 10
+        }
+      }
+    }
+  },
+  "conditional_field_rules": {
+    "version": "1.0.0",
+    "rules_engine": {
+      "description": "Rules to dynamically show/hide/add fields based on feature state, severity, and configuration",
+      "evaluation_order": "sequential",
+      "stop_on_first_match": false
+    },
+    "field_rules": [
+      {
+        "rule_id": "rule-001",
+        "name": "Show advanced settings when feature enabled",
+        "condition": {
+          "field": "feature_enabled",
+          "operator": "equals",
+          "value": true
+        },
+        "action": "SHOW_FIELDS",
+        "target_fields": [
+          "advanced_settings_panel",
+          "test_panel",
+          "live_monitoring",
+          "custom_rules_editor",
+          "verification_steps"
+        ],
+        "priority": 10
+      },
+      {
+        "rule_id": "rule-002",
+        "name": "Show quick enable prompt when feature disabled",
+        "condition": {
+          "field": "feature_enabled",
+          "operator": "equals",
+          "value": false
+        },
+        "action": "SHOW_FIELDS",
+        "target_fields": [
+          "enable_prompt",
+          "risk_summary_compact",
+          "quick_enable_button",
+          "security_impact_indicator"
+        ],
+        "priority": 10
+      },
+      {
+        "rule_id": "rule-003",
+        "name": "Hide sensitive fields when not enabled",
+        "condition": {
+          "field": "feature_enabled",
+          "operator": "equals",
+          "value": false
+        },
+        "action": "HIDE_FIELDS",
+        "target_fields": [
+          "advanced_settings_panel",
+          "test_panel",
+          "live_monitoring",
+          "implementation_steps",
+          "code_examples"
+        ],
+        "priority": 20
+      },
+      {
+        "rule_id": "rule-004",
+        "name": "Show urgent warning for critical/high severity",
+        "condition": {
+          "field": "severity.level",
+          "operator": "in",
+          "value": [
+            "critical",
+            "high"
+          ]
+        },
+        "action": "SHOW_FIELDS",
+        "target_fields": [
+          "urgent_warning_banner",
+          "priority_indicator",
+          "immediate_action_required",
+          "escalation_button"
+        ],
+        "priority": 30
+      },
+      {
+        "rule_id": "rule-005",
+        "name": "Show automated fix button when available",
+        "condition": {
+          "field": "protection.automated_protection.available",
+          "operator": "equals",
+          "value": true
+        },
+        "action": "SHOW_FIELDS",
+        "target_fields": [
+          "auto_fix_button",
+          "implementation_steps_accordion",
+          "estimated_time_badge",
+          "backup_reminder"
+        ],
+        "priority": 15
+      },
+      {
+        "rule_id": "rule-006",
+        "name": "Show expert mode for high remediation effort",
+        "condition": {
+          "field": "protection.remediation_effort",
+          "operator": "equals",
+          "value": "high"
+        },
+        "action": "SHOW_FIELDS",
+        "target_fields": [
+          "expert_mode_toggle",
+          "developer_documentation_link",
+          "manual_steps_warning",
+          "staging_site_recommendation"
+        ],
+        "priority": 25
+      },
+      {
+        "rule_id": "rule-007",
+        "name": "Show payload tester when payloads exist",
+        "condition": {
+          "field": "testing.test_payloads",
+          "operator": "not_empty"
+        },
+        "action": "SHOW_FIELDS",
+        "target_fields": [
+          "payload_tester_panel",
+          "security_scan_button",
+          "payload_library_selector",
+          "test_results_viewer"
+        ],
+        "priority": 20
+      },
+      {
+        "rule_id": "rule-008",
+        "name": "Add 2FA components when 2FA support detected",
+        "condition": {
+          "field": "metadata.tags",
+          "operator": "contains",
+          "value": "2fa"
+        },
+        "action": "INJECT_COMPONENTS",
+        "target_components": [
+          "TwoFactorSetupWizard",
+          "BackupCodesManager",
+          "TOTPValidator"
+        ],
+        "priority": 35
+      },
+      {
+        "rule_id": "rule-009",
+        "name": "Show logging components when logging enabled",
+        "condition": {
+          "field": "feature_category",
+          "operator": "equals",
+          "value": "logging_monitoring"
+        },
+        "action": "INJECT_COMPONENTS",
+        "target_components": [
+          "LiveLogStream",
+          "SecurityEventChart",
+          "AlertRuleBuilder",
+          "LogExporter"
+        ],
+        "priority": 35
+      },
+      {
+        "rule_id": "rule-010",
+        "name": "Show API explorer for API security features",
+        "condition": {
+          "field": "feature_category",
+          "operator": "equals",
+          "value": "api_security"
+        },
+        "action": "SHOW_FIELDS",
+        "target_fields": [
+          "api_endpoint_explorer",
+          "auth_method_configurator",
+          "cors_policy_editor",
+          "api_rate_limiter"
+        ],
+        "priority": 30
+      },
+      {
+        "rule_id": "rule-011",
+        "name": "Show file browser for file security features",
+        "condition": {
+          "field": "feature_category",
+          "operator": "equals",
+          "value": "file_security"
+        },
+        "action": "SHOW_FIELDS",
+        "target_fields": [
+          "file_upload_validator",
+          "upload_directory_browser",
+          "file_permission_viewer",
+          "malware_scanner_panel"
+        ],
+        "priority": 30
+      },
+      {
+        "rule_id": "rule-012",
+        "name": "Show confirmation for protection level changes",
+        "condition": {
+          "field": "ui_configuration.components",
+          "operator": "has_type",
+          "value": "dropdown"
+        },
+        "action": "SET_PROPERTY",
+        "target_property": "confirmation_required",
+        "property_value": true,
+        "priority": 15
+      },
+      {
+        "rule_id": "rule-013",
+        "name": "Enable test button when automated tests available",
+        "condition": {
+          "field": "verification_engine.automated_checks",
+          "operator": "not_empty"
+        },
+        "action": "SHOW_FIELDS",
+        "target_fields": [
+          "run_automated_tests_button",
+          "test_progress_indicator",
+          "last_test_results"
+        ],
+        "priority": 20
+      },
+      {
+        "rule_id": "rule-014",
+        "name": "Show dependency scanner for known vulnerabilities",
+        "condition": {
+          "field": "risk_id",
+          "operator": "equals",
+          "value": "RISK-009"
+        },
+        "action": "INJECT_COMPONENTS",
+        "target_components": [
+          "ComponentVersionTable",
+          "CVEScanner",
+          "AutoUpdateScheduler",
+          "RollbackManager"
+        ],
+        "priority": 40
+      },
+      {
+        "rule_id": "rule-015",
+        "name": "Hide complexity for low severity with easy difficulty",
+        "condition": {
+          "all": [
+            {
+              "field": "severity.level",
+              "operator": "equals",
+              "value": "low"
+            },
+            {
+              "field": "testing.difficulty",
+              "operator": "equals",
+              "value": "easy"
+            }
+          ]
+        },
+        "action": "HIDE_FIELDS",
+        "target_fields": [
+          "expert_mode_toggle",
+          "developer_documentation_link",
+          "complex_configuration_options"
+        ],
+        "priority": 35
+      },
+      {
+        "rule_id": "rule-016",
+        "name": "Show staging recommendation for production sites",
+        "condition": {
+          "field": "environment_type",
+          "operator": "equals",
+          "value": "production"
+        },
+        "action": "SHOW_FIELDS",
+        "target_fields": [
+          "staging_site_recommendation",
+          "backup_before_change_checkbox",
+          "maintenance_mode_option"
+        ],
+        "priority": 25
+      }
+    ],
+    "component_injection_rules": [
+      {
+        "rule_id": "inject-001",
+        "trigger": "risk_id === 'RISK-003' AND feature_enabled",
+        "components": [
+          "SQLInjectionTester",
+          "SQLPayloadLibrary",
+          "QuerySanitizer"
+        ]
+      },
+      {
+        "rule_id": "inject-002",
+        "trigger": "risk_id === 'RISK-004' AND feature_enabled",
+        "components": [
+          "XSSPayloadTester",
+          "ContentSecurityPolicyEditor",
+          "SanitizationPreview"
+        ]
+      },
+      {
+        "rule_id": "inject-003",
+        "trigger": "risk_id === 'RISK-002' AND feature_enabled",
+        "components": [
+          "PasswordStrengthMeter",
+          "PasswordPolicyEditor",
+          "PasswordBlacklistViewer"
+        ]
+      },
+      {
+        "rule_id": "inject-004",
+        "trigger": "risk_id === 'RISK-015' AND feature_enabled",
+        "components": [
+          "TwoFactorAuthSetup",
+          "LoginAttemptMonitor",
+          "SessionManager"
+        ]
+      },
+      {
+        "rule_id": "inject-005",
+        "trigger": "risk_id === 'RISK-013' AND feature_enabled",
+        "components": [
+          "FileUploadTester",
+          "MimeTypeValidator",
+          "FilePermissionChecker"
+        ]
       }
     ]
   },
-  "global_settings": {
-    "backup_before_changes": true,
-    "rollback_capability": true,
-    "logging_level": "info",
-    "notification_settings": {
-      "email": true,
-      "dashboard": true,
-      "slack": false
+  "ui_component_library": {
+    "version": "1.0.0",
+    "description": "Reusable UI component specifications for the VAPT WordPress Plugin UI Builder",
+    "base_components": {
+      "RiskCard": {
+        "props": {
+          "risk_id": "string (required)",
+          "title": "string (required)",
+          "severity": "object with level, cvss_score (required)",
+          "description": "object with summary (required)",
+          "category": "string (required)",
+          "enabled": "boolean",
+          "onToggle": "function",
+          "onConfigure": "function",
+          "compact": "boolean"
+        },
+        "render_states": {
+          "default": [
+            "severity_badge",
+            "title",
+            "summary",
+            "toggle"
+          ],
+          "expanded": [
+            "severity_badge",
+            "title",
+            "description",
+            "category",
+            "toggle",
+            "action_buttons"
+          ],
+          "compact": [
+            "severity_badge_mini",
+            "title_truncated",
+            "toggle_small"
+          ]
+        },
+        "conditional_elements": {
+          "when_critical": [
+            "urgent_icon",
+            "escalate_button"
+          ],
+          "when_enabled": [
+            "status_indicator",
+            "last_scan_time"
+          ],
+          "when_disabled": [
+            "security_impact_preview"
+          ]
+        }
+      },
+      "SeverityBadge": {
+        "props": {
+          "level": "'critical' | 'high' | 'medium' | 'low' (required)",
+          "cvss_score": "number (0-10)",
+          "show_score": "boolean (default: true)",
+          "animated": "boolean (default: false)",
+          "size": "'small' | 'medium' | 'large' (default: 'medium')"
+        },
+        "styles": {
+          "critical": {
+            "backgroundColor": "#dc3232",
+            "color": "#ffffff",
+            "animation": "pulse 2s infinite"
+          },
+          "high": {
+            "backgroundColor": "#f56e28",
+            "color": "#ffffff"
+          },
+          "medium": {
+            "backgroundColor": "#ffb900",
+            "color": "#000000"
+          },
+          "low": {
+            "backgroundColor": "#00a0d2",
+            "color": "#ffffff"
+          }
+        }
+      },
+      "ProtectionToggle": {
+        "props": {
+          "risk_id": "string (required)",
+          "enabled": "boolean (required)",
+          "confirmation_required": "boolean (default: false)",
+          "confirmation_message": "string",
+          "onChange": "function (required)",
+          "loading": "boolean (default: false)",
+          "disabled": "boolean (default: false)"
+        },
+        "behaviors": [
+          "Show confirmation modal if confirmation_required is true",
+          "Display loading spinner during onChange execution",
+          "Update toggle state only after successful API response",
+          "Show success/error notice after state change"
+        ]
+      },
+      "VerificationStepsPanel": {
+        "props": {
+          "risk_id": "string (required)",
+          "steps": "array of VerificationStep (required)",
+          "completed_steps": "array of numbers",
+          "auto_test_available": "boolean",
+          "on_step_complete": "function",
+          "on_run_auto_tests": "function",
+          "expanded_by_default": "boolean (default: false)"
+        },
+        "sections": [
+          "Progress header (X of Y steps completed)",
+          "Collapsible step groups",
+          "Automated test button (if available)",
+          "Manual verification checkboxes",
+          "Export report button"
+        ]
+      },
+      "CodeExampleViewer": {
+        "props": {
+          "code": "string (required)",
+          "language": "string (default: 'php')",
+          "file_location": "string",
+          "editable": "boolean (default: false)",
+          "description": "string",
+          "on_copy": "function",
+          "on_download": "function"
+        },
+        "features": [
+          "Syntax highlighting (PrismJS)",
+          "Copy to clipboard button",
+          "Download as file option",
+          "Line numbers toggle",
+          "Fullscreen expand"
+        ]
+      },
+      "OWASPReference": {
+        "props": {
+          "owasp_top_10": "string",
+          "pci_dss": "array of strings",
+          "gdpr": "array of strings",
+          "cwe": "array of strings",
+          "show_links": "boolean (default: true)"
+        },
+        "render": "Badge group with clickable links to external references"
+      },
+      "TestPayloadPanel": {
+        "props": {
+          "payloads": "array of TestPayload (required)",
+          "risk_id": "string (required)",
+          "on_test": "function (required)",
+          "test_results": "object"
+        },
+        "features": [
+          "Payload selector dropdown",
+          "Payload preview with syntax highlighting",
+          "Test execution button",
+          "Results display (blocked/allowed)",
+          "Add custom payload option"
+        ]
+      },
+      "SecurityScoreCard": {
+        "props": {
+          "overall_score": "number (0-100)",
+          "category_scores": "object",
+          "trend": "'improving' | 'stable' | 'declining'",
+          "last_scan_date": "string (ISO date)"
+        },
+        "visualization": [
+          "Circular progress indicator for overall score",
+          "Category breakdown bars",
+          "Trend arrow with percentage change",
+          "Last scan timestamp"
+        ]
+      },
+      "RiskCategoryFilter": {
+        "props": {
+          "categories": "array of CategoryDefinition",
+          "selected": "array of strings",
+          "onChange": "function",
+          "show_counts": "boolean (default: true)"
+        },
+        "render": "Horizontal scrollable chips or vertical accordion with risk counts"
+      },
+      "QuickActionBar": {
+        "props": {
+          "actions": "array of QuickAction",
+          "layout": "'horizontal' | 'vertical' (default: 'horizontal')"
+        },
+        "actions_default": [
+          {
+            "id": "run_scan",
+            "label": "Run Security Scan",
+            "icon": "search",
+            "primary": true
+          },
+          {
+            "id": "view_critical",
+            "label": "View Critical Risks",
+            "icon": "warning"
+          },
+          {
+            "id": "backup_now",
+            "label": "Create Backup",
+            "icon": "backup"
+          },
+          {
+            "id": "view_report",
+            "label": "View Report",
+            "icon": "chart"
+          }
+        ]
+      }
     },
-    "auto_update_rules": true,
-    "scheduled_scans": true,
-    "scan_frequency": "daily"
+    "feature_specific_components": {
+      "information_disclosure": {
+        "ExposureScanner": {
+          "description": "Scans and displays exposed information",
+          "props": [
+            "risk_id",
+            "scan_types",
+            "on_scan_complete"
+          ]
+        },
+        "AutoCleanupToggle": {
+          "description": "Automatically removes exposed data",
+          "props": [
+            "enabled",
+            "on_change",
+            "cleanup_targets"
+          ]
+        }
+      },
+      "authentication": {
+        "PasswordComplexitySlider": {
+          "description": "Visual password strength requirements",
+          "props": [
+            "min_length",
+            "require_complexity",
+            "on_change"
+          ]
+        },
+        "TwoFactorSetupWizard": {
+          "description": "Step-by-step 2FA configuration",
+          "props": [
+            "user_id",
+            "methods",
+            "on_complete"
+          ]
+        },
+        "LoginAttemptChart": {
+          "description": "Line chart of login attempts over time",
+          "props": [
+            "time_range",
+            "data",
+            "highlight_failures"
+          ]
+        },
+        "SessionManagerTable": {
+          "description": "Active sessions with kill buttons",
+          "props": [
+            "sessions",
+            "on_kill_session"
+          ]
+        }
+      },
+      "injection_protection": {
+        "PayloadTesterWidget": {
+          "description": "Interactive payload testing interface",
+          "props": [
+            "risk_id",
+            "payloads",
+            "target_url",
+            "on_test"
+          ]
+        },
+        "SQLInjectionSimulator": {
+          "description": "Simulates SQL injection attempts",
+          "props": [
+            "database_type",
+            "query_preview",
+            "sanitization_method"
+          ]
+        },
+        "XSSPayloadLibrary": {
+          "description": "Categorized XSS payload collection",
+          "props": [
+            "payload_types",
+            "on_select",
+            "custom_payloads"
+          ]
+        },
+        "FirewallRuleEditor": {
+          "description": "Visual firewall rule builder",
+          "props": [
+            "rules",
+            "on_save",
+            "rule_types"
+          ]
+        }
+      },
+      "access_control": {
+        "RBACConfigurator": {
+          "description": "Role-based access control matrix",
+          "props": [
+            "roles",
+            "capabilities",
+            "on_change"
+          ]
+        },
+        "CapabilityManager": {
+          "description": "WordPress capability assignment",
+          "props": [
+            "role",
+            "capabilities",
+            "on_grant",
+            "on_revoke"
+          ]
+        },
+        "AccessAuditPanel": {
+          "description": "Access attempt audit trail",
+          "props": [
+            "logs",
+            "date_range",
+            "filter_options"
+          ]
+        }
+      },
+      "configuration_security": {
+        "WPConfigEditor": {
+          "description": "Visual wp-config.php editor",
+          "props": [
+            "constants",
+            "on_save",
+            "backup_before_save"
+          ]
+        },
+        "HTAccessGenerator": {
+          "description": ".htaccess rule generator with presets",
+          "props": [
+            "presets",
+            "custom_rules",
+            "on_generate"
+          ]
+        },
+        "SecurityHeadersValidator": {
+          "description": "Security headers check with grade",
+          "props": [
+            "current_headers",
+            "recommended_headers",
+            "on_apply"
+          ]
+        }
+      },
+      "api_security": {
+        "APIEndpointExplorer": {
+          "description": "REST API endpoint discovery and testing",
+          "props": [
+            "base_url",
+            "namespaces",
+            "auth_required"
+          ]
+        },
+        "CORSConfigurator": {
+          "description": "Cross-origin resource sharing settings",
+          "props": [
+            "allowed_origins",
+            "allowed_methods",
+            "on_save"
+          ]
+        }
+      },
+      "file_security": {
+        "MimeTypeValidator": {
+          "description": "File type validation tester",
+          "props": [
+            "allowed_types",
+            "test_file",
+            "on_validate"
+          ]
+        },
+        "FilePermissionChecker": {
+          "description": "File system permission analyzer",
+          "props": [
+            "directory",
+            "expected_permissions",
+            "on_check"
+          ]
+        }
+      }
+    }
   }
 }

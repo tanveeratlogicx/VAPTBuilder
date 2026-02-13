@@ -1,0 +1,5236 @@
+{
+  "metadata": {
+    "schema_version": "3.2.0",
+    "plugin_name": "WordPress VAPT Protection Suite",
+    "generated_at": "2026-02-13T15:30:00.000000Z",
+    "driver": "wp-config",
+    "total_risks": 25,
+    "ai_agent_compatible": true,
+    "ui_framework": "React/WordPress-Admin",
+    "source_version": "3.1.0",
+    "source_document": "VAPT-Complete-Risk-Catalog-99-ENHANCED.json",
+    "enhancement_version": "1.0.0",
+    "enhancement_focus": "wp-config Driver Implementation"
+  },
+  "risk_catalog": [
+    {
+      "risk_id": "RISK-001",
+      "title": "WordPress Version Disclosure",
+      "category": "Information Disclosure",
+      "severity": {
+        "level": "low",
+        "cvss_score": 3.7,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Checks if the WordPress version is publicly visible via generator tags, readme files, or error messages, which can help attackers target known vulnerabilities.",
+        "detailed": "Checks if the WordPress version is publicly visible via generator tags, readme files, or error messages, which can help attackers target known vulnerabilities.",
+        "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A6:2021-Vulnerable and Outdated Components",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-200"]
+      },
+      "testing": {
+        "test_method": "Manual inspection & automated scanning",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools", "wpscan"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "View page source and search for 'generator' meta tag",
+            "expected_result": "No WordPress version visible",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Access /readme.html and check for version number",
+            "expected_result": "404 Not Found or access denied",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 3,
+            "action": "Use wpscan to detect version disclosure",
+            "expected_result": "Version not detected",
+            "command": "wpscan --url http://example.com --enumerate vp",
+            "automated": true
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-4 hours",
+        "priority": 4,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constant",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Add code to remove generator meta tag from wp_head",
+              "file": "wp-config.php",
+              "code": "// Remove WordPress version from head\nremove_action('wp_head', 'wp_generator');\n\n// Remove version from RSS feeds\nadd_filter('the_generator', '__return_empty_string');\n\n// Hide version from scripts and styles\nadd_filter('style_loader_src', function($src) {\n    return remove_query_arg('ver', $src);\n});\nadd_filter('script_loader_src', function($src) {\n    return remove_query_arg('ver', $src);\n});",
+              "backup_required": true,
+              "location": "Before /* That's all, stop editing! */"
+            },
+            {
+              "step_number": 2,
+              "description": "Add constant to disable REST API user endpoints",
+              "file": "wp-config.php",
+              "code": "// Disable REST API user endpoints\nadd_filter('rest_endpoints', function($endpoints) {\n    if (isset($endpoints['/wp/v2/users'])) {\n        unset($endpoints['/wp/v2/users']);\n    }\n    return $endpoints;\n});",
+              "backup_required": true,
+              "location": "Before /* That's all, stop editing! */"
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Delete readme.html, license.txt, and other informational files from root directory",
+            "reason": "These files contain WordPress version information",
+            "verification": "Attempt to access /readme.html and verify 404 response"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {},
+            "code_snippets": [
+              "remove_action('wp_head', 'wp_generator');",
+              "add_filter('the_generator', '__return_empty_string');"
+            ]
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-001-001",
+            "name": "WordPress Version Disclosure Check",
+            "method": "endpoint-test",
+            "script": "check_wordpress_version_disclosure()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "WordPress version is still detectable via generator tags, readme files, or error messages"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-wordpress-version-disclosure-001",
+            "type": "toggle",
+            "label": "Remove WordPress Version from Generator Tag",
+            "description": "Removes the WordPress version meta tag from page headers",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleWordPressVersionDisclosure",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Information Disclosure",
+          "order": 1,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-001-001",
+            "type": "enable",
+            "label": "Apply All Recommendations",
+            "confirmation_required": true,
+            "confirmation_message": "This will add code to your wp-config.php file. A backup will be created automatically. Continue?",
+            "processing_message": "Applying WordPress version disclosure protection...",
+            "success_message": "WordPress version disclosure protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "remove_generator": "code_snippet"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "WordPress version is not publicly detectable"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Complete WordPress Version Disclosure Protection",
+          "code": "// Add to wp-config.php before /* That's all, stop editing! */\n\n// Remove WordPress version from head\nremove_action('wp_head', 'wp_generator');\n\n// Remove version from RSS feeds\nadd_filter('the_generator', '__return_empty_string');\n\n// Hide version from scripts and styles\nadd_filter('style_loader_src', function($src) {\n    return remove_query_arg('ver', $src);\n});\nadd_filter('script_loader_src', function($src) {\n    return remove_query_arg('ver', $src);\n});",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP A6:2021 - Vulnerable and Outdated Components",
+          "url": "https://owasp.org/Top10/A06_2021-Vulnerable_and_Outdated_Components/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Hardening - Hiding WordPress Version",
+          "url": "https://wordpress.org/documentation/article/hardening-wordpress/#hiding-wordpress-version",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.196509Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "information disclosure",
+          "low",
+          "wordpress-version-disclosure",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-007",
+      "title": "Security Misconfiguration",
+      "category": "Configuration",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Configuration compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Checks for default configurations, verbose error messages, unnecessary services, and insecure HTTP headers.",
+        "detailed": "Checks for default configurations, verbose error messages, unnecessary services, and insecure HTTP headers. This includes ensuring debug mode is disabled, file editor is disabled, and security keys are properly configured.",
+        "attack_scenario": "An attacker exploits misconfigurations to gain information about the system or bypass security controls",
+        "affected_components": [
+          "WordPress Core",
+          "wp-config.php",
+          "Plugins",
+          "Themes"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
+        "pci_dss": ["Requirement-2.2", "Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.IP-1", "PR.DS-5"],
+        "cwe": ["CWE-16"]
+      },
+      "testing": {
+        "test_method": "Configuration review & automated scanning",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools", "WP-CLI"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Check for default admin username 'admin'",
+            "expected_result": "Admin username is not 'admin'",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Verify debug mode is disabled in wp-config.php",
+            "expected_result": "WP_DEBUG is defined as false",
+            "command": "wp config get WP_DEBUG",
+            "automated": true
+          },
+          {
+            "step_number": 3,
+            "action": "Check if file editor is disabled",
+            "expected_result": "DISALLOW_FILE_EDIT is defined as true",
+            "command": "wp config get DISALLOW_FILE_EDIT",
+            "automated": true
+          },
+          {
+            "step_number": 4,
+            "action": "Verify authentication salts and keys are defined",
+            "expected_result": "All 8 security keys are defined with unique values",
+            "command": "wp config list | grep _KEY",
+            "automated": true
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Disable file editor in WordPress admin",
+              "file": "wp-config.php",
+              "code": "define('DISALLOW_FILE_EDIT', true);",
+              "backup_required": true,
+              "location": "Before /* That's all, stop editing! */"
+            },
+            {
+              "step_number": 2,
+              "description": "Disable debug mode and error display in production",
+              "file": "wp-config.php",
+              "code": "// Disable debug mode in production\ndefine('WP_DEBUG', false);\ndefine('WP_DEBUG_DISPLAY', false);\ndefine('WP_DEBUG_LOG', false);",
+              "backup_required": true,
+              "location": "Before /* That's all, stop editing! */"
+            },
+            {
+              "step_number": 3,
+              "description": "Define or regenerate WordPress security keys",
+              "file": "wp-config.php",
+              "code": "define('AUTH_KEY',         'put your unique phrase here');\ndefine('SECURE_AUTH_KEY',  'put your unique phrase here');\ndefine('LOGGED_IN_KEY',    'put your unique phrase here');\ndefine('NONCE_KEY',        'put your unique phrase here');\ndefine('AUTH_SALT',        'put your unique phrase here');\ndefine('SECURE_AUTH_SALT', 'put your unique phrase here');\ndefine('LOGGED_IN_SALT',   'put your unique phrase here');\ndefine('NONCE_SALT',       'put your unique phrase here');",
+              "backup_required": true,
+              "location": "Before /* That's all, stop editing! */"
+            },
+            {
+              "step_number": 4,
+              "description": "Change database table prefix if still default",
+              "file": "wp-config.php",
+              "code": "$table_prefix = 'wp_vapt_';",
+              "backup_required": true,
+              "warning": "Changing table prefix after installation requires database update",
+              "location": "Before /* That's all, stop editing! */"
+            },
+            {
+              "step_number": 5,
+              "description": "Force SSL for admin and login",
+              "file": "wp-config.php",
+              "code": "define('FORCE_SSL_ADMIN', true);\ndefine('FORCE_SSL_LOGIN', true);",
+              "backup_required": true,
+              "location": "Before /* That's all, stop editing! */"
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Remove unused plugins and themes",
+            "reason": "Reduce attack surface and potential vulnerabilities",
+            "verification": "Verify only active plugins/themes remain installed"
+          },
+          {
+            "step_number": 2,
+            "description": "Regenerate security keys using WordPress API",
+            "reason": "Ensure keys are truly random and unique",
+            "verification": "Check that salts are not default values",
+            "command": "curl -s https://api.wordpress.org/secret-key/1.1/salt/"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {
+              "DISALLOW_FILE_EDIT": "true",
+              "WP_DEBUG": "false",
+              "WP_DEBUG_DISPLAY": "false",
+              "WP_DEBUG_LOG": "false",
+              "FORCE_SSL_ADMIN": "true",
+              "FORCE_SSL_LOGIN": "true"
+            },
+            "variables": {
+              "table_prefix": "wp_vapt_"
+            },
+            "required_constants": [
+              "AUTH_KEY",
+              "SECURE_AUTH_KEY",
+              "LOGGED_IN_KEY",
+              "NONCE_KEY",
+              "AUTH_SALT",
+              "SECURE_AUTH_SALT",
+              "LOGGED_IN_SALT",
+              "NONCE_SALT"
+            ]
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-007-001",
+            "name": "Security Misconfiguration Check - File Editor",
+            "method": "config-check",
+            "script": "check_wp_config_constant('DISALLOW_FILE_EDIT')",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "true",
+              "actual_value_source": "wp_config"
+            },
+            "failure_message": "DISALLOW_FILE_EDIT constant is not defined or set to false"
+          },
+          {
+            "check_id": "CHECK-007-002",
+            "name": "Security Misconfiguration Check - Debug Mode",
+            "method": "config-check",
+            "script": "check_wp_config_constant('WP_DEBUG')",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "false",
+              "actual_value_source": "wp_config"
+            },
+            "failure_message": "WP_DEBUG is enabled in production environment"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-security-misconfiguration-001",
+            "type": "toggle",
+            "label": "Disable File Editor",
+            "description": "Prevents theme and plugin file editing from WordPress admin",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleFileEditor",
+            "dependencies": []
+          },
+          {
+            "component_id": "UI-security-misconfiguration-002",
+            "type": "toggle",
+            "label": "Disable Debug Mode",
+            "description": "Turns off WordPress debug mode for production environments",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleDebugMode",
+            "dependencies": []
+          },
+          {
+            "component_id": "UI-security-misconfiguration-003",
+            "type": "toggle",
+            "label": "Force SSL for Admin",
+            "description": "Requires HTTPS for WordPress admin and login pages",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleSSLAdmin",
+            "dependencies": []
+          },
+          {
+            "component_id": "UI-security-misconfiguration-004",
+            "type": "action_button",
+            "label": "Regenerate Security Keys",
+            "description": "Generate new random salts and keys for enhanced security",
+            "button_text": "Regenerate Keys",
+            "confirmation_required": true,
+            "confirmation_message": "This will log out all currently logged in users. Continue?",
+            "on_click": "regenerateSecurityKeys",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Configuration Security",
+          "order": 1,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-007-001",
+            "type": "enable",
+            "label": "Apply Hardening Configuration",
+            "confirmation_required": true,
+            "confirmation_message": "This will modify your wp-config.php file. A backup will be created. Continue?",
+            "processing_message": "Applying security configuration...",
+            "success_message": "Security configuration applied successfully",
+            "error_handler": "handleConfigurationError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "disallow_file_edit": "DISALLOW_FILE_EDIT",
+          "wp_debug": "WP_DEBUG",
+          "wp_debug_display": "WP_DEBUG_DISPLAY",
+          "wp_debug_log": "WP_DEBUG_LOG",
+          "force_ssl_admin": "FORCE_SSL_ADMIN",
+          "force_ssl_login": "FORCE_SSL_LOGIN"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Essential security misconfigurations are fixed"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Complete WordPress Security Configuration",
+          "code": "// Add to wp-config.php before /* That's all, stop editing! */\n\n// Disable file editor\ndefine('DISALLOW_FILE_EDIT', true);\n\n// Disable debug mode\ndefine('WP_DEBUG', false);\ndefine('WP_DEBUG_DISPLAY', false);\ndefine('WP_DEBUG_LOG', false);\n\n// Force SSL for admin\ndefine('FORCE_SSL_ADMIN', true);\ndefine('FORCE_SSL_LOGIN', true);\n\n// Change table prefix\n$table_prefix = 'wp_vapt_';\n\n// Security keys - generate at https://api.wordpress.org/secret-key/1.1/salt/",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP A05:2021 - Security Misconfiguration",
+          "url": "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Hardening - Security Configuration",
+          "url": "https://wordpress.org/documentation/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.196880Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "configuration",
+          "medium",
+          "security-misconfiguration",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-015",
+      "title": "Admin Interface Protection",
+      "category": "Authentication",
+      "severity": {
+        "level": "critical",
+        "cvss_score": 9.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "business_impact": "Risk of Authentication compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Verifies that WordPress admin interface is properly protected with strong authentication, IP restrictions, and rate limiting.",
+        "detailed": "Verifies that WordPress admin interface is properly protected with strong authentication, IP restrictions, and rate limiting.",
+        "attack_scenario": "An attacker exploits this authentication to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A07:2021-Identification and Authentication Failures",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Manual access testing & configuration review",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Attempt to access /wp-admin/ without authentication",
+            "expected_result": "Should be protected/blocked",
+            "command": "/wp-admin/",
+            "automated": true
+          },
+          {
+            "step_number": 2,
+            "action": "Check if admin area uses HTTPS",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 3,
+            "action": "Check for 2FA implementation",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-2 days",
+        "priority": 10,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Implement strong passwords + 2FA. Rename admin path or IP restrict. Use HTTPS. Implement login attempt limiting. Regular admin session timeout.",
+              "file": "wp-config.php",
+              "code": "define('FORCE_SSL_ADMIN', true);\ndefine('FORCE_SSL_LOGIN', true);\ndefine('AUTH_KEY', 'put your unique phrase here');\ndefine('SECURE_AUTH_KEY', 'put your unique phrase here');\ndefine('LOGGED_IN_KEY', 'put your unique phrase here');\ndefine('NONCE_KEY', 'put your unique phrase here');\ndefine('AUTH_SALT', 'put your unique phrase here');\ndefine('SECURE_AUTH_SALT', 'put your unique phrase here');\ndefine('LOGGED_IN_SALT', 'put your unique phrase here');\ndefine('NONCE_SALT', 'put your unique phrase here');",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-015-001",
+            "name": "Admin Interface Protection Check",
+            "method": "endpoint-test",
+            "script": "check_admin_interface_protection()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Admin Interface Protection vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-admin-interface-protection-001",
+            "type": "toggle",
+            "label": "Enable Admin Interface Protection",
+            "description": "Activates protection against admin interface protection",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleAdminInterfaceProtection",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Advanced",
+          "order": 15,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-015-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": true,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "force_ssl_admin": "FORCE_SSL_ADMIN",
+          "force_ssl_login": "FORCE_SSL_LOGIN"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Admin Interface Protection protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Admin Interface Protection",
+          "code": "define('FORCE_SSL_ADMIN', true);\ndefine('FORCE_SSL_LOGIN', true);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.197333Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "authentication",
+          "critical",
+          "admin-interface-protection",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-020",
+      "title": "Session Management Security",
+      "category": "Session Management",
+      "severity": {
+        "level": "high",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "business_impact": "Risk of Session Management compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for secure session handling including proper timeout, regeneration, and secure cookie attributes.",
+        "detailed": "Tests for secure session handling including proper timeout, regeneration, and secure cookie attributes.",
+        "attack_scenario": "An attacker exploits this session management to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A07:2017-Identification and Authentication Failures",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Manual session testing & cookie analysis",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Check cookie attributes: HttpOnly, Secure, SameSite",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Test session fixation: login with known session ID",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 3,
+            "action": "Test session timeout after inactivity",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-2 days",
+        "priority": 8,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Set Secure, HttpOnly, SameSite cookies. Implement session timeout. Regenerate session IDs on privilege change. Store sessions securely. Limit concurrent sessions.",
+              "file": "wp-config.php",
+              "code": "@ini_set('session.cookie_httponly', 1);\n@ini_set('session.cookie_secure', 1);\n@ini_set('session.cookie_samesite', 'Strict');\n@ini_set('session.use_only_cookies', 1);\n@ini_set('session.cookie_lifetime', 3600);\n@ini_set('session.gc_maxlifetime', 3600);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-020-001",
+            "name": "Session Management Security Check",
+            "method": "endpoint-test",
+            "script": "check_session_management()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Session Management Security vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-session-management-security-001",
+            "type": "toggle",
+            "label": "Enable Session Management Security Protection",
+            "description": "Activates protection against session management security",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleSessionManagementSecurity",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Advanced",
+          "order": 20,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-020-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": true,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "session_cookie_httponly": "session.cookie_httponly",
+          "session_cookie_secure": "session.cookie_secure",
+          "session_cookie_samesite": "session.cookie_samesite"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Session Management Security protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Session Management Security",
+          "code": "@ini_set('session.cookie_httponly', 1);\n@ini_set('session.cookie_secure', 1);\n@ini_set('session.cookie_samesite', 'Strict');\n@ini_set('session.use_only_cookies', 1);\n@ini_set('session.cookie_lifetime', 3600);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.197556Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "session management",
+          "high",
+          "session-management",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-025",
+      "title": "wp-config.php Protection",
+      "category": "Configuration",
+      "severity": {
+        "level": "critical",
+        "cvss_score": 9.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "business_impact": "Risk of Configuration compromise leading to complete system compromise and data breach"
+      },
+      "description": {
+        "summary": "Verifies that wp-config.php file is properly protected with secure permissions, access restrictions, and contains essential security configurations.",
+        "detailed": "The wp-config.php file contains database credentials, security keys, and critical WordPress settings. If exposed, an attacker can gain complete control of the WordPress installation.",
+        "attack_scenario": "An attacker accesses wp-config.php directly or via backup file to obtain database credentials and security keys, leading to full system compromise.",
+        "affected_components": [
+          "WordPress Core",
+          "wp-config.php",
+          "File System"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
+        "pci_dss": ["Requirement-1.3.6", "Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.AC-4", "PR.DS-5"],
+        "cwe": ["CWE-540"]
+      },
+      "testing": {
+        "test_method": "Configuration review & direct access testing",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools", "curl"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Attempt to access wp-config.php directly via HTTP",
+            "expected_result": "Should return 403 Forbidden, 404 Not Found, or blank page",
+            "command": "curl -I https://example.com/wp-config.php",
+            "automated": true
+          },
+          {
+            "step_number": 2,
+            "action": "Check file permissions on wp-config.php",
+            "expected_result": "Should be 600, 640, or 440 (not world-readable)",
+            "command": "ls -la wp-config.php",
+            "automated": true
+          },
+          {
+            "step_number": 3,
+            "action": "Verify authentication salts and keys are defined and unique",
+            "expected_result": "All 8 security keys are defined with non-default values",
+            "command": "grep -E 'AUTH_KEY|SECURE_AUTH_KEY|LOGGED_IN_KEY|NONCE_KEY' wp-config.php",
+            "automated": true
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-2 days",
+        "priority": 10,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-hardening",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Set proper file permissions on wp-config.php",
+              "file": "wp-config.php",
+              "code": "# Via command line:\nchmod 600 wp-config.php\n# Or for systems with group web server:\nchmod 640 wp-config.php\nchown user:www-data wp-config.php",
+              "backup_required": false
+            },
+            {
+              "step_number": 2,
+              "description": "Ensure DISALLOW_FILE_EDIT is enabled",
+              "file": "wp-config.php",
+              "code": "define('DISALLOW_FILE_EDIT', true);",
+              "backup_required": true,
+              "location": "Before /* That's all, stop editing! */"
+            },
+            {
+              "step_number": 3,
+              "description": "Remove any wp-config.php backup files",
+              "file": "wp-config.php.bak, wp-config.php.save, wp-config.php.old, wp-config.php~",
+              "code": "# Remove backup files via command line\nfind . -name \"wp-config.php.*\" -delete\nfind . -name \"wp-config.php~\" -delete",
+              "backup_required": false
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Consider moving wp-config.php above web root",
+            "reason": "Prevents web server from serving the file even with misconfiguration",
+            "verification": "Attempt to access wp-config.php via browser after moving"
+          },
+          {
+            "step_number": 2,
+            "description": "Regenerate security keys with high entropy",
+            "reason": "Ensure keys are truly random and not default",
+            "verification": "Check that keys are not default or previously compromised",
+            "command": "curl -s https://api.wordpress.org/secret-key/1.1/salt/"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {
+              "DISALLOW_FILE_EDIT": "true"
+            },
+            "required_constants": [
+              "AUTH_KEY",
+              "SECURE_AUTH_KEY",
+              "LOGGED_IN_KEY",
+              "NONCE_KEY",
+              "AUTH_SALT",
+              "SECURE_AUTH_SALT",
+              "LOGGED_IN_SALT",
+              "NONCE_SALT"
+            ]
+          },
+          "htaccess_rules": [],
+          "file_permissions": {
+            "wp-config.php": "600 or 640"
+          },
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-025-001",
+            "name": "wp-config.php Direct Access Check",
+            "method": "endpoint-test",
+            "script": "check_wp_config_direct_access()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "blocked",
+              "actual_value_source": "http_status"
+            },
+            "failure_message": "wp-config.php is accessible via direct HTTP request"
+          },
+          {
+            "check_id": "CHECK-025-002",
+            "name": "wp-config.php Permissions Check",
+            "method": "file-system",
+            "script": "check_wp_config_permissions()",
+            "success_criteria": {
+              "condition": "in",
+              "expected_value": ["600", "640", "440"],
+              "actual_value_source": "file_permission"
+            },
+            "failure_message": "wp-config.php file permissions are too permissive"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-wp-config-protection-001",
+            "type": "toggle",
+            "label": "Disable File Editor",
+            "description": "Adds DISALLOW_FILE_EDIT constant to prevent theme/plugin file editing from admin",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleDisallowFileEdit",
+            "dependencies": []
+          },
+          {
+            "component_id": "UI-wp-config-protection-002",
+            "type": "action_button",
+            "label": "Check wp-config.php Permissions",
+            "description": "Verify current file permissions on wp-config.php",
+            "button_text": "Check Permissions",
+            "on_click": "checkWpConfigPermissions",
+            "dependencies": []
+          },
+          {
+            "component_id": "UI-wp-config-protection-003",
+            "type": "action_button",
+            "label": "Regenerate Security Keys",
+            "description": "Generate new authentication salts and keys",
+            "button_text": "Regenerate Keys",
+            "confirmation_required": true,
+            "confirmation_message": "This will log out all currently logged in users. Continue?",
+            "on_click": "regenerateWpConfigKeys",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Configuration Security",
+          "order": 2,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-025-001",
+            "type": "enable",
+            "label": "Apply wp-config.php Hardening",
+            "confirmation_required": true,
+            "confirmation_message": "This will modify your wp-config.php file. A backup will be created automatically. Continue?",
+            "processing_message": "Applying wp-config.php hardening...",
+            "success_message": "wp-config.php hardening applied successfully",
+            "error_handler": "handleWpConfigError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "disallow_file_edit": "DISALLOW_FILE_EDIT"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "wp-config.php is properly secured"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Secure wp-config.php Configuration",
+          "code": "// Security constants\ndefine('DISALLOW_FILE_EDIT', true);\ndefine('DISALLOW_FILE_MODS', false);\ndefine('FORCE_SSL_ADMIN', true);\ndefine('FORCE_SSL_LOGIN', true);\n\n// Debug mode (disable in production)\ndefine('WP_DEBUG', false);\ndefine('WP_DEBUG_DISPLAY', false);\ndefine('WP_DEBUG_LOG', false);\n\n// Memory limits\ndefine('WP_MEMORY_LIMIT', '256M');",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "WordPress Hardening - Securing wp-config.php",
+          "url": "https://wordpress.org/documentation/article/hardening-wordpress/#securing-wp-configphp",
+          "type": "documentation"
+        },
+        {
+          "title": "OWASP A05:2021 - Security Misconfiguration",
+          "url": "https://owasp.org/Top10/A05_2021-Security_Misconfiguration/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.198918Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "configuration",
+          "critical",
+          "wp-config-protection",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-027",
+      "title": "Debug Mode Exposure",
+      "category": "Information Disclosure",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Information Disclosure leading to sensitive system information exposure"
+      },
+      "description": {
+        "summary": "Checks if WordPress debug mode is enabled in production, potentially exposing sensitive information such as database queries, file paths, and PHP errors.",
+        "detailed": "WordPress debug mode (WP_DEBUG) when enabled in production can expose full file paths, database queries, PHP errors, and potentially sensitive configuration details.",
+        "attack_scenario": "An attacker triggers errors or accesses debug log files to gather information about the system architecture, file paths, and potential vulnerabilities.",
+        "affected_components": ["WordPress Core", "wp-config.php", "debug.log"]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.IP-1"],
+        "cwe": ["CWE-489"]
+      },
+      "testing": {
+        "test_method": "Configuration review & error testing",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools", "WP-CLI"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Check wp-config.php for WP_DEBUG definition",
+            "expected_result": "define('WP_DEBUG', false) or constant not defined",
+            "command": "wp config get WP_DEBUG",
+            "automated": true
+          },
+          {
+            "step_number": 2,
+            "action": "Check if debug.log is accessible in wp-content directory",
+            "expected_result": "debug.log should not be accessible or not exist",
+            "command": "curl -I https://example.com/wp-content/debug.log",
+            "automated": true
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Set WP_DEBUG to false in production",
+              "file": "wp-config.php",
+              "code": "define('WP_DEBUG', false);",
+              "backup_required": true,
+              "location": "Before /* That's all, stop editing! */"
+            },
+            {
+              "step_number": 2,
+              "description": "Disable display of errors to users",
+              "file": "wp-config.php",
+              "code": "define('WP_DEBUG_DISPLAY', false);",
+              "backup_required": true,
+              "location": "Before /* That's all, stop editing! */"
+            },
+            {
+              "step_number": 3,
+              "description": "Disable debug logging or secure its location",
+              "file": "wp-config.php",
+              "code": "define('WP_DEBUG_LOG', false);",
+              "backup_required": true,
+              "location": "Before /* That's all, stop editing! */"
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Remove or secure existing debug.log files",
+            "reason": "Existing debug logs may contain sensitive information",
+            "verification": "Check that debug.log is not accessible via web browser"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {
+              "WP_DEBUG": "false",
+              "WP_DEBUG_DISPLAY": "false",
+              "WP_DEBUG_LOG": "false"
+            }
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-027-001",
+            "name": "WP_DEBUG Configuration Check",
+            "method": "config-check",
+            "script": "check_wp_config_constant('WP_DEBUG')",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "false",
+              "actual_value_source": "wp_config"
+            },
+            "failure_message": "WP_DEBUG is enabled in production environment"
+          },
+          {
+            "check_id": "CHECK-027-002",
+            "name": "Debug Log Exposure Check",
+            "method": "endpoint-test",
+            "script": "check_debug_log_accessibility()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "blocked",
+              "actual_value_source": "http_status"
+            },
+            "failure_message": "debug.log is accessible via web browser"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-debug-mode-exposure-001",
+            "type": "toggle",
+            "label": "Disable WordPress Debug Mode",
+            "description": "Sets WP_DEBUG to false for production environments",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleWpDebug",
+            "dependencies": []
+          },
+          {
+            "component_id": "UI-debug-mode-exposure-002",
+            "type": "toggle",
+            "label": "Disable Error Display",
+            "description": "Prevents PHP errors from being displayed to users",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleErrorDisplay",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Information Disclosure",
+          "order": 2,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-027-001",
+            "type": "enable",
+            "label": "Secure Debug Configuration",
+            "confirmation_required": true,
+            "confirmation_message": "This will disable WordPress debug mode. A backup of wp-config.php will be created. Continue?",
+            "processing_message": "Securing debug configuration...",
+            "success_message": "Debug configuration secured successfully",
+            "error_handler": "handleDebugConfigError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "wp_debug": "WP_DEBUG",
+          "wp_debug_display": "WP_DEBUG_DISPLAY",
+          "wp_debug_log": "WP_DEBUG_LOG"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Debug mode is disabled in production"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Production-Ready Debug Configuration",
+          "code": "// Production debug settings - add to wp-config.php\n\n// Disable all debug output in production\ndefine('WP_DEBUG', false);\ndefine('WP_DEBUG_DISPLAY', false);\ndefine('WP_DEBUG_LOG', false);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "WordPress Debugging Documentation",
+          "url": "https://wordpress.org/documentation/article/debugging-in-wordpress/",
+          "type": "documentation"
+        },
+        {
+          "title": "CWE-489: Active Debug Code",
+          "url": "https://cwe.mitre.org/data/definitions/489.html",
+          "type": "cwe"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.199002Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "information disclosure",
+          "medium",
+          "debug-mode-exposure",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-028",
+      "title": "Database Error Disclosure",
+      "category": "Information Disclosure",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for database error messages exposed to users, which could reveal sensitive information.",
+        "detailed": "Tests for database error messages exposed to users, which could reveal sensitive information.",
+        "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Manual error triggering",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Trigger SQL errors with invalid queries",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Check for detailed error messages in response",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Set `display_errors` to Off in php.ini. Configure WordPress to log errors instead of displaying. Use custom error pages. Implement proper error handling.",
+              "file": "wp-config.php",
+              "code": "define('WP_DEBUG_DISPLAY', false);\n$wpdb->suppress_errors = true;",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-028-001",
+            "name": "Database Error Disclosure Check",
+            "method": "endpoint-test",
+            "script": "check_database_error_disclosure()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Database Error Disclosure vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-database-error-disclosure-001",
+            "type": "toggle",
+            "label": "Enable Database Error Disclosure Protection",
+            "description": "Activates protection against database error disclosure",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleDatabaseErrorDisclosure",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Information Disclosure",
+          "order": 28,
+          "collapsible": true,
+          "default_expanded": false
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-028-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": false,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "wp_debug_display": "WP_DEBUG_DISPLAY"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Database Error Disclosure protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Database Error Disclosure",
+          "code": "define('WP_DEBUG_DISPLAY', false);\n$wpdb->suppress_errors = true;",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.199046Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "information disclosure",
+          "medium",
+          "database-error-disclosure",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-029",
+      "title": "PHP Error Reporting",
+      "category": "Information Disclosure",
+      "severity": {
+        "level": "low",
+        "cvss_score": 3.7,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Verifies that PHP error reporting is disabled in production environment.",
+        "detailed": "Verifies that PHP error reporting is disabled in production environment.",
+        "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Configuration review & error testing",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Check php.ini for display_errors = Off",
+            "expected_result": "Should be protected/blocked",
+            "command": "display_errors = Off",
+            "automated": true
+          },
+          {
+            "step_number": 2,
+            "action": "Test with syntax error in PHP files",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-4 hours",
+        "priority": 4,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Set `display_errors = Off` in php.ini. Set `error_reporting` to appropriate level. Use `ini_set()` in code if needed. Regular PHP configuration review.",
+              "file": "wp-config.php",
+              "code": "@ini_set('display_errors', 0);\nerror_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-029-001",
+            "name": "PHP Error Reporting Check",
+            "method": "endpoint-test",
+            "script": "check_php_error_reporting()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "PHP Error Reporting vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-php-error-reporting-001",
+            "type": "toggle",
+            "label": "Enable PHP Error Reporting Protection",
+            "description": "Activates protection against php error reporting",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "togglePHPErrorReporting",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Information Disclosure",
+          "order": 29,
+          "collapsible": true,
+          "default_expanded": false
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-029-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": false,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "display_errors": "ini_set"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "PHP Error Reporting protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for PHP Error Reporting",
+          "code": "@ini_set('display_errors', 0);\nerror_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.199088Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "information disclosure",
+          "low",
+          "php-error-reporting",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-030",
+      "title": "Directory Listing",
+      "category": "Information Disclosure",
+      "severity": {
+        "level": "low",
+        "cvss_score": 3.7,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for enabled directory listing which could expose sensitive files and directory structure.",
+        "detailed": "Tests for enabled directory listing which could expose sensitive files and directory structure.",
+        "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Manual directory access testing",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Access directories without index files: /wp-content/uploads/",
+            "expected_result": "Should be protected/blocked",
+            "command": "/wp-content/uploads/",
+            "automated": true
+          },
+          {
+            "step_number": 2,
+            "action": "Test /wp-includes/ directory access",
+            "expected_result": "Should be protected/blocked",
+            "command": "/wp-includes/",
+            "automated": true
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-4 hours",
+        "priority": 4,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-code",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Add `Options -Indexes` to .htaccess. Ensure each directory has index.php or index.html. Configure web server to disable directory listing. Regular directory checks.",
+              "file": "wp-config.php",
+              "code": "// Add before /* That's all, stop editing! */\nif (!file_exists(ABSPATH . 'index.php')) {\n    file_put_contents(ABSPATH . 'index.php', '<?php // Silence is golden');\n}",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-030-001",
+            "name": "Directory Listing Check",
+            "method": "endpoint-test",
+            "script": "check_directory_listing()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Directory Listing vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-directory-listing-001",
+            "type": "toggle",
+            "label": "Enable Directory Listing Protection",
+            "description": "Activates protection against directory listing",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleDirectoryListing",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Information Disclosure",
+          "order": 30,
+          "collapsible": true,
+          "default_expanded": false
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-030-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": false,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "create_index": "code_snippet"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Directory Listing protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Directory Listing",
+          "code": "// Add to wp-config.php\nif (!file_exists(ABSPATH . 'index.php')) {\n    file_put_contents(ABSPATH . 'index.php', '<?php // Silence is golden');\n}",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.199141Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "information disclosure",
+          "low",
+          "directory-listing",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-055",
+      "title": "Session Timeout",
+      "category": "Session Management",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Session Management compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for proper session timeout implementation to prevent session hijacking.",
+        "detailed": "Tests for proper session timeout implementation to prevent session hijacking.",
+        "attack_scenario": "An attacker exploits this session management to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A07:2021-Identification and Authentication Failures",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Manual session duration testing",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Test session expiration after inactivity",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Verify logout functionality destroys sessions",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-session",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Implement both idle and absolute timeouts. Destroy sessions properly on logout. Invalidate sessions after password change. Secure remember me functionality.",
+              "file": "wp-config.php",
+              "code": "@ini_set('session.gc_maxlifetime', 3600);\n@ini_set('session.cookie_lifetime', 0);\n@ini_set('session.gc_probability', 1);\n@ini_set('session.gc_divisor', 100);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-055-001",
+            "name": "Session Timeout Check",
+            "method": "endpoint-test",
+            "script": "check_session_timeout_protection()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Session Timeout vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-session-timeout-001",
+            "type": "toggle",
+            "label": "Enable Session Timeout Protection",
+            "description": "Activates protection against session timeout",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleSessionTimeout",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Session Management",
+          "order": 55,
+          "collapsible": true,
+          "default_expanded": false
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-055-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": false,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "session_gc_maxlifetime": "session.gc_maxlifetime"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Session Timeout protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Session Timeout",
+          "code": "@ini_set('session.gc_maxlifetime', 3600);\n@ini_set('session.cookie_lifetime', 0);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.200394Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "session management",
+          "medium",
+          "session-timeout-protection",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-057",
+      "title": "Cookie Security Attributes",
+      "category": "Session Management",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Session Management compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for secure, HttpOnly, and SameSite attributes on authentication cookies.",
+        "detailed": "Tests for secure, HttpOnly, and SameSite attributes on authentication cookies.",
+        "attack_scenario": "An attacker exploits this session management to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Cookie analysis",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Check cookie flags: Secure, HttpOnly, SameSite",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Verify authentication cookies have proper attributes",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-session",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Set Secure, HttpOnly, SameSite=Strict cookies. Use proper cookie scope. Consider __Host- prefix for extra security. Regular cookie security review.",
+              "file": "wp-config.php",
+              "code": "@ini_set('session.cookie_httponly', 1);\n@ini_set('session.cookie_secure', 1);\n@ini_set('session.cookie_samesite', 'Strict');\n@ini_set('session.use_only_cookies', 1);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-057-001",
+            "name": "Cookie Security Attributes Check",
+            "method": "endpoint-test",
+            "script": "check_cookie_security_attributes()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Cookie Security Attributes vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-cookie-security-attributes-001",
+            "type": "toggle",
+            "label": "Enable Cookie Security Attributes Protection",
+            "description": "Activates protection against cookie security attributes",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleCookieSecurityAttributes",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Session Management",
+          "order": 57,
+          "collapsible": true,
+          "default_expanded": false
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-057-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": false,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "session_cookie_httponly": "session.cookie_httponly",
+          "session_cookie_secure": "session.cookie_secure",
+          "session_cookie_samesite": "session.cookie_samesite"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Cookie Security Attributes protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Cookie Security Attributes",
+          "code": "@ini_set('session.cookie_httponly', 1);\n@ini_set('session.cookie_secure', 1);\n@ini_set('session.cookie_samesite', 'Strict');",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.200485Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "session management",
+          "medium",
+          "cookie-security-attributes",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-058",
+      "title": "Sensitive Data in URL",
+      "category": "Information Disclosure",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for sensitive data exposure through URL parameters (session tokens, passwords, etc.).",
+        "detailed": "Tests for sensitive data exposure through URL parameters (session tokens, passwords, etc.).",
+        "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A04:2021-Insecure Design",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "URL parameter analysis",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Check for session IDs in URLs",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Look for password reset tokens in URLs",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Use POST instead of GET for sensitive data. Avoid tokens in URLs. Implement proper session management. Clean URLs of sensitive data. Use HTTP referrer policy.",
+              "file": "wp-config.php",
+              "code": "define('FORCE_SSL_ADMIN', true);\n\$_SERVER['HTTPS'] = 'on';",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-058-001",
+            "name": "Sensitive Data in URL Check",
+            "method": "endpoint-test",
+            "script": "check_sensitive_data_in_url()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Sensitive Data in URL vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-sensitive-data-in-url-001",
+            "type": "toggle",
+            "label": "Enable Sensitive Data in URL Protection",
+            "description": "Activates protection against sensitive data in url",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleSensitiveDatainURL",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Information Disclosure",
+          "order": 58,
+          "collapsible": true,
+          "default_expanded": false
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-058-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": false,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "force_ssl_admin": "FORCE_SSL_ADMIN"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Sensitive Data in URL protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Sensitive Data in URL",
+          "code": "define('FORCE_SSL_ADMIN', true);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.200529Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "information disclosure",
+          "medium",
+          "sensitive-data-in-url",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-061",
+      "title": "Data Encryption in Transit",
+      "category": "Cryptography",
+      "severity": {
+        "level": "high",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "business_impact": "Risk of Cryptography compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for proper TLS/SSL implementation for data transmission.",
+        "detailed": "Tests for proper TLS/SSL implementation for data transmission.",
+        "attack_scenario": "An attacker exploits this cryptography to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Automated SSL scanning",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Verify HTTPS is enforced site-wide",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Test for mixed content issues",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "high",
+        "estimated_time": "1-2 days",
+        "priority": 8,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Enforce HTTPS everywhere. Implement HSTS. Use strong TLS configurations. Regular SSL certificate renewal. Monitor for mixed content.",
+              "file": "wp-config.php",
+              "code": "define('FORCE_SSL_ADMIN', true);\ndefine('FORCE_SSL_LOGIN', true);\n\$_SERVER['HTTPS'] = 'on';",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-061-001",
+            "name": "Data Encryption in Transit Check",
+            "method": "endpoint-test",
+            "script": "check_data_encryption_in_transit()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Data Encryption in Transit vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-data-encryption-in-transit-001",
+            "type": "toggle",
+            "label": "Enable Data Encryption in Transit Protection",
+            "description": "Activates protection against data encryption in transit",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleDataEncryptioninTransit",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Cryptography",
+          "order": 61,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-061-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": true,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "force_ssl_admin": "FORCE_SSL_ADMIN",
+          "force_ssl_login": "FORCE_SSL_LOGIN"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Data Encryption in Transit protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Data Encryption in Transit",
+          "code": "define('FORCE_SSL_ADMIN', true);\ndefine('FORCE_SSL_LOGIN', true);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.200706Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "cryptography",
+          "high",
+          "data-encryption-in-transit",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-062",
+      "title": "Weak Cryptographic Algorithms",
+      "category": "Cryptography",
+      "severity": {
+        "level": "high",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "business_impact": "Risk of Cryptography compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for use of weak or deprecated cryptographic algorithms and protocols.",
+        "detailed": "Tests for use of weak or deprecated cryptographic algorithms and protocols.",
+        "attack_scenario": "An attacker exploits this cryptography to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A02:2021-Cryptographic Failures",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Configuration review & code analysis",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Check for MD5, SHA1 hash usage",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Test for weak password hashing algorithms",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "high",
+        "estimated_time": "1-2 days",
+        "priority": 8,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Use strong hashing algorithms (bcrypt, Argon2). Deprecate weak algorithms. Use modern TLS configurations. Avoid custom crypto implementations.",
+              "file": "wp-config.php",
+              "code": "define('WP_PASSWORD_BCRYPT_COST', 12);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-062-001",
+            "name": "Weak Cryptographic Algorithms Check",
+            "method": "endpoint-test",
+            "script": "check_weak_cryptographic_algorithms()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Weak Cryptographic Algorithms vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-weak-cryptographic-algorithms-001",
+            "type": "toggle",
+            "label": "Enable Weak Cryptographic Algorithms Protection",
+            "description": "Activates protection against weak cryptographic algorithms",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleWeakCryptographicAlgorithms",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Cryptography",
+          "order": 62,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-062-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": true,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "wp_password_bcrypt_cost": "WP_PASSWORD_BCRYPT_COST"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Weak Cryptographic Algorithms protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Weak Cryptographic Algorithms",
+          "code": "define('WP_PASSWORD_BCRYPT_COST', 12);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.200746Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "cryptography",
+          "high",
+          "weak-cryptographic-algorithms",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-063",
+      "title": "Insecure Random Number Generation",
+      "category": "Cryptography",
+      "severity": {
+        "level": "high",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "business_impact": "Risk of Cryptography compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for insecure random number generation for tokens, passwords, or cryptographic operations.",
+        "detailed": "Tests for insecure random number generation for tokens, passwords, or cryptographic operations.",
+        "attack_scenario": "An attacker exploits this cryptography to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A02:2021-Cryptographic Failures",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Code review & randomness testing",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Check token generation randomness",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Test password reset token predictability",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "high",
+        "estimated_time": "1-2 days",
+        "priority": 8,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Use cryptographically secure random functions (`random_bytes()`, `openssl_random_pseudo_bytes()`). Ensure sufficient entropy. Test randomness of generated values.",
+              "file": "wp-config.php",
+              "code": "define('WP_RANDOM_SEED', true);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-063-001",
+            "name": "Insecure Random Number Generation Check",
+            "method": "endpoint-test",
+            "script": "check_insecure_random_number_generation()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Insecure Random Number Generation vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-insecure-random-number-generation-001",
+            "type": "toggle",
+            "label": "Enable Insecure Random Number Generation Protection",
+            "description": "Activates protection against insecure random number generation",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleInsecureRandomNumberGeneration",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Cryptography",
+          "order": 63,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-063-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": true,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "wp_random_seed": "WP_RANDOM_SEED"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Insecure Random Number Generation protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Insecure Random Number Generation",
+          "code": "define('WP_RANDOM_SEED', true);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.200790Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "cryptography",
+          "high",
+          "insecure-random-number-generation",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-075",
+      "title": "File Path Traversal",
+      "category": "Input Validation",
+      "severity": {
+        "level": "high",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "business_impact": "Risk of Input Validation compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for file path traversal vulnerabilities in file download or view functionality.",
+        "detailed": "Tests for file path traversal vulnerabilities in file download or view functionality.",
+        "attack_scenario": "An attacker exploits this input validation to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A01:2021-Broken Access Control",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Manual path traversal testing",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Test file download parameters with ../",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Try absolute paths",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-2 days",
+        "priority": 8,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Validate and sanitize file paths. Use basename() to extract filenames. Implement allowlists for accessible files. Use chroot or similar restrictions.",
+              "file": "wp-config.php",
+              "code": "define('DISALLOW_FILE_EDIT', true);\ndefine('DISALLOW_FILE_MODS', true);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-075-001",
+            "name": "File Path Traversal Check",
+            "method": "endpoint-test",
+            "script": "check_file_path_traversal_extended()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "File Path Traversal vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-file-path-traversal-001",
+            "type": "toggle",
+            "label": "Enable File Path Traversal Protection",
+            "description": "Activates protection against file path traversal",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleFilePathTraversal",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Input Validation",
+          "order": 75,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-075-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": true,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "disallow_file_edit": "DISALLOW_FILE_EDIT",
+          "disallow_file_mods": "DISALLOW_FILE_MODS"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "File Path Traversal protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for File Path Traversal",
+          "code": "define('DISALLOW_FILE_EDIT', true);\ndefine('DISALLOW_FILE_MODS', true);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.201416Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "input validation",
+          "high",
+          "file-path-traversal-extended",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-076",
+      "title": "Unrestricted File Upload",
+      "category": "Input Validation",
+      "severity": {
+        "level": "critical",
+        "cvss_score": 9.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "business_impact": "Risk of Input Validation compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for unrestricted file upload allowing malicious file execution on the server.",
+        "detailed": "Tests for unrestricted file upload allowing malicious file execution on the server.",
+        "attack_scenario": "An attacker exploits this input validation to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A03:2021-Injection",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Manual file upload testing",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Upload PHP files with various extensions",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Test double extensions (file.jpg.php)",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-2 days",
+        "priority": 10,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Validate file type by content, not extension. Use allowlists for file types. Store files outside web root. Scan uploaded files for malware. Set proper permissions.",
+              "file": "wp-config.php",
+              "code": "define('DISALLOW_FILE_MODS', true);\ndefine('DISALLOW_FILE_EDIT', true);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-076-001",
+            "name": "Unrestricted File Upload Check",
+            "method": "endpoint-test",
+            "script": "check_unrestricted_file_upload()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Unrestricted File Upload vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-unrestricted-file-upload-001",
+            "type": "toggle",
+            "label": "Enable Unrestricted File Upload Protection",
+            "description": "Activates protection against unrestricted file upload",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleUnrestrictedFileUpload",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Input Validation",
+          "order": 76,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-076-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": true,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "disallow_file_mods": "DISALLOW_FILE_MODS",
+          "disallow_file_edit": "DISALLOW_FILE_EDIT"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Unrestricted File Upload protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Unrestricted File Upload",
+          "code": "define('DISALLOW_FILE_MODS', true);\ndefine('DISALLOW_FILE_EDIT', true);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.201451Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "input validation",
+          "critical",
+          "unrestricted-file-upload",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-081",
+      "title": "WordPress File Editor Access",
+      "category": "Configuration",
+      "severity": {
+        "level": "high",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "business_impact": "Risk of Configuration compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests for enabled file editor in WordPress admin allowing direct theme/plugin file modification.",
+        "detailed": "Tests for enabled file editor in WordPress admin allowing direct theme/plugin file modification.",
+        "attack_scenario": "An attacker exploits this configuration to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Configuration review & access testing",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Check wp-config.php for DISALLOW_FILE_EDIT",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Test access to theme/plugin editor in admin",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-2 days",
+        "priority": 8,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Add `define('DISALLOW_FILE_EDIT', true);` to wp-config.php. Restrict editor access to specific users. Implement file change monitoring. Regular file integrity checks.",
+              "file": "wp-config.php",
+              "code": "define('DISALLOW_FILE_EDIT', true);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-081-001",
+            "name": "WordPress File Editor Access Check",
+            "method": "endpoint-test",
+            "script": "check_wordpress_file_editor_access()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "WordPress File Editor Access vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "disallow_file_edit",
+            "type": "toggle",
+            "label": "Disable File Editor",
+            "description": "Disables the built-in WordPress theme and plugin editor.",
+            "default_value": true
+          }
+        ],
+        "layout": {
+          "section": "Configuration Security",
+          "order": 81,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-081-001",
+            "type": "enable",
+            "label": "Enforce Rule",
+            "confirmation_required": true
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "disallow_file_edit": "DISALLOW_FILE_EDIT"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "WordPress File Editor Access protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for WordPress File Editor Access",
+          "code": "define('DISALLOW_FILE_EDIT', true);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.201756Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "configuration",
+          "high",
+          "wordpress-file-editor-access",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-083",
+      "title": "wp-cron.php Security",
+      "category": "Configuration",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Configuration compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests wp-cron.php for vulnerabilities including DoS and unauthorized task execution.",
+        "detailed": "Tests wp-cron.php for vulnerabilities including DoS and unauthorized task execution.",
+        "attack_scenario": "An attacker exploits this configuration to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A05:2021-Security Misconfiguration",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Manual cron testing",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Test wp-cron.php for DoS vulnerabilities",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Check for unauthorized cron task execution",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Disable WordPress cron if using server cron. Implement cron authentication if needed. Monitor cron execution. Limit cron resource usage. Regular cron job review.",
+              "file": "wp-config.php",
+              "code": "define('DISABLE_WP_CRON', true);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-083-001",
+            "name": "wp-cron.php Security Check",
+            "method": "endpoint-test",
+            "script": "check_wp_cron_security()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "wp-cron.php Security vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "disable_wp_cron",
+            "type": "toggle",
+            "label": "Disable WP-Cron Endpoint",
+            "description": "Disables the default WordPress wp-cron.php execution on every page load.",
+            "default_value": true
+          }
+        ],
+        "layout": {
+          "section": "Configuration Security",
+          "order": 83,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-083-001",
+            "type": "enable",
+            "label": "Enforce Rule",
+            "confirmation_required": false
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "disable_wp_cron": "DISABLE_WP_CRON"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "wp-cron.php Security protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for wp-cron.php Security",
+          "code": "define('DISABLE_WP_CRON', true);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.201849Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "configuration",
+          "medium",
+          "wp-cron-security",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-084",
+      "title": "User Registration Security",
+      "category": "Authentication",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Authentication compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Tests user registration functionality for vulnerabilities including spam registration and privilege assignment.",
+        "detailed": "Tests user registration functionality for vulnerabilities including spam registration and privilege assignment.",
+        "attack_scenario": "An attacker exploits this authentication to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A07:2021-Identification and Authentication Failures",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Manual registration testing",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Test registration without CAPTCHA",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Check for role assignment vulnerabilities",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Implement CAPTCHA on registration. Require email confirmation. Use role-based registration. Implement rate limiting. Validate all registration inputs.",
+              "file": "wp-config.php",
+              "code": "define('USERS_CAN_REGISTER', false);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-084-001",
+            "name": "User Registration Security Check",
+            "method": "endpoint-test",
+            "script": "check_user_registration_security()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "User Registration Security vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-user-registration-security-001",
+            "type": "toggle",
+            "label": "Enable User Registration Security Protection",
+            "description": "Activates protection against user registration security",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleUserRegistrationSecurity",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Authentication",
+          "order": 84,
+          "collapsible": true,
+          "default_expanded": false
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-084-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": false,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "users_can_register": "USERS_CAN_REGISTER"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "User Registration Security protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for User Registration Security",
+          "code": "define('USERS_CAN_REGISTER', false);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.201899Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "authentication",
+          "medium",
+          "user-registration-security",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-088",
+      "title": "wp-cron.php Enabled Leads to DoS Attack",
+      "category": "Configuration",
+      "severity": {
+        "level": "high",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "business_impact": "Risk of Configuration compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "WordPress cron system enabled via wp-cron.php allows resource exhaustion through repeated cron spam requests, leading to server overload.",
+        "detailed": "WordPress cron system enabled via wp-cron.php allows resource exhaustion through repeated cron spam requests, leading to server overload.",
+        "attack_scenario": "An attacker exploits this configuration to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A04:2021 - Insecure Design",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Direct endpoint access",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Access /wp-cron.php directly",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Monitor server load during repeated requests",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "low",
+        "estimated_time": "1-2 days",
+        "priority": 8,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-constants",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Disable wp-cron.php via wp-config.php (define('DISABLE_WP_CRON', true)); Use server cron jobs instead.",
+              "file": "wp-config.php",
+              "code": "define('DISABLE_WP_CRON', true);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-088-001",
+            "name": "wp-cron.php Enabled Leads to DoS Attack Check",
+            "method": "endpoint-test",
+            "script": "check_1()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "wp-cron.php Enabled Leads to DoS Attack vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-wp-cron.php-enabled-leads-to-dos-attack-001",
+            "type": "toggle",
+            "label": "Enable wp-cron.php Enabled Leads to DoS Attack Protection",
+            "description": "Activates protection against wp-cron.php enabled leads to dos attack",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "togglewp-cron.phpEnabledLeadstoDoSAttack",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Configuration Security",
+          "order": 88,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-088-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": true,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "disable_wp_cron": "DISABLE_WP_CRON"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "wp-cron.php Enabled Leads to DoS Attack protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for wp-cron.php Enabled Leads to DoS Attack",
+          "code": "define('DISABLE_WP_CRON', true);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.202050Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "configuration",
+          "high",
+          "wp-cron-security",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-090",
+      "title": "Username Enumeration via WordPress REST API",
+      "category": "Authentication",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Authentication compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "WP REST API /wp/v2/users endpoint exposes usernames without authentication.",
+        "detailed": "WP REST API /wp/v2/users endpoint exposes usernames without authentication.",
+        "attack_scenario": "An attacker exploits this authentication to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A01:2021 - Broken Access Control",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "REST API enumeration",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "GET /wp/v2/users",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Check response for username slugs",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-code",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Add .htaccess rule: RewriteRule ^wp-json/wp/v2/users - [F]. Use authentication plugins.",
+              "file": "wp-config.php",
+              "code": "add_filter('rest_endpoints', function($endpoints) {\n    if (isset($endpoints['/wp/v2/users'])) {\n        unset($endpoints['/wp/v2/users']);\n    }\n    if (isset($endpoints['/wp/v2/users/(?P<id>[\\d]+)'])) {\n        unset($endpoints['/wp/v2/users/(?P<id>[\\d]+)']);\n    }\n    return $endpoints;\n});",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-090-001",
+            "name": "Username Enumeration via WordPress REST API Check",
+            "method": "endpoint-test",
+            "script": "check_3()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Username Enumeration via WordPress REST API vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-username-enumeration-via-wordpress-rest-api-001",
+            "type": "toggle",
+            "label": "Enable Username Enumeration via WordPress REST API Protection",
+            "description": "Activates protection against username enumeration via wordpress rest api",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleUsernameEnumerationviaWordPressRESTAPI",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Authentication",
+          "order": 90,
+          "collapsible": true,
+          "default_expanded": false
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-090-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": false,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "disable_rest_users": "code_snippet"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Username Enumeration via WordPress REST API protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Username Enumeration via WordPress REST API",
+          "code": "add_filter('rest_endpoints', function($endpoints) {\n    if (isset($endpoints['/wp/v2/users'])) {\n        unset($endpoints['/wp/v2/users']);\n    }\n    return $endpoints;\n});",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.202127Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "authentication",
+          "medium",
+          "username-enumeration",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-091",
+      "title": "Email Flooding via Password Reset",
+      "category": "Authentication",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Authentication compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "wp-login.php?checkemail=1 endpoint abuse allows unlimited password reset emails.",
+        "detailed": "wp-login.php?checkemail=1 endpoint abuse allows unlimited password reset emails.",
+        "attack_scenario": "An attacker exploits this authentication to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A07:2021 - Identification and Authentication Failures",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Password reset spam",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "POST to /wp-login.php?action=lostpassword",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Check email delivery repeatedly",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-code",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Implement rate limiting via plugins (Limit Login Attempts). Add CAPTCHA to reset form.",
+              "file": "wp-config.php",
+              "code": "// Add to functions.php or wp-config.php\nadd_filter('retrieve_password_message', function($message, $key, $user_login) {\n    $ip = $_SERVER['REMOTE_ADDR'];\n    $transient_key = 'pwd_reset_' . md5($ip);\n    $attempts = get_transient($transient_key);\n    \n    if ($attempts > 3) {\n        return new WP_Error('too_many_attempts', 'Too many password reset attempts. Please try again later.');\n    }\n    \n    set_transient($transient_key, $attempts + 1, 3600);\n    return $message;\n}, 10, 3);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-091-001",
+            "name": "Email Flooding via Password Reset Check",
+            "method": "endpoint-test",
+            "script": "check_4()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Email Flooding via Password Reset vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-email-flooding-via-password-reset-001",
+            "type": "toggle",
+            "label": "Enable Email Flooding via Password Reset Protection",
+            "description": "Activates protection against email flooding via password reset",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleEmailFloodingviaPasswordReset",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Authentication",
+          "order": 91,
+          "collapsible": true,
+          "default_expanded": false
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-091-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": false,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "rate_limit_reset": "code_snippet"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Email Flooding via Password Reset protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Email Flooding via Password Reset",
+          "code": "add_filter('retrieve_password_message', function($message, $key, $user_login) {\n    $ip = $_SERVER['REMOTE_ADDR'];\n    $transient_key = 'pwd_reset_' . md5($ip);\n    $attempts = get_transient($transient_key);\n    \n    if ($attempts > 3) {\n        return new WP_Error('too_many_attempts', 'Too many password reset attempts.');\n    }\n    \n    set_transient($transient_key, $attempts + 1, 3600);\n    return $message;\n}, 10, 3);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.202206Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "authentication",
+          "medium",
+          "password-reset-flood",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-094",
+      "title": "Lack of Rate Limiting on WordPress Login",
+      "category": "Authentication",
+      "severity": {
+        "level": "high",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "business_impact": "Risk of Authentication compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "wp-login.php lacks brute-force protection, enabling unlimited login attempts.",
+        "detailed": "wp-login.php lacks brute-force protection, enabling unlimited login attempts.",
+        "attack_scenario": "An attacker exploits this authentication to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A07:2021 - Identification and Authentication Failures",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Brute-force simulation",
+        "difficulty": "medium",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "Attempt multiple failed logins",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "Monitor for lockout/throttling",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-2 days",
+        "priority": 8,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-code",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Install Limit Login Attempts Reloaded. Add fail2ban rules for wp-login.php.",
+              "file": "wp-config.php",
+              "code": "// Add to functions.php or wp-config.php\nadd_filter('authenticate', function($user, $username, $password) {\n    if (!empty($username) && !empty($password)) {\n        $ip = $_SERVER['REMOTE_ADDR'];\n        $transient_key = 'login_attempts_' . md5($ip);\n        $attempts = get_transient($transient_key);\n        \n        if ($attempts > 5) {\n            return new WP_Error('too_many_attempts', 'Too many login attempts. Please try again in 15 minutes.');\n        }\n        \n        set_transient($transient_key, $attempts + 1, 900);\n    }\n    return $user;\n}, 10, 3);",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-094-001",
+            "name": "Lack of Rate Limiting on WordPress Login Check",
+            "method": "endpoint-test",
+            "script": "check_7()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Lack of Rate Limiting on WordPress Login vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "weekly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-lack-of-rate-limiting-on-wordpress-login-001",
+            "type": "toggle",
+            "label": "Enable Lack of Rate Limiting on WordPress Login Protection",
+            "description": "Activates protection against lack of rate limiting on wordpress login",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleLackofRateLimitingonWordPressLogin",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Authentication",
+          "order": 94,
+          "collapsible": true,
+          "default_expanded": true
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-094-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": true,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "rate_limit_login": "code_snippet"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Lack of Rate Limiting on WordPress Login protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Lack of Rate Limiting on WordPress Login",
+          "code": "add_filter('authenticate', function($user, $username, $password) {\n    $ip = $_SERVER['REMOTE_ADDR'];\n    $transient_key = 'login_attempts_' . md5($ip);\n    $attempts = get_transient($transient_key);\n    \n    if ($attempts > 5) {\n        return new WP_Error('too_many_attempts', 'Too many login attempts.');\n    }\n    \n    set_transient($transient_key, $attempts + 1, 900);\n    return $user;\n}, 10, 3);",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.202492Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "authentication",
+          "high",
+          "brute-force-protection",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    },
+    {
+      "risk_id": "RISK-095",
+      "title": "Username Enumeration via wp-login.php",
+      "category": "Authentication",
+      "severity": {
+        "level": "medium",
+        "cvss_score": 5.3,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "business_impact": "Risk of Authentication compromise leading to data breach or system compromise"
+      },
+      "description": {
+        "summary": "Different error messages on wp-login.php reveal valid vs invalid usernames.",
+        "detailed": "Different error messages on wp-login.php reveal valid vs invalid usernames.",
+        "attack_scenario": "An attacker exploits this authentication to compromise system security",
+        "affected_components": [
+          "WordPress Core",
+          "Plugins",
+          "Themes",
+          "Custom Code"
+        ]
+      },
+      "owasp_mapping": {
+        "owasp_top_10_2021": "A07:2021 - Identification and Authentication Failures",
+        "pci_dss": ["Requirement-6.5"],
+        "gdpr": ["Article-32"],
+        "nist_csf": ["PR.DS-5"],
+        "cwe": ["CWE-000"]
+      },
+      "testing": {
+        "test_method": "Login error analysis",
+        "difficulty": "easy",
+        "tools_required": ["Manual testing", "Browser DevTools"],
+        "verification_steps": [
+          {
+            "step_number": 1,
+            "action": "POST invalid username",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          },
+          {
+            "step_number": 2,
+            "action": "POST known username with bad pass",
+            "expected_result": "Should be protected/blocked",
+            "command": null,
+            "automated": false
+          }
+        ],
+        "test_payloads": []
+      },
+      "protection": {
+        "remediation_effort": "medium",
+        "estimated_time": "1-4 hours",
+        "priority": 6,
+        "driver": "wp-config",
+        "automated_protection": {
+          "available": true,
+          "method": "wp-config-code",
+          "implementation_steps": [
+            {
+              "step_number": 1,
+              "description": "Use uniform error: 'Invalid credentials'. Plugins: Rename wp-login.php.",
+              "file": "wp-config.php",
+              "code": "add_filter('login_errors', function() {\n    return 'Invalid username or password.';\n});",
+              "backup_required": true
+            }
+          ]
+        },
+        "manual_steps": [
+          {
+            "step_number": 1,
+            "description": "Review and test the protection",
+            "reason": "Requires validation in production environment",
+            "verification": "Perform security testing after implementation"
+          }
+        ],
+        "configuration_changes": {
+          "wp_config": {
+            "constants": {}
+          },
+          "htaccess_rules": [],
+          "php_ini": {}
+        },
+        "plugin_dependencies": []
+      },
+      "verification_engine": {
+        "automated_checks": [
+          {
+            "check_id": "CHECK-095-001",
+            "name": "Username Enumeration via wp-login.php Check",
+            "method": "endpoint-test",
+            "script": "check_8()",
+            "success_criteria": {
+              "condition": "equals",
+              "expected_value": "protected",
+              "actual_value_source": "security_scan"
+            },
+            "failure_message": "Username Enumeration via wp-login.php vulnerability detected"
+          }
+        ],
+        "manual_verification": [],
+        "continuous_monitoring": {
+          "enabled": true,
+          "frequency": "monthly",
+          "alert_on_failure": true,
+          "auto_remediate": false
+        }
+      },
+      "ui_configuration": {
+        "components": [
+          {
+            "component_id": "UI-username-enumeration-via-wp-login.php-001",
+            "type": "toggle",
+            "label": "Enable Username Enumeration via wp-login.php Protection",
+            "description": "Activates protection against username enumeration via wp-login.php",
+            "default_value": true,
+            "options": [],
+            "validation": {
+              "required": false
+            },
+            "on_change": "toggleUsernameEnumerationviawp-login.php",
+            "dependencies": []
+          }
+        ],
+        "layout": {
+          "section": "Authentication",
+          "order": 95,
+          "collapsible": true,
+          "default_expanded": false
+        },
+        "actions": [
+          {
+            "action_id": "ACTION-095-001",
+            "type": "enable",
+            "label": "Enable Protection",
+            "confirmation_required": false,
+            "confirmation_message": "This will enable protection. Continue?",
+            "processing_message": "Enabling protection...",
+            "success_message": "Protection enabled successfully",
+            "error_handler": "handleProtectionError"
+          }
+        ]
+      },
+      "enforcement": {
+        "driver": "wp-config",
+        "mappings": {
+          "uniform_login_error": "code_snippet"
+        },
+        "target_file": "wp-config.php",
+        "backup_required": true,
+        "restore_capability": true
+      },
+      "reporting": {
+        "status_indicators": [
+          {
+            "indicator": "protected",
+            "display": "badge",
+            "message": "Username Enumeration via wp-login.php protection active"
+          }
+        ],
+        "export_formats": ["pdf", "json", "csv"],
+        "share_capability": true
+      },
+      "code_examples": [
+        {
+          "language": "php",
+          "description": "Implementation for Username Enumeration via wp-login.php",
+          "code": "add_filter('login_errors', function() {\n    return 'Invalid username or password.';\n});",
+          "file_location": "wp-config.php"
+        }
+      ],
+      "references": [
+        {
+          "title": "OWASP Security Guide",
+          "url": "https://owasp.org/",
+          "type": "documentation"
+        },
+        {
+          "title": "WordPress Security Best Practices",
+          "url": "https://wordpress.org/support/article/hardening-wordpress/",
+          "type": "documentation"
+        }
+      ],
+      "metadata": {
+        "created_at": "2026-01-28T18:23:59.202518Z",
+        "updated_at": "2026-02-13T15:30:00.000000Z",
+        "version": "2.0.0",
+        "author": "VAPT Security Team",
+        "review_status": "approved",
+        "tags": [
+          "authentication",
+          "medium",
+          "username-enumeration",
+          "wp-config",
+          "driver-wp-config"
+        ]
+      }
+    }
+  ]
+}

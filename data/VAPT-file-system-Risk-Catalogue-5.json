@@ -1,0 +1,1215 @@
+{
+    "metadata": {
+        "schema_version": "3.2.0",
+        "plugin_name": "WordPress VAPT Protection Suite",
+        "generated_at": "2026-02-13T17:14:26+00:00",
+        "total_risks": 5,
+        "ai_agent_compatible": true,
+        "ui_framework": "React/WordPress-Admin",
+        "source_version": "3.1.0",
+        "source_document": "Feature-List-99.json",
+        "source_generated_at": "2026-01-28",
+        "enhancement_version": "1.0.0",
+        "enhancement_focus": "AI Agent Instructions & UI Builder Integration",
+        "driver": "file-system"
+    },
+    "risk_catalog": [
+        {
+            "risk_id": "RISK-024",
+            "title": "File Permissions",
+            "category": "Configuration",
+            "severity": {
+                "level": "medium",
+                "cvss_score": 5.3,
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                "business_impact": "Risk of Configuration compromise leading to data breach or system compromise"
+            },
+            "description": {
+                "summary": "Checks for proper file and directory permissions on WordPress files, preventing unauthorized read/write access.",
+                "detailed": "Checks for proper file and directory permissions on WordPress files, preventing unauthorized read/write access.",
+                "attack_scenario": "An attacker exploits this configuration to compromise system security",
+                "affected_components": [
+                    "WordPress Core",
+                    "Plugins",
+                    "Themes",
+                    "Custom Code"
+                ]
+            },
+            "owasp_mapping": {
+                "owasp_top_10_2021": "A00:2021-Security Risk",
+                "pci_dss": [
+                    "Requirement-6.5"
+                ],
+                "gdpr": [
+                    "Article-32"
+                ],
+                "nist_csf": [
+                    "PR.DS-5"
+                ],
+                "cwe": [
+                    "CWE-000"
+                ]
+            },
+            "testing": {
+                "test_method": "Manual permission checking",
+                "difficulty": "easy",
+                "tools_required": [
+                    "Manual testing",
+                    "Browser DevTools"
+                ],
+                "verification_steps": [
+                    {
+                        "step_number": 1,
+                        "action": "1. Check WordPress directory permissions: ls -la /var/www/html/",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "ls -la /var/www/html/",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 2,
+                        "action": "2. Verify wp-config.php is 640 or 600",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 3,
+                        "action": "3. Check uploads directory permissions (should be 755)",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 4,
+                        "action": "4. Test for writable PHP files in web root",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 5,
+                        "action": "5. Check ownership of WordPress files",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 6,
+                        "action": "6. Verify .htaccess permissions",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 7,
+                        "action": "7. Use WordPress security scanner plugins",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 8,
+                        "action": "8. Test with command: find . -type f -perm 0777 -ls",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "find . -type f -perm 0777 -ls",
+                        "automated": true
+                    }
+                ],
+                "test_payloads": []
+            },
+            "protection": {
+                "remediation_effort": "low",
+                "estimated_time": "1-4 hours",
+                "priority": 6,
+                "automated_protection": {
+                    "available": true,
+                    "method": "plugin-configuration",
+                    "implementation_steps": [
+                        {
+                            "step_number": 1,
+                            "description": "Set proper permissions: directories 755, files 644, wp-config.php 640. Use correct ownership. Regular permission audits. Use security plugins to check.",
+                            "file": "wp-config.php",
+                            "code": "Set proper permissions: directories 755, files 644, wp-config.php 640. Use correct ownership. Regular permission audits. Use security plugins to check.",
+                            "backup_required": true
+                        }
+                    ]
+                },
+                "manual_steps": [
+                    {
+                        "step_number": 1,
+                        "description": "Review and test the protection",
+                        "reason": "Requires validation in production environment",
+                        "verification": "Perform security testing after implementation"
+                    }
+                ],
+                "configuration_changes": {
+                    "wp_config": {
+                        "constants": []
+                    },
+                    "htaccess_rules": [],
+                    "php_ini": []
+                },
+                "plugin_dependencies": [],
+                "driver": "file-system"
+            },
+            "verification_engine": {
+                "automated_checks": [
+                    {
+                        "check_id": "CHECK-024-001",
+                        "name": "File Permissions Check",
+                        "method": "endpoint-test",
+                        "script": "check_file_permissions()",
+                        "success_criteria": {
+                            "condition": "equals",
+                            "expected_value": "protected",
+                            "actual_value_source": "security_scan"
+                        },
+                        "failure_message": "File Permissions vulnerability detected"
+                    }
+                ],
+                "manual_verification": [],
+                "continuous_monitoring": {
+                    "enabled": true,
+                    "frequency": "monthly",
+                    "alert_on_failure": true,
+                    "auto_remediate": false
+                }
+            },
+            "ui_configuration": {
+                "components": [
+                    {
+                        "component_id": "UI-file-permissions-001",
+                        "type": "toggle",
+                        "label": "Enable File Permissions Protection",
+                        "description": "Activates protection against file permissions",
+                        "default_value": true,
+                        "options": [],
+                        "validation": {
+                            "required": false
+                        },
+                        "on_change": "toggleFilePermissions",
+                        "dependencies": []
+                    }
+                ],
+                "layout": {
+                    "section": "General",
+                    "order": 24,
+                    "collapsible": true,
+                    "default_expanded": false
+                },
+                "actions": [
+                    {
+                        "action_id": "ACTION-024-001",
+                        "type": "enable",
+                        "label": "Enable Protection",
+                        "confirmation_required": false,
+                        "confirmation_message": "This will enable protection. Continue?",
+                        "processing_message": "Enabling protection...",
+                        "success_message": "Protection enabled successfully",
+                        "error_handler": "handleProtectionError"
+                    }
+                ]
+            },
+            "reporting": {
+                "status_indicators": [
+                    {
+                        "indicator": "protected",
+                        "display": "badge",
+                        "message": "File Permissions protection active"
+                    }
+                ],
+                "export_formats": [
+                    "pdf",
+                    "json",
+                    "csv"
+                ],
+                "share_capability": true
+            },
+            "code_examples": [
+                {
+                    "language": "php",
+                    "description": "Implementation for File Permissions",
+                    "code": "Set proper permissions: directories 755, files 644, wp-config.php 640. Use correct ownership. Regular permission audits. Use security plugins to check.",
+                    "file_location": "functions.php or plugin file"
+                }
+            ],
+            "references": [
+                {
+                    "title": "OWASP Security Guide",
+                    "url": "https://owasp.org/",
+                    "type": "documentation"
+                },
+                {
+                    "title": "WordPress Security Best Practices",
+                    "url": "https://wordpress.org/support/article/hardening-wordpress/",
+                    "type": "documentation"
+                }
+            ],
+            "metadata": {
+                "created_at": "2026-01-28T18:23:59.198868Z",
+                "updated_at": "2026-01-28T18:23:59.198869Z",
+                "version": "1.0.0",
+                "author": "Security Team",
+                "review_status": "approved",
+                "tags": [
+                    "configuration",
+                    "medium",
+                    "file-permissions"
+                ]
+            },
+            "driver": "file-system"
+        },
+        {
+            "risk_id": "RISK-031",
+            "title": "Backup File Exposure",
+            "category": "Information Disclosure",
+            "severity": {
+                "level": "high",
+                "cvss_score": 7.5,
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
+            },
+            "description": {
+                "summary": "Scans for exposed backup files (.bak, .backup, .sql, etc.) containing sensitive data.",
+                "detailed": "Scans for exposed backup files (.bak, .backup, .sql, etc.) containing sensitive data.",
+                "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
+                "affected_components": [
+                    "WordPress Core",
+                    "Plugins",
+                    "Themes",
+                    "Custom Code"
+                ]
+            },
+            "owasp_mapping": {
+                "owasp_top_10_2021": "A00:2021-Security Risk",
+                "pci_dss": [
+                    "Requirement-6.5"
+                ],
+                "gdpr": [
+                    "Article-32"
+                ],
+                "nist_csf": [
+                    "PR.DS-5"
+                ],
+                "cwe": [
+                    "CWE-000"
+                ]
+            },
+            "testing": {
+                "test_method": "Automated file discovery",
+                "difficulty": "medium",
+                "tools_required": [
+                    "Manual testing",
+                    "Browser DevTools"
+                ],
+                "verification_steps": [
+                    {
+                        "step_number": 1,
+                        "action": "1. Scan for common backup extensions: .bak, .backup, .old, .save",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".bak",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 2,
+                        "action": "2. Check for database backups: .sql, .dump, .export",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".sql",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 3,
+                        "action": "3. Look for zip files: .zip, .tar.gz, .rar",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".zip",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 4,
+                        "action": "4. Test for wp-config backups: wp-config.php.bak",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "wp-config.php.bak",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 5,
+                        "action": "5. Use tools like DirBuster with backup file wordlists",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 6,
+                        "action": "6. Check git repository exposure: .git/ directory",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".git/",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 7,
+                        "action": "7. Look for IDE backup files: .idea/, .vscode/",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".idea/",
+                        "automated": true
+                    }
+                ],
+                "test_payloads": []
+            },
+            "protection": {
+                "remediation_effort": "low",
+                "estimated_time": "1-2 days",
+                "priority": 8,
+                "automated_protection": {
+                    "available": true,
+                    "method": "plugin-configuration",
+                    "implementation_steps": [
+                        {
+                            "step_number": 1,
+                            "description": "Remove backup files from web root. Store backups in secure locations. Use .htaccess to block backup file access. Implement proper backup procedures outside web root.",
+                            "file": "wp-config.php",
+                            "code": "Remove backup files from web root. Store backups in secure locations. Use .htaccess to block backup file access. Implement proper backup procedures outside web root.",
+                            "backup_required": true
+                        }
+                    ]
+                },
+                "manual_steps": [
+                    {
+                        "step_number": 1,
+                        "description": "Review and test the protection",
+                        "reason": "Requires validation in production environment",
+                        "verification": "Perform security testing after implementation"
+                    }
+                ],
+                "configuration_changes": {
+                    "wp_config": {
+                        "constants": []
+                    },
+                    "htaccess_rules": [],
+                    "php_ini": []
+                },
+                "plugin_dependencies": [],
+                "driver": "file-system"
+            },
+            "verification_engine": {
+                "automated_checks": [
+                    {
+                        "check_id": "CHECK-031-001",
+                        "name": "Backup File Exposure Check",
+                        "method": "endpoint-test",
+                        "script": "check_backup_file_exposure()",
+                        "success_criteria": {
+                            "condition": "equals",
+                            "expected_value": "protected",
+                            "actual_value_source": "security_scan"
+                        },
+                        "failure_message": "Backup File Exposure vulnerability detected"
+                    }
+                ],
+                "manual_verification": [],
+                "continuous_monitoring": {
+                    "enabled": true,
+                    "frequency": "weekly",
+                    "alert_on_failure": true,
+                    "auto_remediate": false
+                }
+            },
+            "ui_configuration": {
+                "components": [
+                    {
+                        "component_id": "UI-backup-file-exposure-001",
+                        "type": "toggle",
+                        "label": "Enable Backup File Exposure Protection",
+                        "description": "Activates protection against backup file exposure",
+                        "default_value": true,
+                        "options": [],
+                        "validation": {
+                            "required": false
+                        },
+                        "on_change": "toggleBackupFileExposure",
+                        "dependencies": []
+                    }
+                ],
+                "layout": {
+                    "section": "Advanced",
+                    "order": 31,
+                    "collapsible": true,
+                    "default_expanded": true
+                },
+                "actions": [
+                    {
+                        "action_id": "ACTION-031-001",
+                        "type": "enable",
+                        "label": "Enable Protection",
+                        "confirmation_required": true,
+                        "confirmation_message": "This will enable protection. Continue?",
+                        "processing_message": "Enabling protection...",
+                        "success_message": "Protection enabled successfully",
+                        "error_handler": "handleProtectionError"
+                    }
+                ]
+            },
+            "reporting": {
+                "status_indicators": [
+                    {
+                        "indicator": "protected",
+                        "display": "badge",
+                        "message": "Backup File Exposure protection active"
+                    }
+                ],
+                "export_formats": [
+                    "pdf",
+                    "json",
+                    "csv"
+                ],
+                "share_capability": true
+            },
+            "code_examples": [
+                {
+                    "language": "php",
+                    "description": "Implementation for Backup File Exposure",
+                    "code": "Remove backup files from web root. Store backups in secure locations. Use .htaccess to block backup file access. Implement proper backup procedures outside web root.",
+                    "file_location": "functions.php or plugin file"
+                }
+            ],
+            "references": [
+                {
+                    "title": "OWASP Security Guide",
+                    "url": "https://owasp.org/",
+                    "type": "documentation"
+                },
+                {
+                    "title": "WordPress Security Best Practices",
+                    "url": "https://wordpress.org/support/article/hardening-wordpress/",
+                    "type": "documentation"
+                }
+            ],
+            "metadata": {
+                "created_at": "2026-01-28T18:23:59.199233Z",
+                "updated_at": "2026-01-28T18:23:59.199234Z",
+                "version": "1.0.0",
+                "author": "Security Team",
+                "review_status": "approved",
+                "tags": [
+                    "information disclosure",
+                    "high",
+                    "backup-file-exposure"
+                ]
+            },
+            "driver": "file-system"
+        },
+        {
+            "risk_id": "RISK-032",
+            "title": "Configuration File Exposure",
+            "category": "Information Disclosure",
+            "severity": {
+                "level": "critical",
+                "cvss_score": 9.5,
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
+            },
+            "description": {
+                "summary": "Tests for exposed configuration files (config.php, configuration.php, etc.) with database credentials.",
+                "detailed": "Tests for exposed configuration files (config.php, configuration.php, etc.) with database credentials.",
+                "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
+                "affected_components": [
+                    "WordPress Core",
+                    "Plugins",
+                    "Themes",
+                    "Custom Code"
+                ]
+            },
+            "owasp_mapping": {
+                "owasp_top_10_2021": "A00:2021-Security Risk",
+                "pci_dss": [
+                    "Requirement-6.5"
+                ],
+                "gdpr": [
+                    "Article-32"
+                ],
+                "nist_csf": [
+                    "PR.DS-5"
+                ],
+                "cwe": [
+                    "CWE-000"
+                ]
+            },
+            "testing": {
+                "test_method": "Automated file discovery",
+                "difficulty": "medium",
+                "tools_required": [
+                    "Manual testing",
+                    "Browser DevTools"
+                ],
+                "verification_steps": [
+                    {
+                        "step_number": 1,
+                        "action": "1. Test access to wp-config.php directly",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "wp-config.php",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 2,
+                        "action": "2. Check for wp-config.php.save, wp-config.php.old",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "wp-config.php.save",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 3,
+                        "action": "3. Look for other config files: config.php, configuration.php",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "config.php",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 4,
+                        "action": "4. Check for .env files with credentials",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".env",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 5,
+                        "action": "5. Test for .htpasswd files",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".htpasswd",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 6,
+                        "action": "6. Look for robots.txt that may reveal sensitive paths",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "robots.txt",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 7,
+                        "action": "7. Use automated scanners for configuration files",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    }
+                ],
+                "test_payloads": []
+            },
+            "protection": {
+                "remediation_effort": "low",
+                "estimated_time": "1-2 days",
+                "priority": 10,
+                "automated_protection": {
+                    "available": true,
+                    "method": "plugin-configuration",
+                    "implementation_steps": [
+                        {
+                            "step_number": 1,
+                            "description": "Move sensitive config files outside web root. Set proper file permissions (600). Use environment variables for credentials. Regular security scans for exposed files.",
+                            "file": "wp-config.php",
+                            "code": "Move sensitive config files outside web root. Set proper file permissions (600). Use environment variables for credentials. Regular security scans for exposed files.",
+                            "backup_required": true
+                        }
+                    ]
+                },
+                "manual_steps": [
+                    {
+                        "step_number": 1,
+                        "description": "Review and test the protection",
+                        "reason": "Requires validation in production environment",
+                        "verification": "Perform security testing after implementation"
+                    }
+                ],
+                "configuration_changes": {
+                    "wp_config": {
+                        "constants": []
+                    },
+                    "htaccess_rules": [],
+                    "php_ini": []
+                },
+                "plugin_dependencies": [],
+                "driver": "file-system"
+            },
+            "verification_engine": {
+                "automated_checks": [
+                    {
+                        "check_id": "CHECK-032-001",
+                        "name": "Configuration File Exposure Check",
+                        "method": "endpoint-test",
+                        "script": "check_configuration_file_exposure()",
+                        "success_criteria": {
+                            "condition": "equals",
+                            "expected_value": "protected",
+                            "actual_value_source": "security_scan"
+                        },
+                        "failure_message": "Configuration File Exposure vulnerability detected"
+                    }
+                ],
+                "manual_verification": [],
+                "continuous_monitoring": {
+                    "enabled": true,
+                    "frequency": "weekly",
+                    "alert_on_failure": true,
+                    "auto_remediate": false
+                }
+            },
+            "ui_configuration": {
+                "components": [
+                    {
+                        "component_id": "UI-configuration-file-exposure-001",
+                        "type": "toggle",
+                        "label": "Enable Configuration File Exposure Protection",
+                        "description": "Activates protection against configuration file exposure",
+                        "default_value": true,
+                        "options": [],
+                        "validation": {
+                            "required": false
+                        },
+                        "on_change": "toggleConfigurationFileExposure",
+                        "dependencies": []
+                    }
+                ],
+                "layout": {
+                    "section": "Advanced",
+                    "order": 32,
+                    "collapsible": true,
+                    "default_expanded": true
+                },
+                "actions": [
+                    {
+                        "action_id": "ACTION-032-001",
+                        "type": "enable",
+                        "label": "Enable Protection",
+                        "confirmation_required": true,
+                        "confirmation_message": "This will enable protection. Continue?",
+                        "processing_message": "Enabling protection...",
+                        "success_message": "Protection enabled successfully",
+                        "error_handler": "handleProtectionError"
+                    }
+                ]
+            },
+            "reporting": {
+                "status_indicators": [
+                    {
+                        "indicator": "protected",
+                        "display": "badge",
+                        "message": "Configuration File Exposure protection active"
+                    }
+                ],
+                "export_formats": [
+                    "pdf",
+                    "json",
+                    "csv"
+                ],
+                "share_capability": true
+            },
+            "code_examples": [
+                {
+                    "language": "php",
+                    "description": "Implementation for Configuration File Exposure",
+                    "code": "Move sensitive config files outside web root. Set proper file permissions (600). Use environment variables for credentials. Regular security scans for exposed files.",
+                    "file_location": "functions.php or plugin file"
+                }
+            ],
+            "references": [
+                {
+                    "title": "OWASP Security Guide",
+                    "url": "https://owasp.org/",
+                    "type": "documentation"
+                },
+                {
+                    "title": "WordPress Security Best Practices",
+                    "url": "https://wordpress.org/support/article/hardening-wordpress/",
+                    "type": "documentation"
+                }
+            ],
+            "metadata": {
+                "created_at": "2026-01-28T18:23:59.199290Z",
+                "updated_at": "2026-01-28T18:23:59.199291Z",
+                "version": "1.0.0",
+                "author": "Security Team",
+                "review_status": "approved",
+                "tags": [
+                    "information disclosure",
+                    "critical",
+                    "configuration-file-exposure"
+                ]
+            },
+            "driver": "file-system"
+        },
+        {
+            "risk_id": "RISK-033",
+            "title": "Log File Exposure",
+            "category": "Information Disclosure",
+            "severity": {
+                "level": "high",
+                "cvss_score": 7.5,
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
+            },
+            "description": {
+                "summary": "Checks for exposed log files containing sensitive information about users and system activities.",
+                "detailed": "Checks for exposed log files containing sensitive information about users and system activities.",
+                "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
+                "affected_components": [
+                    "WordPress Core",
+                    "Plugins",
+                    "Themes",
+                    "Custom Code"
+                ]
+            },
+            "owasp_mapping": {
+                "owasp_top_10_2021": "A00:2021-Security Risk",
+                "pci_dss": [
+                    "Requirement-6.5"
+                ],
+                "gdpr": [
+                    "Article-32"
+                ],
+                "nist_csf": [
+                    "PR.DS-5"
+                ],
+                "cwe": [
+                    "CWE-000"
+                ]
+            },
+            "testing": {
+                "test_method": "Manual file discovery",
+                "difficulty": "medium",
+                "tools_required": [
+                    "Manual testing",
+                    "Browser DevTools"
+                ],
+                "verification_steps": [
+                    {
+                        "step_number": 1,
+                        "action": "1. Check for common log file locations",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 2,
+                        "action": "2. Test for debug.log in wp-content directory",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "debug.log",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 3,
+                        "action": "3. Look for access/error logs: access.log, error.log",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "access.log",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 4,
+                        "action": "4. Check for plugin-specific log files",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 5,
+                        "action": "5. Test for PHP error logs",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 6,
+                        "action": "6. Look for .log extension files",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".log",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 7,
+                        "action": "7. Use directory traversal to access log files",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    }
+                ],
+                "test_payloads": []
+            },
+            "protection": {
+                "remediation_effort": "low",
+                "estimated_time": "1-2 days",
+                "priority": 8,
+                "automated_protection": {
+                    "available": true,
+                    "method": "plugin-configuration",
+                    "implementation_steps": [
+                        {
+                            "step_number": 1,
+                            "description": "Disable public access to log files via .htaccess. Store logs outside web root. Regularly rotate and delete old logs. Use secure logging plugins.",
+                            "file": "wp-config.php",
+                            "code": "Disable public access to log files via .htaccess. Store logs outside web root. Regularly rotate and delete old logs. Use secure logging plugins.",
+                            "backup_required": true
+                        }
+                    ]
+                },
+                "manual_steps": [
+                    {
+                        "step_number": 1,
+                        "description": "Review and test the protection",
+                        "reason": "Requires validation in production environment",
+                        "verification": "Perform security testing after implementation"
+                    }
+                ],
+                "configuration_changes": {
+                    "wp_config": {
+                        "constants": []
+                    },
+                    "htaccess_rules": [],
+                    "php_ini": []
+                },
+                "plugin_dependencies": [],
+                "driver": "file-system"
+            },
+            "verification_engine": {
+                "automated_checks": [
+                    {
+                        "check_id": "CHECK-033-001",
+                        "name": "Log File Exposure Check",
+                        "method": "endpoint-test",
+                        "script": "check_log_file_exposure()",
+                        "success_criteria": {
+                            "condition": "equals",
+                            "expected_value": "protected",
+                            "actual_value_source": "security_scan"
+                        },
+                        "failure_message": "Log File Exposure vulnerability detected"
+                    }
+                ],
+                "manual_verification": [],
+                "continuous_monitoring": {
+                    "enabled": true,
+                    "frequency": "weekly",
+                    "alert_on_failure": true,
+                    "auto_remediate": false
+                }
+            },
+            "ui_configuration": {
+                "components": [
+                    {
+                        "component_id": "UI-log-file-exposure-001",
+                        "type": "toggle",
+                        "label": "Enable Log File Exposure Protection",
+                        "description": "Activates protection against log file exposure",
+                        "default_value": true,
+                        "options": [],
+                        "validation": {
+                            "required": false
+                        },
+                        "on_change": "toggleLogFileExposure",
+                        "dependencies": []
+                    }
+                ],
+                "layout": {
+                    "section": "Advanced",
+                    "order": 33,
+                    "collapsible": true,
+                    "default_expanded": true
+                },
+                "actions": [
+                    {
+                        "action_id": "ACTION-033-001",
+                        "type": "enable",
+                        "label": "Enable Protection",
+                        "confirmation_required": true,
+                        "confirmation_message": "This will enable protection. Continue?",
+                        "processing_message": "Enabling protection...",
+                        "success_message": "Protection enabled successfully",
+                        "error_handler": "handleProtectionError"
+                    }
+                ]
+            },
+            "reporting": {
+                "status_indicators": [
+                    {
+                        "indicator": "protected",
+                        "display": "badge",
+                        "message": "Log File Exposure protection active"
+                    }
+                ],
+                "export_formats": [
+                    "pdf",
+                    "json",
+                    "csv"
+                ],
+                "share_capability": true
+            },
+            "code_examples": [
+                {
+                    "language": "php",
+                    "description": "Implementation for Log File Exposure",
+                    "code": "Disable public access to log files via .htaccess. Store logs outside web root. Regularly rotate and delete old logs. Use secure logging plugins.",
+                    "file_location": "functions.php or plugin file"
+                }
+            ],
+            "references": [
+                {
+                    "title": "OWASP Security Guide",
+                    "url": "https://owasp.org/",
+                    "type": "documentation"
+                },
+                {
+                    "title": "WordPress Security Best Practices",
+                    "url": "https://wordpress.org/support/article/hardening-wordpress/",
+                    "type": "documentation"
+                }
+            ],
+            "metadata": {
+                "created_at": "2026-01-28T18:23:59.199353Z",
+                "updated_at": "2026-01-28T18:23:59.199354Z",
+                "version": "1.0.0",
+                "author": "Security Team",
+                "review_status": "approved",
+                "tags": [
+                    "information disclosure",
+                    "high",
+                    "log-file-exposure"
+                ]
+            },
+            "driver": "file-system"
+        },
+        {
+            "risk_id": "RISK-034",
+            "title": "Source Code Disclosure",
+            "category": "Information Disclosure",
+            "severity": {
+                "level": "medium",
+                "cvss_score": 5.3,
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
+            },
+            "description": {
+                "summary": "Tests for source code disclosure vulnerabilities through misconfigured servers or file handling.",
+                "detailed": "Tests for source code disclosure vulnerabilities through misconfigured servers or file handling.",
+                "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
+                "affected_components": [
+                    "WordPress Core",
+                    "Plugins",
+                    "Themes",
+                    "Custom Code"
+                ]
+            },
+            "owasp_mapping": {
+                "owasp_top_10_2021": "A00:2021-Security Risk",
+                "pci_dss": [
+                    "Requirement-6.5"
+                ],
+                "gdpr": [
+                    "Article-32"
+                ],
+                "nist_csf": [
+                    "PR.DS-5"
+                ],
+                "cwe": [
+                    "CWE-000"
+                ]
+            },
+            "testing": {
+                "test_method": "Manual testing & file access attempts",
+                "difficulty": "easy",
+                "tools_required": [
+                    "Manual testing",
+                    "Browser DevTools"
+                ],
+                "verification_steps": [
+                    {
+                        "step_number": 1,
+                        "action": "1. Test for PHP source disclosure via path manipulation",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 2,
+                        "action": "2. Check for .phps files (PHP source files)",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".phps",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 3,
+                        "action": "3. Test file inclusion with PHP filters",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 4,
+                        "action": "4. Check for exposed .git repository",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".git",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 5,
+                        "action": "5. Look for .svn or other version control files",
+                        "expected_result": "Should be protected/blocked",
+                        "command": ".svn",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 6,
+                        "action": "6. Test for LFI vulnerabilities that reveal source code",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 7,
+                        "action": "7. Check for misconfigured servers exposing source",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    }
+                ],
+                "test_payloads": []
+            },
+            "protection": {
+                "remediation_effort": "low",
+                "estimated_time": "1-4 hours",
+                "priority": 6,
+                "automated_protection": {
+                    "available": true,
+                    "method": "plugin-configuration",
+                    "implementation_steps": [
+                        {
+                            "step_number": 1,
+                            "description": "Configure web server to parse PHP files properly. Remove version control directories. Secure file inclusion. Regular source code disclosure checks.",
+                            "file": "wp-config.php",
+                            "code": "Configure web server to parse PHP files properly. Remove version control directories. Secure file inclusion. Regular source code disclosure checks.",
+                            "backup_required": true
+                        }
+                    ]
+                },
+                "manual_steps": [
+                    {
+                        "step_number": 1,
+                        "description": "Review and test the protection",
+                        "reason": "Requires validation in production environment",
+                        "verification": "Perform security testing after implementation"
+                    }
+                ],
+                "configuration_changes": {
+                    "wp_config": {
+                        "constants": []
+                    },
+                    "htaccess_rules": [],
+                    "php_ini": []
+                },
+                "plugin_dependencies": [],
+                "driver": "file-system"
+            },
+            "verification_engine": {
+                "automated_checks": [
+                    {
+                        "check_id": "CHECK-034-001",
+                        "name": "Source Code Disclosure Check",
+                        "method": "endpoint-test",
+                        "script": "check_source_code_disclosure()",
+                        "success_criteria": {
+                            "condition": "equals",
+                            "expected_value": "protected",
+                            "actual_value_source": "security_scan"
+                        },
+                        "failure_message": "Source Code Disclosure vulnerability detected"
+                    }
+                ],
+                "manual_verification": [],
+                "continuous_monitoring": {
+                    "enabled": true,
+                    "frequency": "monthly",
+                    "alert_on_failure": true,
+                    "auto_remediate": false
+                }
+            },
+            "ui_configuration": {
+                "components": [
+                    {
+                        "component_id": "UI-source-code-disclosure-001",
+                        "type": "toggle",
+                        "label": "Enable Source Code Disclosure Protection",
+                        "description": "Activates protection against source code disclosure",
+                        "default_value": true,
+                        "options": [],
+                        "validation": {
+                            "required": false
+                        },
+                        "on_change": "toggleSourceCodeDisclosure",
+                        "dependencies": []
+                    }
+                ],
+                "layout": {
+                    "section": "General",
+                    "order": 34,
+                    "collapsible": true,
+                    "default_expanded": false
+                },
+                "actions": [
+                    {
+                        "action_id": "ACTION-034-001",
+                        "type": "enable",
+                        "label": "Enable Protection",
+                        "confirmation_required": false,
+                        "confirmation_message": "This will enable protection. Continue?",
+                        "processing_message": "Enabling protection...",
+                        "success_message": "Protection enabled successfully",
+                        "error_handler": "handleProtectionError"
+                    }
+                ]
+            },
+            "reporting": {
+                "status_indicators": [
+                    {
+                        "indicator": "protected",
+                        "display": "badge",
+                        "message": "Source Code Disclosure protection active"
+                    }
+                ],
+                "export_formats": [
+                    "pdf",
+                    "json",
+                    "csv"
+                ],
+                "share_capability": true
+            },
+            "code_examples": [
+                {
+                    "language": "php",
+                    "description": "Implementation for Source Code Disclosure",
+                    "code": "Configure web server to parse PHP files properly. Remove version control directories. Secure file inclusion. Regular source code disclosure checks.",
+                    "file_location": "functions.php or plugin file"
+                }
+            ],
+            "references": [
+                {
+                    "title": "OWASP Security Guide",
+                    "url": "https://owasp.org/",
+                    "type": "documentation"
+                },
+                {
+                    "title": "WordPress Security Best Practices",
+                    "url": "https://wordpress.org/support/article/hardening-wordpress/",
+                    "type": "documentation"
+                }
+            ],
+            "metadata": {
+                "created_at": "2026-01-28T18:23:59.199390Z",
+                "updated_at": "2026-01-28T18:23:59.199391Z",
+                "version": "1.0.0",
+                "author": "Security Team",
+                "review_status": "approved",
+                "tags": [
+                    "information disclosure",
+                    "medium",
+                    "source-code-disclosure"
+                ]
+            },
+            "driver": "file-system"
+        }
+    ]
+}
