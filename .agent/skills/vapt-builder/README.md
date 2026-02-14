@@ -8,6 +8,8 @@ This skill equips the AI agent with the specific knowledge required to configure
 
 *   **`SKILL.md`**: The primary instruction file for the AI agent. Defines the rules, strategies, and constraints.
 *   **`resources/`**: Reference data used by the agent to ensure accuracy.
+    *   `VAPT-Complete-Risk-Catalog-99-ENHANCED.json`: Unified enhanced risk catalog.
+    *   `VAPT-*-Risk-Catalogue-*.json`: Driver-specific risk catalogs.
     *   `driver-reference.json`: Lookup table for valid drivers (`htaccess`, `hook`), directives, and probe types.
 *   **`examples/`**: "Gold Standard" implementation patterns.
     *   `apache-templates.conf`: Verified `.htaccess` snippets.

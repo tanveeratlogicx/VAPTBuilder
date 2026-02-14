@@ -38,3 +38,15 @@ Common issues and solutions when implementing VAPT configurations.
 **Fix**: Tune the specific rule causing false positives.
 *   **Debug**: Check `error.log` to see WHICH rule ID triggered.
 *   **Exclusion**: `<IfModule mod_security2.c> SecRuleRemoveById [ID] </IfModule>`
+## 🏁 Feature: Verification Failures
+**Symptom**: "Verification Failed" but the protection seems to be working manually.
+**Cause**: The probe is looking for the `X-VAPTC-Enforced` header, but it's missing from the enforcement code.
+**Fix**: Ensure your enforcement mapping includes the evidence header.
+*   Apache: `Header set X-VAPTC-Enforced "feature-key"`
+*   Nginx: `add_header X-VAPTC-Enforced "feature-key" always;`
+*   IIS: `<add name="X-VAPTC-Enforced" value="feature-key" />`
+
+## 🚗 Feature: Driver Mismatch
+**Symptom**: "Invalid Driver" or "Driver not supported" error during schema validation.
+**Cause**: Using a driver name that isn't whitelist in the validator.
+**Fix**: Use one of the supported drivers: `htaccess`, `nginx`, `iis`, `wp-config`, `hook`, or `manual`.

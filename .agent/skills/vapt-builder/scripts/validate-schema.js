@@ -26,7 +26,7 @@ try {
   }
 
   // 2. Enforcement Driver Check
-  const validDrivers = ['htaccess', 'hook', 'nginx', 'iis', 'manual'];
+  const validDrivers = ['htaccess', 'hook', 'nginx', 'iis', 'manual', 'wp-config'];
   if (!validDrivers.includes(schema.enforcement.driver)) {
     throw new Error(`Invalid driver '${schema.enforcement.driver}'. Must be one of: ${validDrivers.join(', ')}`);
   }

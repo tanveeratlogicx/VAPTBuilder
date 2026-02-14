@@ -10,6 +10,7 @@
         <add name="X-Content-Type-Options" value="nosniff" />
         <add name="X-Frame-Options" value="SAMEORIGIN" />
         <add name="X-XSS-Protection" value="1; mode=block" />
+        <add name="X-VAPTC-Enforced" value="security-headers" />
         <remove name="X-Powered-By" />
       </customHeaders>
     </httpProtocol>

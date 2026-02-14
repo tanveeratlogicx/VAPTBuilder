@@ -14,7 +14,10 @@
       "test_config": {
         "method": "GET",
         "path": "/wp-config.php",
-        "expected_status": 403
+        "expected_status": 403,
+        "expected_headers": {
+          "X-VAPTC-Enforced": "block_sensitive_files"
+        }
       }
     },
     {

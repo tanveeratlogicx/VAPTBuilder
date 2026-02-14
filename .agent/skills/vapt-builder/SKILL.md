@@ -1,186 +1,101 @@
 ---
 name: vapt-builder
-description: Specialized VAPT Builder skill trained on the 99-item Risk Catalog and SixT Risk Catalog. Focuses on generating JSON configuration schemas for the VAPTBuilder plugin, specifically prioritizing .htaccess (Apache) rules for server-side security enforcement.
+description: Specialized VAPT Builder skill trained on the 99-item Risk Catalog. Focuses on generating JSON configuration schemas for the VAPTBuilder plugin, serving as a single point of contact for implementing security features across various server drivers.
 ---
 
 # VAPT Builder Expert Skill
 
-This skill is a specialized extension of the generic WordPress VAPT expert, specifically tailored for the **VAPTBuilder Plugin**. It uses the `VAPT-Complete-Risk-Catalog-99.json` as its primary source of truth.
+This skill is the **Single Point of Contact** for implementing security features in the **VAPTBuilder Plugin**. It leverages a suite of structured JSON risk catalogs to provide precise implementation logic and UI configurations.
 
 ## 🎯 Primary Goal
 
-To implement security features by **generating configuration schemas** for various server architectures. The VAPTBuilder plugin uses a "Driver" system where you map features to existing drivers (Apache, Nginx, IIS) or provide manual configuration steps (Cloudflare, Caddy, Node.js).
+To implement security features by **generating configuration schemas** (`generated_schema`) for various server architectures and WordPress environments.
 
-## 🧠 Intelligent Trigger (When to use this skill)
+## 🧠 Intelligent Trigger
 
 **You MUST use this skill whenever:**
-1.  The user mentions "VAPTBuilder".
-2.  **The user references "VAPTBuilder", "99-item catalog", or "SixT catalog".**
-3.  The task involves implementing security controls from a risk list found in the resources.
+1.  The user mentions "VAPTBuilder" or "Workbench".
+2.  The task involves implementing, modifying, or auditing security controls from the 99-item risk catalog.
+3.  Generating JSON schemas for the VAPTBuilder Functional Workbench.
 
-## 📚 Source of Truth
+## 📚 Source of Truth (Risk Catalogs)
 
-*   **Primary Risk Catalog**: `.agent/skills/vapt-builder/resources/VAPT-Complete-Risk-Catalog-99.json`
-*   **Supplementary Risk Catalog**: `.agent/skills/vapt-builder/resources/VAPT-SixT-Risk-Catalog-12.json`
-*   **Driver System**:
-    *   `vapt_htaccess_driver`: For Apache/Litespeed (native support).
-    *   `vapt_nginx_driver`: For Nginx/OpenResty (native support).
-    *   `vapt_iis_driver`: For IIS (native support).
-    *   `vapt_hook_driver`: For WordPress-specific logic.
-    *   `manual`: For Cloudflare, Caddy, Node.js, etc.
+*   **Primary (Enhanced)**: `.agent/skills/vapt-builder/resources/VAPT-Complete-Risk-Catalog-99-ENHANCED.json`
+*   **Split (Driver-Specific)**:
+    *   `.agent/skills/vapt-builder/resources/VAPT-wp-config-Risk-Catalogue-87.json`
+    *   `.agent/skills/vapt-builder/resources/VAPT-htaccess-Risk-Catalogue-3.json`
+    *   `.agent/skills/vapt-builder/resources/VAPT-nginx-config-Risk-Catalogue-4.json`
+    *   `.agent/skills/vapt-builder/resources/VAPT-file-system-Risk-Catalogue-5.json`
+*   **Implementation Specs**: `.agent/skills/vapt-builder/resources/driver-reference.json`
 
-## 🛠️ Implementation Strategy
+## 🛠️ Feature Implementation Protocol
 
-### 1. Server-Side Rules (Apache/Nginx/IIS) - **PRIORITY**
+Follow this strict protocol when asked to implement or update a feature:
 
-For any feature that can be implemented at the server level, check the target architecture and use the appropriate driver.
-
-**Driver Selection:**
-*   **Apache / Litespeed** -> `driver: "htaccess"`
-*   **Nginx / OpenResty** -> `driver: "nginx"`
-*   **IIS** -> `driver: "iis"`
-
-**Schema Pattern (Native Drivers):**
-```json
-{
-  "enforcement": {
-    "driver": "nginx", // or "htaccess", "iis"
-    "mappings": {
-      "enable_feature": "add_header X-Frame-Options SAMEORIGIN always;" // Nginx syntax
-    }
-  }
-}
-```
-
-### 2. Manual Configuration (Cloudflare/Caddy/Node.js)
-
-For architectures without native plugin drivers, use `driver: "manual"` and provide the exact configuration code in `manual_steps`.
-
-**Schema Pattern (Manual):**
-```json
-{
-  "enforcement": {
-    "driver": "manual",
-    "manual_steps": [
-      {
-        "platform": "cloudflare",
-        "description": "Create a WAF Custom Rule.",
-        "code": "(http.request.uri.path eq \"/xmlrpc.php\") action: block"
-      },
-      {
-        "platform": "caddy",
-        "description": "Add to Caddyfile",
-        "code": "@xmlrpc { path /xmlrpc.php } respond @xmlrpc 403"
-      }
-    ]
-  }
-}
-```
-
-### 3. Application Logic (WordPress Hooks)
-
-Use the `VAPT_Hook_Driver` only when PHP/WP logic is required.
+1.  **Locate Feature**: Search the risk catalogs (Enhanced first, then Split) for the corresponding `risk_id` or title.
+2.  **Extract Implementation Logic**:
+    *   Look at `protection.automated_protection.code` or `protection.configuration_changes`.
+    *   Identify the target **Driver**: `htaccess`, `nginx`, `iis`, `wp-config`, or `hook`.
+3.  **Map UI Configuration**:
+    *   Translate the catalog's `ui_configuration.components` into the plugin's `controls` array.
+    *   Standardize on `type: "toggle"` for most enforcements.
+4.  **Configure Enforcement**:
+    *   Use the `enforcement` object in the schema.
+    *   Map the control keys (e.g., `enable_feature`) to the actual code/directive extracted in step 2.
+5.  **Define Verification**:
+    *   Convert `testing.verification_steps` into one or more `test_action` controls using `universal_probe`.
 
 ## 📋 JSON Schema Reference
 
-When generating the `generated_schema` for a feature, use this exact structure:
+When generating the `generated_schema` for a feature, use this structure:
 
 ```json
 {
   "controls": [
-    // 1. Functional Controls (Left Column)
     {
       "type": "toggle",
       "label": "Enable [Feature Name]",
       "key": "enable_[feature_key]",
-      "help": "Description of what this does."
+      "help": "[Summary from Catalog]"
     },
-    // 2. Verification Controls (Right Column)
     {
       "type": "test_action",
-      "label": "Verify: [Test Name]",
-      "key": "verify_[test_key]",
+      "label": "Verify Coverage",
+      "key": "verify_[feature_key]",
       "test_logic": "universal_probe",
       "test_config": {
-        "method": "GET", // or POST, HEAD
-        "path": "/target/path",
-        "expected_status": 403, // or 200, 404
-        "expected_headers": { "X-VAPTC-Enforced": "[feature_key]" } // Evidence header
+        "method": "GET",
+        "path": "/",
+        "expected_status": 200,
+        "expected_headers": { "X-VAPTC-Enforced": "[feature_key]" }
       }
+    },
+    {
+      "type": "textarea",
+      "label": "Operational Notes",
+      "key": "operational_notes",
+      "help": "Deployment specific context."
     }
   ],
   "enforcement": {
-    "driver": "htaccess", // CHANGE TO 'hook' if necessary
+    "driver": "htaccess", // Use htaccess, nginx, iis, wp-config, or hook
     "mappings": {
-      "enable_[feature_key]": "[Raw .htaccess rules or Hook Method Name]"
+      "enable_[feature_key]": "Header set X-Frame-Options \"SAMEORIGIN\"" 
     }
   }
 }
 ```
 
-## 🎨 UI Guidelines
+## 🔌 Driver Specifics
 
-1.  **Layout**: The dashboard expects controls in specific order.
-    *   **Functional Inputs**: Defined first.
-    *   **Test Actions**: Defined second (types: `test_action`).
-    *   **Operational Notes**: Defined last (key: `operational_notes`).
-2.  **Context**: Use the `help` property to provide tooltips.
-
-## 🧪 Verification Engine
-
-Always include `test_action` controls. The preferred logic is `universal_probe`.
-
-*   **Positive Test**: Does the page load normally when it should? (Status 200)
-*   **Negative Test**: Is the malicious request blocked? (Status 403)
-*   **Evidence**: Does the response contain the `X-VAPTC-Enforced` header?
-
-## 🚀 Workflow
-
-1.  **Analyze**: Read the feature details.
-2.  **Determine Target**: Ask or infer the user's server stack (Apache, Nginx, IIS, etc.).
-3.  **Strategy**:
-    *   **Native Supported**: Use `htaccess`, `nginx`, or `iis` drivers.
-    *   **Manual Required**: Use `manual` driver for Cloudflare, Caddy, Node.
-    *   **WordPress Logic**: Use `hook` driver.
-4.  **Generate**: Create the JSON schema with Controls + Enforcement.
-5.  **Verify**: Ensure `test_action` is configured to prove the protection works.
+*   **`htaccess`**: Standard Apache directives. Must be escaped for JSON.
+*   **`nginx`**: Standard Nginx directives (always ends with `;`).
+*   **`wp-config` / `hook`**: PHP constants or method names registered in `VAPT_Hook_Driver`.
+*   **`manual`**: For manual steps where no driver exists.
 
 ## ⚠️ Critical Constraints
 
-*   **No Custom PHP Files**: Do not suggest creating new PHP files. Use the existing plugin infrastructure.
-*   **Valid JSON**: The output must be valid JSON, parsable by `json_decode()`.
-*   **Escape Characters**: When putting code (like Regex) into JSON strings, strictly escape backslashes (e.g., `\\` becomes `\\\\`).
-
-## 📂 Included Resources
-
-This skill comes with specialized resources to speed up implementation:
-
-### `/resources/driver-reference.json`
-
-A complete lookup table for:
-*   **Htaccess Directives**: Allowed/Forbidden directives for the htaccess driver.
-*   **Hook Driver Methods**: All available PHP enforcement methods in `VAPT_Hook_Driver`.
-*   **Probe Schemas**: Configuration reference for `universal_probe` and others.
-
-### `/examples/apache-templates.conf`
-
-Pre-written, VAPT-ready `.htaccess` templates for:
-*   Security Headers (HSTS, X-Frame-Options, etc.)
-*   Blocking Sensitive Files (`wp-config.php`, `.log`)
-*   Blocking XML-RPC
-*   Disabling Directory Browsing
-
-
-### `/examples/complete-schema-example.json`
-
-A full JSON Schema example demonstrating:
-1.  **Functional Controls**: Toggles with descriptions.
-2.  **Verification**: Dual `test_action` probes (Positive & Negative tests).
-3.  **Enforcement**: Use of `htaccess` driver with proper escaping.
-4.  **Documentation**: `operational_notes` for context.
-
-### `/scripts/validate-schema.js`
-
-A Node.js utility to validate generated JSON files.
-*   **Usage**: `node .agent/skills/vapt-builder/scripts/validate-schema.js <path-to-json>`
-*   **Checks**: Verifies JSON syntax, required fields (`controls`, `enforcement`), driver validity, and maps keys between controls and enforcement.
+*   **No custom PHP files**: Use the `hook` driver for application-level logic.
+*   **Strict JSON**: Must be valid for `json_decode()`.
+*   **Escaping**: Escape backslashes (`\\\\`) and quotes properly.
+*   **One Source**: Always cross-reference the `ENHANCED.json` catalog for the latest AI-compatible descriptions.

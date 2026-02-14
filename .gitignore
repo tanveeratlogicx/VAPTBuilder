@@ -52,3 +52,5 @@ wp-config.php
 # Note: If you wish to whitelist themes,
 # uncomment the next line
 #/wp-content/themes
+.agent/skills/vapt-builder/resources/VAPT-Complete-Risk-Catalog-99json
+.agent/skills/vapt-builder/resources/VAPT-SixT-Risk-Catalog-12json

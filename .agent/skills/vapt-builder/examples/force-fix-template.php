@@ -20,7 +20,7 @@ if (! function_exists('vapt_force_fix_YOUR_FEATURE_KEY')) {
       $schema = array(
         'controls' => array(
           array('type' => 'toggle', 'label' => 'Enable Feature', 'key' => 'enable_YOUR_FEATURE_KEY', 'help' => 'Description...'),
-          array('type' => 'test_action', 'label' => 'Verify', 'key' => 'verify_it', 'test_logic' => 'universal_probe', 'test_config' => ['path' => '/', 'expected_status' => 200])
+          array('type' => 'test_action', 'label' => 'Verify', 'key' => 'verify_it', 'test_logic' => 'universal_probe', 'test_config' => ['path' => '/', 'expected_status' => 200, 'expected_headers' => ['X-VAPTC-Enforced' => 'YOUR_FEATURE_KEY']])
         ),
         'enforcement' => array(
           'driver' => 'hook', // or 'htaccess'

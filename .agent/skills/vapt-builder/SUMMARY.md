@@ -8,9 +8,10 @@
 *   **Validation**: Includes tooling to syntax-check generated configurations.
 
 ## Source of Truth
-*   **Risk Catalog**: `data/VAPT-Complete-Risk-Catalog-99.json`
-*   **Plugin Version**: 3.3.20+
-*   **Drivers**: `vapt_htaccess_driver`, `vapt_nginx_driver`, `vapt_iis_driver`, `vapt_hook_driver`
+*   **Primary Catalog**: `resources/VAPT-Complete-Risk-Catalog-99-ENHANCED.json`
+*   **Split Catalogs**: Driver-specific JSON files in `resources/`
+*   **Plugin Version**: 3.12.2+
+*   **Drivers**: `htaccess`, `nginx`, `iis`, `wp-config`, `hook`, `manual`
 
 ## Quick Manifest
 
