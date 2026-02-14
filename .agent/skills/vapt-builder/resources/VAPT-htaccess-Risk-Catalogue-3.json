@@ -1,0 +1,736 @@
+{
+    "metadata": {
+        "schema_version": "3.2.0",
+        "plugin_name": "WordPress VAPT Protection Suite",
+        "generated_at": "2026-02-13T17:14:26+00:00",
+        "total_risks": 3,
+        "ai_agent_compatible": true,
+        "ui_framework": "React/WordPress-Admin",
+        "source_version": "3.1.0",
+        "source_document": "Feature-List-99.json",
+        "source_generated_at": "2026-01-28",
+        "enhancement_version": "1.0.0",
+        "enhancement_focus": "AI Agent Instructions & UI Builder Integration",
+        "driver": "htaccess"
+    },
+    "risk_catalog": [
+        {
+            "risk_id": "RISK-016",
+            "title": "XML-RPC API Security",
+            "category": "API Security",
+            "severity": {
+                "level": "medium",
+                "cvss_score": 5.3,
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                "business_impact": "Risk of API Security compromise leading to data breach or system compromise"
+            },
+            "description": {
+                "summary": "Tests the XML-RPC interface for vulnerabilities including pingback DDoS amplification, brute force attacks, and remote code execution.",
+                "detailed": "Tests the XML-RPC interface for vulnerabilities including pingback DDoS amplification, brute force attacks, and remote code execution.",
+                "attack_scenario": "An attacker exploits this api security to compromise system security",
+                "affected_components": [
+                    "WordPress Core",
+                    "Plugins",
+                    "Themes",
+                    "Custom Code"
+                ]
+            },
+            "owasp_mapping": {
+                "owasp_top_10_2021": "A00:2021-Security Risk",
+                "pci_dss": [
+                    "Requirement-6.5"
+                ],
+                "gdpr": [
+                    "Article-32"
+                ],
+                "nist_csf": [
+                    "PR.DS-5"
+                ],
+                "cwe": [
+                    "CWE-000"
+                ]
+            },
+            "testing": {
+                "test_method": "Manual API testing & automated scanning",
+                "difficulty": "easy",
+                "tools_required": [
+                    "Manual testing",
+                    "Browser DevTools"
+                ],
+                "verification_steps": [
+                    {
+                        "step_number": 1,
+                        "action": "1. Check if XML-RPC is enabled: curl -X POST -d '<methodCall><methodName>system.listMethods</methodName></methodCall>' http://site.com/xmlrpc.php",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "curl -X POST -d '<methodCall><methodName>system.listMethods</methodName></methodCall>' http://site.com/xmlrpc.php",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 2,
+                        "action": "2. Test pingback DDoS: use pingback.ping method",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "pingback.ping",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 3,
+                        "action": "3. Test brute force via wp.getUsersBlogs",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "wp.getUsersBlogs",
+                        "automated": true
+                    },
+                    {
+                        "step_number": 4,
+                        "action": "4. Check for authentication bypass",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 5,
+                        "action": "5. Test for XXE in XML-RPC requests",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 6,
+                        "action": "6. Use wpscan: wpscan --url http://site.com --disable-tls-checks --enumerate",
+                        "expected_result": "Should be protected/blocked",
+                        "command": "wpscan --url http://site.com --disable-tls-checks --enumerate",
+                        "automated": true
+                    }
+                ],
+                "test_payloads": [
+                    {
+                        "type": "XXE",
+                        "payload": "<?xml version=\"1.0\"?><!DOCTYPE root [<!ENTITY test SYSTEM \"file:///etc/passwd\">]>",
+                        "expected_behavior": "protected"
+                    }
+                ]
+            },
+            "protection": {
+                "remediation_effort": "medium",
+                "estimated_time": "1-4 hours",
+                "priority": 6,
+                "automated_protection": {
+                    "available": true,
+                    "method": "plugin-configuration",
+                    "implementation_steps": [
+                        {
+                            "step_number": 1,
+                            "description": "Disable XML-RPC if not needed: add to .htaccess `RewriteRule ^xmlrpc\\.php$ - [F,L]`. Use security plugins to block abuse. Implement rate limiting.",
+                            "file": "wp-config.php",
+                            "code": "Disable XML-RPC if not needed: add to .htaccess `RewriteRule ^xmlrpc\\.php$ - [F,L]`. Use security plugins to block abuse. Implement rate limiting.",
+                            "backup_required": true
+                        }
+                    ]
+                },
+                "manual_steps": [
+                    {
+                        "step_number": 1,
+                        "description": "Review and test the protection",
+                        "reason": "Requires validation in production environment",
+                        "verification": "Perform security testing after implementation"
+                    }
+                ],
+                "configuration_changes": {
+                    "wp_config": {
+                        "constants": []
+                    },
+                    "htaccess_rules": [],
+                    "php_ini": []
+                },
+                "plugin_dependencies": [],
+                "driver": "htaccess"
+            },
+            "verification_engine": {
+                "automated_checks": [
+                    {
+                        "check_id": "CHECK-016-001",
+                        "name": "XML-RPC API Security Check",
+                        "method": "endpoint-test",
+                        "script": "check_xml_rpc_security()",
+                        "success_criteria": {
+                            "condition": "equals",
+                            "expected_value": "protected",
+                            "actual_value_source": "security_scan"
+                        },
+                        "failure_message": "XML-RPC API Security vulnerability detected"
+                    }
+                ],
+                "manual_verification": [],
+                "continuous_monitoring": {
+                    "enabled": true,
+                    "frequency": "monthly",
+                    "alert_on_failure": true,
+                    "auto_remediate": false
+                }
+            },
+            "ui_configuration": {
+                "components": [
+                    {
+                        "component_id": "UI-xml-rpc-api-security-001",
+                        "type": "toggle",
+                        "label": "Enable XML-RPC API Security Protection",
+                        "description": "Activates protection against xml-rpc api security",
+                        "default_value": true,
+                        "options": [],
+                        "validation": {
+                            "required": false
+                        },
+                        "on_change": "toggleXML-RPCAPISecurity",
+                        "dependencies": []
+                    }
+                ],
+                "layout": {
+                    "section": "General",
+                    "order": 16,
+                    "collapsible": true,
+                    "default_expanded": false
+                },
+                "actions": [
+                    {
+                        "action_id": "ACTION-016-001",
+                        "type": "enable",
+                        "label": "Enable Protection",
+                        "confirmation_required": false,
+                        "confirmation_message": "This will enable protection. Continue?",
+                        "processing_message": "Enabling protection...",
+                        "success_message": "Protection enabled successfully",
+                        "error_handler": "handleProtectionError"
+                    }
+                ]
+            },
+            "reporting": {
+                "status_indicators": [
+                    {
+                        "indicator": "protected",
+                        "display": "badge",
+                        "message": "XML-RPC API Security protection active"
+                    }
+                ],
+                "export_formats": [
+                    "pdf",
+                    "json",
+                    "csv"
+                ],
+                "share_capability": true
+            },
+            "code_examples": [
+                {
+                    "language": "php",
+                    "description": "Implementation for XML-RPC API Security",
+                    "code": "Disable XML-RPC if not needed: add to .htaccess `RewriteRule ^xmlrpc\\.php$ - [F,L]`. Use security plugins to block abuse. Implement rate limiting.",
+                    "file_location": "functions.php or plugin file"
+                }
+            ],
+            "references": [
+                {
+                    "title": "OWASP Security Guide",
+                    "url": "https://owasp.org/",
+                    "type": "documentation"
+                },
+                {
+                    "title": "WordPress Security Best Practices",
+                    "url": "https://wordpress.org/support/article/hardening-wordpress/",
+                    "type": "documentation"
+                }
+            ],
+            "metadata": {
+                "created_at": "2026-01-28T18:23:59.197374Z",
+                "updated_at": "2026-01-28T18:23:59.197375Z",
+                "version": "1.0.0",
+                "author": "Security Team",
+                "review_status": "approved",
+                "tags": [
+                    "api security",
+                    "medium",
+                    "xml-rpc-security"
+                ]
+            },
+            "driver": "htaccess"
+        },
+        {
+            "risk_id": "RISK-090",
+            "title": "Username Enumeration via WordPress REST API",
+            "category": "Authentication",
+            "severity": {
+                "level": "medium",
+                "cvss_score": 5.3,
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                "business_impact": "Risk of Authentication compromise leading to data breach or system compromise"
+            },
+            "description": {
+                "summary": "WP REST API /wp/v2/users endpoint exposes usernames without authentication.",
+                "detailed": "WP REST API /wp/v2/users endpoint exposes usernames without authentication.",
+                "attack_scenario": "An attacker exploits this authentication to compromise system security",
+                "affected_components": [
+                    "WordPress Core",
+                    "Plugins",
+                    "Themes",
+                    "Custom Code"
+                ]
+            },
+            "owasp_mapping": {
+                "owasp_top_10_2021": "A01:2021 - Broken Access Control",
+                "pci_dss": [
+                    "Requirement-6.5"
+                ],
+                "gdpr": [
+                    "Article-32"
+                ],
+                "nist_csf": [
+                    "PR.DS-5"
+                ],
+                "cwe": [
+                    "CWE-000"
+                ]
+            },
+            "testing": {
+                "test_method": "REST API enumeration",
+                "difficulty": "easy",
+                "tools_required": [
+                    "Manual testing",
+                    "Browser DevTools"
+                ],
+                "verification_steps": [
+                    {
+                        "step_number": 1,
+                        "action": "1. GET /wp/v2/users",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 2,
+                        "action": "2. Check response for username slugs",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 3,
+                        "action": "3. Iterate ?page=2 for pagination",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 4,
+                        "action": "4. Verify no auth required",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    }
+                ],
+                "test_payloads": []
+            },
+            "protection": {
+                "remediation_effort": "medium",
+                "estimated_time": "1-4 hours",
+                "priority": 6,
+                "automated_protection": {
+                    "available": true,
+                    "method": "plugin-configuration",
+                    "implementation_steps": [
+                        {
+                            "step_number": 1,
+                            "description": "Add .htaccess rule: RewriteRule ^wp-json/wp/v2/users - [F]. Use authentication plugins.",
+                            "file": "wp-config.php",
+                            "code": "Add .htaccess rule: RewriteRule ^wp-json/wp/v2/users - [F]. Use authentication plugins.",
+                            "backup_required": true
+                        }
+                    ]
+                },
+                "manual_steps": [
+                    {
+                        "step_number": 1,
+                        "description": "Review and test the protection",
+                        "reason": "Requires validation in production environment",
+                        "verification": "Perform security testing after implementation"
+                    }
+                ],
+                "configuration_changes": {
+                    "wp_config": {
+                        "constants": []
+                    },
+                    "htaccess_rules": [],
+                    "php_ini": []
+                },
+                "plugin_dependencies": [],
+                "driver": "htaccess"
+            },
+            "verification_engine": {
+                "automated_checks": [
+                    {
+                        "check_id": "CHECK-090-001",
+                        "name": "Username Enumeration via WordPress REST API Check",
+                        "method": "endpoint-test",
+                        "script": "check_3()",
+                        "success_criteria": {
+                            "condition": "equals",
+                            "expected_value": "protected",
+                            "actual_value_source": "security_scan"
+                        },
+                        "failure_message": "Username Enumeration via WordPress REST API vulnerability detected"
+                    }
+                ],
+                "manual_verification": [],
+                "continuous_monitoring": {
+                    "enabled": true,
+                    "frequency": "monthly",
+                    "alert_on_failure": true,
+                    "auto_remediate": false
+                }
+            },
+            "ui_configuration": {
+                "components": [
+                    {
+                        "component_id": "UI-username-enumeration-via-wordpress-rest-api-001",
+                        "type": "toggle",
+                        "label": "Enable Username Enumeration via WordPress REST API Protection",
+                        "description": "Activates protection against username enumeration via wordpress rest api",
+                        "default_value": true,
+                        "options": [],
+                        "validation": {
+                            "required": false
+                        },
+                        "on_change": "toggleUsernameEnumerationviaWordPressRESTAPI",
+                        "dependencies": []
+                    },
+                    {
+                        "component_id": "UI-username-enumeration-via-wordpress-rest-api-002",
+                        "type": "dropdown",
+                        "label": "Protection Level",
+                        "description": "Select the strictness of protection",
+                        "default_value": "strict",
+                        "options": [
+                            "permissive",
+                            "moderate",
+                            "strict"
+                        ],
+                        "validation": {
+                            "required": true
+                        },
+                        "on_change": "updateProtectionLevel",
+                        "dependencies": [
+                            "UI-username-enumeration-via-wordpress-rest-api-001"
+                        ]
+                    }
+                ],
+                "layout": {
+                    "section": "General",
+                    "order": 90,
+                    "collapsible": true,
+                    "default_expanded": false
+                },
+                "actions": [
+                    {
+                        "action_id": "ACTION-090-001",
+                        "type": "enable",
+                        "label": "Enable Protection",
+                        "confirmation_required": false,
+                        "confirmation_message": "This will enable protection. Continue?",
+                        "processing_message": "Enabling protection...",
+                        "success_message": "Protection enabled successfully",
+                        "error_handler": "handleProtectionError"
+                    }
+                ]
+            },
+            "reporting": {
+                "status_indicators": [
+                    {
+                        "indicator": "protected",
+                        "display": "badge",
+                        "message": "Username Enumeration via WordPress REST API protection active"
+                    }
+                ],
+                "export_formats": [
+                    "pdf",
+                    "json",
+                    "csv"
+                ],
+                "share_capability": true
+            },
+            "code_examples": [
+                {
+                    "language": "php",
+                    "description": "Implementation for Username Enumeration via WordPress REST API",
+                    "code": "Add .htaccess rule: RewriteRule ^wp-json/wp/v2/users - [F]. Use authentication plugins.",
+                    "file_location": "functions.php or plugin file"
+                }
+            ],
+            "references": [
+                {
+                    "title": "OWASP Security Guide",
+                    "url": "https://owasp.org/",
+                    "type": "documentation"
+                },
+                {
+                    "title": "WordPress Security Best Practices",
+                    "url": "https://wordpress.org/support/article/hardening-wordpress/",
+                    "type": "documentation"
+                }
+            ],
+            "metadata": {
+                "created_at": "2026-01-28T18:23:59.202127Z",
+                "updated_at": "2026-01-28T18:23:59.202128Z",
+                "version": "1.0.0",
+                "author": "Security Team",
+                "review_status": "approved",
+                "tags": [
+                    "authentication",
+                    "medium",
+                    "3"
+                ]
+            },
+            "driver": "htaccess"
+        },
+        {
+            "risk_id": "RISK-092",
+            "title": "Exposed WordPress Admin Username via Author Query",
+            "category": "Information Disclosure",
+            "severity": {
+                "level": "medium",
+                "cvss_score": 5.3,
+                "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                "business_impact": "Risk of Information Disclosure compromise leading to data breach or system compromise"
+            },
+            "description": {
+                "summary": "/?author=1 reveals admin usernames through IDOR in author archives.",
+                "detailed": "/?author=1 reveals admin usernames through IDOR in author archives.",
+                "attack_scenario": "An attacker exploits this information disclosure to compromise system security",
+                "affected_components": [
+                    "WordPress Core",
+                    "Plugins",
+                    "Themes",
+                    "Custom Code"
+                ]
+            },
+            "owasp_mapping": {
+                "owasp_top_10_2021": "A01:2021 - Broken Access Control",
+                "pci_dss": [
+                    "Requirement-6.5"
+                ],
+                "gdpr": [
+                    "Article-32"
+                ],
+                "nist_csf": [
+                    "PR.DS-5"
+                ],
+                "cwe": [
+                    "CWE-000"
+                ]
+            },
+            "testing": {
+                "test_method": "Author ID enumeration",
+                "difficulty": "easy",
+                "tools_required": [
+                    "Manual testing",
+                    "Browser DevTools"
+                ],
+                "verification_steps": [
+                    {
+                        "step_number": 1,
+                        "action": "1. Access /?author=1",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 2,
+                        "action": "2. Extract author name from meta/h1",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 3,
+                        "action": "3. Iterate author=2,3,...",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    },
+                    {
+                        "step_number": 4,
+                        "action": "4. Check post archives",
+                        "expected_result": "Should be protected/blocked",
+                        "command": null,
+                        "automated": false
+                    }
+                ],
+                "test_payloads": []
+            },
+            "protection": {
+                "remediation_effort": "low",
+                "estimated_time": "1-4 hours",
+                "priority": 6,
+                "automated_protection": {
+                    "available": true,
+                    "method": "plugin-configuration",
+                    "implementation_steps": [
+                        {
+                            "step_number": 1,
+                            "description": "Add .htaccess: RewriteCond %{QUERY_STRING} ^author=.* [NC] RewriteRule .* - [R=403]. Rename admin user.",
+                            "file": "wp-config.php",
+                            "code": "Add .htaccess: RewriteCond %{QUERY_STRING} ^author=.* [NC] RewriteRule .* - [R=403]. Rename admin user.",
+                            "backup_required": true
+                        }
+                    ]
+                },
+                "manual_steps": [
+                    {
+                        "step_number": 1,
+                        "description": "Review and test the protection",
+                        "reason": "Requires validation in production environment",
+                        "verification": "Perform security testing after implementation"
+                    }
+                ],
+                "configuration_changes": {
+                    "wp_config": {
+                        "constants": []
+                    },
+                    "htaccess_rules": [],
+                    "php_ini": []
+                },
+                "plugin_dependencies": [],
+                "driver": "htaccess"
+            },
+            "verification_engine": {
+                "automated_checks": [
+                    {
+                        "check_id": "CHECK-092-001",
+                        "name": "Exposed WordPress Admin Username via Author Query Check",
+                        "method": "endpoint-test",
+                        "script": "check_5()",
+                        "success_criteria": {
+                            "condition": "equals",
+                            "expected_value": "protected",
+                            "actual_value_source": "security_scan"
+                        },
+                        "failure_message": "Exposed WordPress Admin Username via Author Query vulnerability detected"
+                    }
+                ],
+                "manual_verification": [],
+                "continuous_monitoring": {
+                    "enabled": true,
+                    "frequency": "monthly",
+                    "alert_on_failure": true,
+                    "auto_remediate": false
+                }
+            },
+            "ui_configuration": {
+                "components": [
+                    {
+                        "component_id": "UI-exposed-wordpress-admin-username-via-author-query-001",
+                        "type": "toggle",
+                        "label": "Enable Exposed WordPress Admin Username via Author Query Protection",
+                        "description": "Activates protection against exposed wordpress admin username via author query",
+                        "default_value": true,
+                        "options": [],
+                        "validation": {
+                            "required": false
+                        },
+                        "on_change": "toggleExposedWordPressAdminUsernameviaAuthorQuery",
+                        "dependencies": []
+                    },
+                    {
+                        "type": "textarea",
+                        "label": "Implementation & Operational Notes",
+                        "key": "operational_notes",
+                        "help": "Record deployment specific notes, override settings, or environmental context here.",
+                        "visibility": {
+                            "condition": "always",
+                            "fallback": "show"
+                        }
+                    },
+                    {
+                        "type": "risk_indicators",
+                        "label": "Threat Vector Coverage",
+                        "items": [
+                            "A01:2021 - Broken Access Control",
+                            "Information Disclosure (CWE-200)",
+                            "Insecure Direct Object Reference (IDOR)"
+                        ]
+                    },
+                    {
+                        "type": "assurance_badges",
+                        "label": "Security Assurance",
+                        "items": [
+                            "Enumeration Protected",
+                            "Hardened Access Control",
+                            "Automated Enforcement"
+                        ]
+                    }
+                ],
+                "layout": {
+                    "section": "General",
+                    "order": 92,
+                    "collapsible": true,
+                    "default_expanded": false
+                },
+                "actions": [
+                    {
+                        "action_id": "ACTION-092-001",
+                        "type": "enable",
+                        "label": "Enable Protection",
+                        "confirmation_required": false,
+                        "confirmation_message": "This will enable protection. Continue?",
+                        "processing_message": "Enabling protection...",
+                        "success_message": "Protection enabled successfully",
+                        "error_handler": "handleProtectionError"
+                    }
+                ]
+            },
+            "reporting": {
+                "status_indicators": [
+                    {
+                        "indicator": "protected",
+                        "display": "badge",
+                        "message": "Exposed WordPress Admin Username via Author Query protection active"
+                    }
+                ],
+                "export_formats": [
+                    "pdf",
+                    "json",
+                    "csv"
+                ],
+                "share_capability": true
+            },
+            "code_examples": [
+                {
+                    "language": "php",
+                    "description": "Implementation for Exposed WordPress Admin Username via Author Query",
+                    "code": "Add .htaccess: RewriteCond %{QUERY_STRING} ^author=.* [NC] RewriteRule .* - [R=403]. Rename admin user.",
+                    "file_location": "functions.php or plugin file"
+                }
+            ],
+            "references": [
+                {
+                    "title": "OWASP Security Guide",
+                    "url": "https://owasp.org/",
+                    "type": "documentation"
+                },
+                {
+                    "title": "WordPress Security Best Practices",
+                    "url": "https://wordpress.org/support/article/hardening-wordpress/",
+                    "type": "documentation"
+                }
+            ],
+            "metadata": {
+                "created_at": "2026-01-28T18:23:59.202257Z",
+                "updated_at": "2026-01-28T18:23:59.202258Z",
+                "version": "1.0.0",
+                "author": "Security Team",
+                "review_status": "approved",
+                "tags": [
+                    "information disclosure",
+                    "medium",
+                    "5"
+                ]
+            },
+            "driver": "htaccess"
+        }
+    ]
+}
