@@ -111,12 +111,17 @@ class VAPT_Htaccess_Driver
       }
     }
 
-    // 2. Wrap collected rules in a marker header for verification (v3.12.5 - Compacted)
+    // 2. Wrap collected rules in a marker comment for verification (v3.12.10 - Anonymous)
     if (!empty($rules)) {
       $feature_key = isset($schema['feature_key']) ? $schema['feature_key'] : 'unknown';
-      // Compact headers into single block
+      $hash = substr(md5($feature_key), 0, 8); // Short hash for anonymity
+
+      $header_block = "<IfModule mod_headers.c>\n  Header set X-VAPT-Enforced \"htaccess\"\n</IfModule>";
+      $id_marker = "# VAPTID-$hash";
+
+      // Prepend marker and header block
       $rules = array_merge(
-        ["<IfModule mod_headers.c>\n  Header set X-VAPT-Enforced \"htaccess\"\n  Header append X-VAPT-Feature \"$feature_key\"\n</IfModule>"],
+        [$id_marker, $header_block],
         $rules
       );
     }
@@ -145,12 +150,13 @@ class VAPT_Htaccess_Driver
     }
 
     $content = file_get_contents($htaccess_path);
-    $search_string = "X-VAPT-Feature \"$key\"";
+    $hash = substr(md5($key), 0, 8);
+    $search_string = "VAPTID-$hash";
     $found = (strpos($content, $search_string) !== false);
 
-    error_log("VAPT VERIFY: Looking for '$search_string' - " . ($found ? 'FOUND' : 'NOT FOUND'));
+    error_log("VAPT VERIFY: Looking for anonymous ID '$search_string' - " . ($found ? 'FOUND' : 'NOT FOUND'));
 
-    // Look for the specific feature key within our VAPT block
+    // Look for the specific feature hash within our VAPT block
     return $found;
   }
 
@@ -189,7 +195,16 @@ class VAPT_Htaccess_Driver
     $rules_string = "";
 
     if (!empty($all_rules_array)) {
-      $rules_string = "\n" . $start_marker . "\n" . implode("\n", $all_rules_array) . "\n" . $end_marker . "\n";
+      $has_rewrite = false;
+      foreach ($all_rules_array as $rule) {
+        if (stripos($rule, 'RewriteCond') !== false || stripos($rule, 'RewriteRule') !== false) {
+          $has_rewrite = true;
+          break;
+        }
+      }
+
+      $glue = ($has_rewrite) ? "\n  RewriteEngine On\n" : "\n";
+      $rules_string = "\n" . $start_marker . $glue . implode("\n\n", $all_rules_array) . "\n" . $end_marker . "\n";
     }
 
     // Replace or Append
@@ -205,16 +220,14 @@ class VAPT_Htaccess_Driver
       $new_content = preg_replace($old_pattern, trim($rules_string), $content);
     } else {
       // Append if not found
+      // Prepend to top for absolute effectiveness (v3.12.9)
       if ($target_key === 'root') {
-        if (strpos($content, "# END WordPress") !== false) {
-          $new_content = str_replace("# END WordPress", "# END WordPress\n" . $rules_string, $content);
+        if (strpos($content, "# BEGIN WordPress") !== false) {
+          $new_content = $rules_string . "\n" . $content;
         } else {
-          $new_content = $content . $rules_string;
+          $new_content = $rules_string . $content;
         }
       } else {
-        // For non-root (like uploads), usually we control the whole file, but let's be safe and just append/replace block
-        // Actually for uploads, we might just be the only owner. 
-        // But adhering to the block strategy is safer.
         $new_content = $content . $rules_string;
       }
     }
@@ -274,9 +287,10 @@ class VAPT_Htaccess_Driver
     $directive = trim($directive);
     if (empty($directive)) return $directive;
 
-    // If already wrapped in IfModule, skip
+    // [v3.12.9] If already wrapped, strip wrapper to apply our clean formatting
     if (stripos($directive, '<IfModule') === 0) {
-      return $directive;
+      $directive = preg_replace('/^<IfModule.*?>\s*(.*?)\s*<\/IfModule>$/s', '$1', $directive);
+      $directive = trim($directive);
     }
 
     // Wrap mod_headers directives
@@ -293,10 +307,11 @@ class VAPT_Htaccess_Driver
       foreach ($lines as $line) {
         $trimmed = trim($line);
         if (empty($trimmed)) {
-          $formatted_lines[] = '';
+          // Skip empty lines to prevent gaps at start or between directives
+          continue;
         } elseif (strpos($trimmed, '#') === 0) {
-          // Comment line - add blank line before it and indent
-          if (!empty($formatted_lines) && end($formatted_lines) !== '') {
+          // Comment line - add blank line before it and indent (unless it's the first line)
+          if (!empty($formatted_lines)) {
             $formatted_lines[] = '';
           }
           $formatted_lines[] = '  ' . $trimmed;

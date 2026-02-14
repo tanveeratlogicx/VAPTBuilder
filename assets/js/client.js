@@ -271,7 +271,28 @@
           el('div', { style: { display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'center', gap: '20px', width: '100%' } }, [
             el('div', null, [
               el('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } }, [
-                el('h3', { style: { margin: 0, fontSize: '16px', fontWeight: 700, color: '#111827' } }, f.label),
+                el('h3', { style: { margin: 0, fontSize: '16px', fontWeight: 700, color: '#111827', display: 'flex', alignItems: 'center' } }, [
+                  f.label,
+                  f.severity && el('span', {
+                    style: {
+                      marginLeft: '15px',
+                      fontSize: '11px',
+                      fontWeight: '700',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      textTransform: 'uppercase',
+                      color: '#fff',
+                      background: (() => {
+                        const s = f.severity.toLowerCase();
+                        if (s === 'critical') return '#dc2626'; // Red
+                        if (s === 'high') return '#ea580c';     // Orange
+                        if (s === 'medium') return '#2271b1';   // Blue
+                        return '#64748b';                        // Slate (Low/Info)
+                      })(),
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    }
+                  }, f.severity)
+                ]),
                 f.description && el('p', { style: { margin: 0, fontSize: '12px', color: '#64748b', lineHeight: '1.4' } }, f.description)
               ])
             ]),

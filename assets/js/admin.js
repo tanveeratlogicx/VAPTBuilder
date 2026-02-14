@@ -686,23 +686,6 @@ window.vaptScriptLoaded = true;
       title: el('div', { className: 'vapt-design-modal-header' }, [
         el('div', { className: 'vapt-flex-row', style: { gap: '10px', alignItems: 'center' } }, [
           el('span', null, sprintf(__('Design Implementation: %s', 'vapt-builder'), feature.label)),
-          // Severity Badge (v3.12.4)
-          (() => {
-            const severity = parsedSchema?.metadata?.severity;
-            if (!severity) return null;
-            const s = severity.toLowerCase();
-            return el('span', {
-              style: {
-                padding: '2px 8px',
-                borderRadius: '4px',
-                fontSize: '10px',
-                fontWeight: '700',
-                color: '#fff',
-                textTransform: 'uppercase',
-                background: s === 'critical' ? '#dc2626' : (s === 'high' ? '#ea580c' : '#2271b1')
-              }
-            }, severity);
-          })(),
         ]),
         // Status Pill
         el('span', {
