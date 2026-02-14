@@ -462,6 +462,22 @@ window.vaptScriptLoaded = true;
     const copyContext = () => {
       let contextJson = '';
 
+      // 1. Determine Driver Priority based on Active Datasource (v3.13.0)
+      let prioritizedDriver = 'hook';
+      let driverContextInstruction = '';
+      const activeFiles = (selectedFile || '').split(',');
+
+      if (activeFiles.some(f => f.includes('htaccess'))) {
+        prioritizedDriver = 'htaccess';
+        driverContextInstruction = `\n      - **CRITICAL**: The active datasource is an **htaccess** catalog. You MUST prioritize the 'htaccess' driver.`;
+      } else if (activeFiles.some(f => f.includes('wp-config'))) {
+        prioritizedDriver = 'wp-config';
+        driverContextInstruction = `\n      - **CRITICAL**: The active datasource is a **wp-config/hook** catalog. Use PHP constants or hooks.`;
+      } else if (activeFiles.some(f => f.includes('nginx'))) {
+        prioritizedDriver = 'nginx';
+        driverContextInstruction = `\n      - **CRITICAL**: The active datasource is an **nginx** catalog. Use Nginx directives.`;
+      }
+
       if (designPromptConfig) {
         contextJson = typeof designPromptConfig === 'string'
           ? designPromptConfig
@@ -469,7 +485,7 @@ window.vaptScriptLoaded = true;
       } else {
         const defaultTemplate = {
           "design_prompt": {
-            "interface_type": "Interactive Security Assessment Interface",
+            "interface_type": "Interactive VAPT Functional Workbench",
             "schema_definition": "WordPress VAPT schema with standardized control fields",
             "id": "{{id}}",
             "title": "{{title}}",
@@ -496,41 +512,33 @@ window.vaptScriptLoaded = true;
                 "Manual Verification (Full-Width Protocol & Evidence Checklist)",
                 "Automated Verification (Trigger Actions & Live Status)"
               ],
-              "styling": "Standardized cards with subtle shadows, 24px padding, and clear hierarchy."
+              "styling": "Standardized cards with subtle shadows and clear hierarchy."
             },
             "automation_context": {
               "ai_check_prompt": "{{automation_prompts.ai_check}}",
               "ai_schema_fields": "{{automation_prompts.ai_schema}}"
             },
             "implementation_strategy": {
-              "execution_driver": "Hybrid (Htaccess + PHP Hook Driver)",
-              "enforcement_mechanism": "Intelligent automated selection based on target type.",
+              "execution_driver": `Prioritize: ${prioritizedDriver}`,
+              "enforcement_mechanism": "Intelligent automated selection based on active datasource.",
               "decision_matrix": {
-                "driver: htaccess": "Use for physical files (.html, .txt, .php.bak, .env, xmlrpc.php) or server-wide blocking (Directory Browsing). Requires target: root.",
-                "driver: hook": "Use for dynamic PHP logic, headers, or request interceptions (e.g. wp_head, init, login_init)."
+                "driver: htaccess": "Use for physical files, server-wide blocking, or headers. Requires 'target': 'root'.",
+                "driver: hook": "Use for dynamic PHP logic, headers, or request interceptions (wp_head, init).",
+                "driver: wp-config": "Use for PHP constants (e.g. DISALLOW_FILE_EDIT)."
               },
               "available_methods": [
-                "limit_login_attempts - Enforces rate limiting (requires 'limit' or 'rate_limit' key)",
-                "block_xmlrpc - Blocks XML-RPC requests (requires toggle)",
-                "disable_directory_browsing - Blocks directory listing",
-                "enable_security_headers - Injects security headers",
-                "block_null_byte_injection - blocks null byte chars",
-                "hide_wp_version - Hides version",
-                "block_debug_exposure - Blocks debug.log access",
-                "block_author_enumeration - Blocks author archives",
-                "disable_xmlrpc_pingback - Disables XML-RPC pingbacks",
-                "block_sensitive_files - Blocks readme.html, license.txt, etc."
+                "block_xmlrpc",
+                "add_security_headers",
+                "hide_wp_version",
+                "block_user_enumeration",
+                "disable_file_editors",
+                "block_debug_exposure",
+                "limit_login_attempts"
               ],
-              "data_binding": "Controls must use 'key' to bind to method arguments."
+              "data_binding": "Controls must use 'key' to bind to enforcer logic."
             },
             "verification_protocol": {
-              "operational_notes": "Contextual help and operational guidance (Right Column)",
-              "manual_verification": "Step-by-step human verification (Evidence Checklist)",
-              "automated_verification": "Interactive test actions for real-time proof"
-            },
-            "threat_model": {
-              "risks": "{{risks}}",
-              "assurance_against": "{{assurance_against}}"
+              "automated_verification": "Interactive test actions (universal_probe) for real-time proof"
             },
             "raw_feature_context": "{{raw_json}}",
             "previous_implementation": "{{previous_schema}}"
@@ -540,19 +548,17 @@ window.vaptScriptLoaded = true;
         contextJson = JSON.stringify(defaultTemplate, null, 2);
       }
 
-      // 1. Extract Development Guidance
+      // 2. Extract Development Guidance
       let displayInstruct = feature.dev_instruct || feature.devInstruct || '';
       if (!displayInstruct && feature.generated_schema) {
         try {
           const schema = typeof feature.generated_schema === 'string' ? JSON.parse(feature.generated_schema) : feature.generated_schema;
-          if (schema && schema.instruction) {
-            displayInstruct = schema.instruction;
-          }
+          if (schema && schema.instruction) displayInstruct = schema.instruction;
         } catch (e) { }
       }
       if (!displayInstruct) displayInstruct = 'No specific guidelines provided.';
 
-      // 2. Extract Reference Code (v3.6.10)
+      // 3. Extract Reference Code
       let referenceCode = '';
       if (feature.code_examples && Array.isArray(feature.code_examples)) {
         referenceCode = feature.code_examples.map(ex => {
@@ -576,7 +582,6 @@ window.vaptScriptLoaded = true;
       contextJson = replaceAll(contextJson, 'assurance', Array.isArray(feature.assurance) ? feature.assurance.join(', ') : (feature.assurance || ''));
       contextJson = replaceAll(contextJson, 'tests', Array.isArray(feature.tests) ? feature.tests.join(', ') : (feature.tests || ''));
       contextJson = replaceAll(contextJson, 'evidence', Array.isArray(feature.evidence) ? feature.evidence.join(', ') : (feature.evidence || ''));
-      contextJson = replaceAll(contextJson, 'schema_hints.fields', feature.schema_hints?.fields?.map(f => `${f.name} (${f.type})`).join(', '));
       contextJson = replaceAll(contextJson, 'test_method', feature.test_method || '');
       contextJson = replaceAll(contextJson, 'owasp', feature.owasp || '');
       contextJson = replaceAll(contextJson, 'cwe', feature.cwe || '');
@@ -584,32 +589,28 @@ window.vaptScriptLoaded = true;
       contextJson = replaceAll(contextJson, 'evidence_requirements', Array.isArray(feature.evidence_requirements) ? feature.evidence_requirements.join(', ') : (feature.evidence_requirements || ''));
       contextJson = replaceAll(contextJson, 'verification_steps', Array.isArray(feature.verification_steps) ? feature.verification_steps.join(', ') : (feature.verification_steps || ''));
 
-      // Structural Alignment (v3.3.3)
       const rawContext = { ...feature };
       delete rawContext.generated_schema;
       delete rawContext.implementation_data;
       contextJson = replaceAll(contextJson, 'raw_json', JSON.stringify(rawContext, null, 2));
       contextJson = replaceAll(contextJson, 'previous_schema', feature.generated_schema || 'None');
 
-      // Dynamic Substitution
       const prompts = feature.automation_prompts || {};
       contextJson = replaceAll(contextJson, 'automation_prompts.ai_ui', prompts.ai_ui || `Interactive JSON Schema for VAPT Workbench.`);
       contextJson = replaceAll(contextJson, 'automation_prompts.ai_check', prompts.ai_check || `PHP verification logic for ${feature.label || 'this feature'}.`);
       contextJson = replaceAll(contextJson, 'automation_prompts.ai_schema', prompts.ai_schema || `Essential schema fields for ${feature.label || 'this feature'}.`);
 
-      // Assemble HYBRID PROMPT
+      // 4. Assemble HYBRID PROMPT (v3.13.0 - VAPT Builder Skill Aligned)
       const finalPrompt = `
       --- ROLE & OBJECTIVE ---
-      You are an Expert WordPress Security Engineer, UI Designer, and VAPT Specialist. Your core mandate is to implement security controls that adhere to VAPT and OWASP Top 10 risks and WordPress Coding Standards.
-
-      I need you to generate a highly optimized JSON Schema for a 'Functional Workbench' interface for the following security feature:
+      You are the **VAPT Builder Expert**. Your mandate is to implement security controls in the VAPTBuilder Plugin using standardized JSON schemas. You MUST follow the **Feature Implementation Protocol** (Locate -> Extract -> Map -> Configure -> Define).
 
       --- DESIGN CONTEXT (JSON) ---
       ${contextJson}
       --- 
 
       --- REFERENCE CODE ---
-      ${referenceCode || 'No specific reference code provided in catalog.'}
+      ${referenceCode || 'No specific reference code provided.'}
       ---
 
       --- FEATURE-SPECIFIC REQUIREMENTS ---
@@ -617,61 +618,32 @@ window.vaptScriptLoaded = true;
       ---
 
       --- INSTRUCTIONS & CRITICAL RULES ---
-      1. **Response Format**: Provide ONLY a JSON block. No preamble or conversation.
-      2. **Schema Structure**: You MUST include both 'controls' and 'enforcement' blocks.
-      3. **Reference Code Usage**: You **MUST** first check the 'REFERENCE CODE' section.
-         - If 'htaccess' rules are provided, use the 'htaccess' driver.
-         - If PHP code is provided, use the 'hook' driver.
-         - Map controls to the exact logic shown in the reference.
-      4. **Control Properties (MANDATORY)**:
-         - Every object in the 'controls' array ** MUST ** have a 'type' field.
-         - ** Functional **: 'toggle', 'input', 'select', 'textarea', 'code', 'test_action', 'button', 'password'. (MUST HAVE 'key' & 'default').
-         - ** Presentational **: 'info', 'alert', 'section', 'group', 'divider', 'html', 'header', 'label'. (NO 'key' required).
-         - ** Rich UI **: 'risk_indicators', 'assurance_badges', 'test_checklist', 'evidence_list'. (NO 'key' required).
-          - ** Optional **: 'visibility': { 'condition': 'has_content', 'fallback': 'hide' } - Use this to suppress empty informational blocks.
-      5. ** JSON Skeleton **:
-        \`\`\`json
+      1. **Response Format**: Provide ONLY a JSON block. No preamble.
+      2. **Schema Structure**: Include both 'controls' and 'enforcement' blocks.${driverContextInstruction}
+      3. **Reference Code**: Prioritize the logic shown in 'REFERENCE CODE'.
+      4. **Control Types**: Use 'toggle', 'input', 'select', 'textarea', 'code', 'test_action'.
+      5. **Enforcement Drivers**:
+         - Use 'htaccess' for physical files or server blocking. (Requires "target": "root").
+         - Use 'hook' or 'wp-config' for PHP-level logic.
+      6. **JSON Skeleton**:
+      \`\`\`json
       {
         "controls": [
-          { "type": "header", "label": "Implementation" },
           { "type": "toggle", "label": "Enable Feature", "key": "feat_enabled", "default": true },
-          { "type": "test_action", "label": "Verify Protection", "key": "verify_feat", "test_logic": "universal_probe", "test_config": { ... } }
+          { "type": "test_action", "label": "Verify", "key": "verify_feat", "test_logic": "universal_probe", "test_config": { ... } }
         ],
         "enforcement": { 
-          "driver": "hook", 
-          "mappings": { "feat_enabled": "backend_method_name" } 
-        },
-        "// Alternative Htaccess Driver": {
-          "enforcement": {
-            "driver": "htaccess",
-            "target": "root",
-            "mappings": {
-              "feat_enabled": "<FilesMatch \\"readme\\\\.html\\">\\\\nOrder allow,deny\\\\nDeny from all\\\\n</FilesMatch>"
-            }
-          }
+          "driver": "${prioritizedDriver}", 
+          "mappings": { "feat_enabled": "logic_or_directive" } 
         }
       }
       \`\`\`
-      6. **Enforcement Drivers (INTELLIGENT SELECTION)**:
-         - **MANDATORY**: Use 'htaccess' for any feature targeting physical files (e.g. readme.html, license.txt, xmlrpc.php, .env). PHP hooks CANNOT block these effectively on Apache.
-         - Use 'hook' for dynamic logic, API interceptions, or header injections.
-         - For 'htaccess', ALWAYS include 'target': 'root' in the enforcement block.
-      7. **Visibility Overrides**:
-         - INCLUDE 'test_checklist' and 'evidence_list' for verification.
-         - ${includeNotes ? "INCLUDE a 'textarea' with key 'operational_notes' for Implementation Notes. Use visibility: { \"condition\": \"has_content\", \"fallback\": \"hide\" } to ensure it remains hidden if empty." : "EXCLUDE operational notes textarea."}
-      8. **No Orphan Headers**: Do NOT include 'header' or 'section' controls if they are not followed by functional controls.
+      7. **Automated Verification**: Use 'test_action' with 'universal_probe'.
+      8. **Escaping**: Escape backslashes (\\\\\\\\) and quotes properly in JSON strings.
 
-9. **Automated Verification (CRITICAL)**:
-   - Use 'test_action' for verification buttons.
-   - **MUST** include 'test_logic'. Valid options: 'universal_probe', 'check_headers', 'spam_requests', 'block_xmlrpc', 'disable_directory_browsing', 'hide_wp_version', 'block_null_byte_injection'.
-   - For 'universal_probe', ensure 'test_config' is complete: { "method": "GET|POST", "path": "/", "expected_status": [200|403|429], "expected_text": "text_to_find" }.
-   - If information is missing for a valid test, add an 'alert' control explaining exactly what is needed (e.g., "Missing endpoint path").
-10. **Toggle Labels**: All 'toggle' controls MUST have a clear 'label' explaining what they enable/disable.
-11. **Enforcement Logic**: Ensure 'enforcement.mappings' bind the functional keys (e.g., toggles) to the backend strategy.
-
-Feature Name: ${feature.name || feature.label || feature.title}
-Feature ID: ${feature.id || 'N/A'}
-`;
+      Feature Name: ${feature.label || 'Unnamed Feature'}
+      Feature ID: ${feature.id || 'N/A'}
+      `;
 
       // Personalize Domain (v3.3.0)
       const currentDomain = (settings.currentDomain || window.location.hostname || 'hermasnet.local').split(':')[0];
@@ -697,6 +669,7 @@ Feature ID: ${feature.id || 'N/A'}
         setTimeout(() => setSaveStatus(null), 3000);
       });
     };
+
 
     return el(Modal, {
       title: el('div', { className: 'vapt-design-modal-header' }, [
