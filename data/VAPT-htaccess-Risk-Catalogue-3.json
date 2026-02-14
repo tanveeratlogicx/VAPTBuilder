@@ -142,7 +142,14 @@
                     "php_ini": []
                 },
                 "plugin_dependencies": [],
-                "driver": "htaccess"
+                "driver": "htaccess",
+                "enforcement": {
+                    "driver": "htaccess",
+                    "target": "root",
+                    "mappings": {
+                        "UI-xml-rpc-api-security-001": "<Files xmlrpc.php>\n  Order Deny,Allow\n  Deny from all\n</Files>"
+                    }
+                }
             },
             "verification_engine": {
                 "automated_checks": [

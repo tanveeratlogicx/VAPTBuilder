@@ -79,6 +79,7 @@ class VAPT_Htaccess_Driver
 
     // DEBUG: Log what we're receiving
     error_log('VAPT DEBUG generate_rules - Data received: ' . print_r($data, true));
+    error_log('VAPT DEBUG generate_rules - Schema Enforcement: ' . print_r($enf_config, true));
     error_log('VAPT DEBUG generate_rules - Mappings: ' . print_r(array_keys($mappings), true));
 
 
@@ -126,6 +127,7 @@ class VAPT_Htaccess_Driver
       );
     }
 
+    error_log('VAPT DEBUG generate_rules - Final Rules: ' . print_r($rules, true));
     return $rules;
   }
 
@@ -220,12 +222,15 @@ class VAPT_Htaccess_Driver
       $new_content = preg_replace($old_pattern, trim($rules_string), $content);
     } else {
       // Append if not found
-      // Prepend to top for absolute effectiveness (v3.12.9)
+      // [ENHANCEMENT v3.12.13] Place VAPT Rules AFTER WordPress Core Block
       if ($target_key === 'root') {
-        if (strpos($content, "# BEGIN WordPress") !== false) {
-          $new_content = $rules_string . "\n" . $content;
+        if (strpos($content, "# END WordPress") !== false) {
+          // Insert AFTER the WordPress block
+          $parts = explode("# END WordPress", $content);
+          $new_content = $parts[0] . "# END WordPress\n" . $rules_string . (isset($parts[1]) ? $parts[1] : "");
         } else {
-          $new_content = $rules_string . $content;
+          // If no WP block, append to end
+          $new_content = $content . "\n" . $rules_string;
         }
       } else {
         $new_content = $content . $rules_string;
@@ -287,8 +292,9 @@ class VAPT_Htaccess_Driver
     $directive = trim($directive);
     if (empty($directive)) return $directive;
 
-    // [v3.12.9] If already wrapped, strip wrapper to apply our clean formatting
-    if (stripos($directive, '<IfModule') === 0) {
+    // [FIX v3.12.13] Only strip IfModule if it's a single, simple block.
+    // Prevents mangling complex directives that contain multiple internal blocks.
+    if (stripos($directive, '<IfModule') === 0 && substr_count(strtolower($directive), '<ifmodule') === 1) {
       $directive = preg_replace('/^<IfModule.*?>\s*(.*?)\s*<\/IfModule>$/s', '$1', $directive);
       $directive = trim($directive);
     }
@@ -354,6 +360,7 @@ class VAPT_Htaccess_Driver
 
     foreach (self::$dangerous_patterns as $pattern) {
       if (preg_match($pattern, $directive)) {
+        error_log("VAPT DEBUG: Rejected directive matching pattern $pattern: " . substr($directive, 0, 100));
         return [
           'valid' => false,
           'reason' => sprintf('Contains dangerous pattern: %s', $pattern)
@@ -361,15 +368,19 @@ class VAPT_Htaccess_Driver
       }
     }
 
-    if (preg_match('/<[^>]*php[^>]*>/i', $directive)) {
+    // [FIX] Refine PHP detection to allow PHP filenames in legitimate tags (v3.12.13)
+    if (preg_match('/<\?php|<\?=|<script\s+language=["\']php["\']/i', $directive)) {
+      error_log("VAPT DEBUG: Rejected directive containing PHP tags: " . substr($directive, 0, 100));
       return ['valid' => false, 'reason' => 'Contains PHP-related tags'];
     }
 
     if (preg_match('/[<>{}]/', $directive) && !preg_match('/<(?:IfModule|Files|Directory|FilesMatch|DirectoryMatch)/i', $directive)) {
+      error_log("VAPT DEBUG: Rejected directive for special characters: " . substr($directive, 0, 100));
       return ['valid' => false, 'reason' => 'Contains unescaped special characters'];
     }
 
     if (strlen($directive) > 4096) {
+      error_log("VAPT DEBUG: Rejected directive for length: " . strlen($directive));
       return ['valid' => false, 'reason' => 'Directive exceeds maximum length (4096 characters)'];
     }
 

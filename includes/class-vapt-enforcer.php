@@ -188,6 +188,10 @@ class VAPT_Enforcer
     // [ENHANCEMENT] Filter by Active Data Files (v3.12.0)
     $active_keys = self::get_active_file_keys();
     $enforced_features = array_filter($enforced_features, function ($feat) use ($active_keys) {
+      // [FIX] Always allow XML-RPC regardless of key mismatch (v3.12.13)
+      if (strpos($feat['feature_key'], 'xml-rpc') !== false || strpos($feat['feature_key'], 'xmlrpc') !== false || $feat['feature_key'] === 'RISK-016-001') {
+        return true;
+      }
       return in_array($feat['feature_key'], $active_keys);
     });
 

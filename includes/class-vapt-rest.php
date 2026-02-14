@@ -551,6 +551,7 @@ class VAPT_REST
         $is_legacy_format = isset($schema['type']) && in_array($schema['type'], ['wp_config', 'htaccess', 'manual', 'complex_input']);
 
         if (!$is_legacy_format) {
+          $schema = self::sanitize_and_fix_schema($schema);
           $validation = self::validate_schema($schema);
           if (is_wp_error($validation)) {
             return new WP_REST_Response(array(
@@ -561,8 +562,37 @@ class VAPT_REST
             ), 400);
           }
 
+          // 🛡️ DATA EXTRACTION (v3.13.0)
+          // Extract rich context for specific UI tabs
+          if (isset($schema['manual_protocol'])) {
+            $meta_updates['manual_protocol_content'] = is_string($schema['manual_protocol'])
+              ? $schema['manual_protocol']
+              : json_encode($schema['manual_protocol']);
+          }
+          if (isset($schema['operational_notes'])) {
+            $meta_updates['operational_notes_content'] = is_string($schema['operational_notes'])
+              ? $schema['operational_notes']
+              : json_encode($schema['operational_notes']);
+          }
+
           // 🛡️ INTELLIGENT ENFORCEMENT (v3.3.9)
           $schema = self::analyze_enforcement_strategy($schema, $key);
+
+          // [FIX] Self-Healing for XML-RPC (v3.12.13)
+          // Detected missing enforcement in legacy schema, patching from catalog.
+          $is_xml_rpc = (stripos($key, 'xml-rpc') !== false) || (stripos($key, 'xmlrpc') !== false) || $key === 'RISK-016-001';
+
+          if ($is_xml_rpc && empty($schema['enforcement'])) {
+            $schema['enforcement'] = [
+              'driver' => 'htaccess',
+              'target' => 'root',
+              'mappings' => [
+                'UI-xml-rpc-api-security-001' => "<Files xmlrpc.php>\n  Order Deny,Allow\n  Deny from all\n</Files>"
+              ]
+            ];
+            // Auto-update the generated schema variable
+            $generated_schema = $schema;
+          }
         }
 
         if ($current_status === 'test') {
@@ -1337,6 +1367,31 @@ class VAPT_REST
     if ($driver === 'htaccess') {
       $schema['enforcement']['backup'] = $schema['enforcement']['backup'] ?? true;
       $schema['enforcement']['rollback_on_disable'] = $schema['enforcement']['rollback_on_disable'] ?? true;
+    }
+
+    return $schema;
+  }
+
+  /**
+   * Auto-fix common schema issues before validation.
+   */
+  private static function sanitize_and_fix_schema($schema)
+  {
+    if (!isset($schema['controls']) || !is_array($schema['controls'])) {
+      return $schema;
+    }
+
+    $no_key_types = ['button', 'info', 'alert', 'section', 'group', 'divider', 'html', 'header', 'label', 'evidence_uploader', 'risk_indicators', 'assurance_badges', 'remediation_steps', 'test_checklist', 'evidence_list'];
+
+    foreach ($schema['controls'] as $index => &$control) {
+      if (!is_array($control)) continue;
+
+      // Fix missing key
+      if (empty($control['key']) && !empty($control['type']) && !in_array($control['type'], $no_key_types)) {
+        // Try to find a meaningful ID
+        $base = $control['id'] ?? ($control['component_id'] ?? 'control');
+        $control['key'] = sanitize_key($base . '_' . $index . '_' . wp_generate_password(4, false));
+      }
     }
 
     return $schema;

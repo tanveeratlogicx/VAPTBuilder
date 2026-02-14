@@ -422,6 +422,12 @@ window.vaptScriptLoaded = true;
           include_manual_protocol: includeProtocol ? 1 : 0,
           include_operational_notes: includeNotes ? 1 : 0,
         };
+
+        // Auto-transition from Draft to Develop on first Save & Deploy (v3.13.0)
+        if (feature.normalized_status === 'draft') {
+          payload.status = 'Develop';
+        }
+
         updateFeature(feature.key || feature.id, payload)
           .then(() => {
             setIsSaving(false);
@@ -542,6 +548,11 @@ window.vaptScriptLoaded = true;
             "verification_protocol": {
               "automated_verification": "Interactive test actions (universal_probe) for real-time proof"
             },
+            "ui_blueprint": "{{ui_configuration}}",
+            "implementation_logic": {
+              "automated_steps": "{{automated_steps}}",
+              "manual_steps": "{{manual_steps}}"
+            },
             "raw_feature_context": "{{raw_json}}",
             "previous_implementation": "{{previous_schema}}"
           }
@@ -591,6 +602,15 @@ window.vaptScriptLoaded = true;
       contextJson = replaceAll(contextJson, 'evidence_requirements', Array.isArray(feature.evidence_requirements) ? feature.evidence_requirements.join(', ') : (feature.evidence_requirements || ''));
       contextJson = replaceAll(contextJson, 'verification_steps', Array.isArray(feature.verification_steps) ? feature.verification_steps.join(', ') : (feature.verification_steps || ''));
 
+      // Extract split-catalog specific fields (v3.13.0)
+      const uiConfig = feature.ui_configuration || {};
+      contextJson = replaceAll(contextJson, 'ui_configuration', JSON.stringify(uiConfig.components || [], null, 2));
+
+      const protection = feature.protection || {};
+      const autoSteps = protection.automated_protection?.implementation_steps || [];
+      contextJson = replaceAll(contextJson, 'automated_steps', Array.isArray(autoSteps) ? JSON.stringify(autoSteps, null, 2) : (autoSteps || ''));
+      contextJson = replaceAll(contextJson, 'manual_steps', JSON.stringify(protection.manual_steps || [], null, 2));
+
       const rawContext = { ...feature };
       delete rawContext.generated_schema;
       delete rawContext.implementation_data;
@@ -602,7 +622,26 @@ window.vaptScriptLoaded = true;
       contextJson = replaceAll(contextJson, 'automation_prompts.ai_check', prompts.ai_check || `PHP verification logic for ${feature.label || 'this feature'}.`);
       contextJson = replaceAll(contextJson, 'automation_prompts.ai_schema', prompts.ai_schema || `Essential schema fields for ${feature.label || 'this feature'}.`);
 
-      // 4. Assemble PRODUCTION READY PROMPT (v3.12.3 - VAPT Builder Skill Aligned)
+      // 4. Extract Manual Protocol & Operational Context (v3.13.0)
+      const featureSeverity = feature.severity || {};
+      const businessImpact = typeof featureSeverity === 'object' ? featureSeverity.business_impact : '';
+      const featureDesc = feature.description || {};
+      const detailedDesc = typeof featureDesc === 'object' ? featureDesc.detailed : feature.description;
+      const attackScenario = typeof featureDesc === 'object' ? featureDesc.attack_scenario : '';
+
+      const operationalContext = `
+        - **Business Impact/Risk**: ${businessImpact || 'N/A'}
+        - **Attack Scenario**: ${attackScenario || 'N/A'}
+        - **Detailed Security Benefit**: ${detailedDesc || 'N/A'}
+      `.trim();
+
+      const protocolContext = `
+        - **Manual Verification Steps**: ${Array.isArray(feature.verification_steps) ? feature.verification_steps.join('\n') : (feature.verification_steps || 'N/A')}
+        - **Remediation Effort**: ${feature.protection?.remediation_effort || 'N/A'}
+        - **Testing Protocol**: ${feature.testing?.test_method || 'N/A'}
+      `.trim();
+
+      // 5. Assemble PRODUCTION READY PROMPT (v3.12.3 - VAPT Builder Skill Aligned)
       const finalPrompt = `
       --- ROLE & OBJECTIVE ---
       You are the **VAPT Builder Expert**. Your mandate is to implement security controls in the VAPTBuilder Plugin using standardized JSON schemas. You MUST provide a **Production-Ready** deployment that is precise, straightforward, and targeted.
@@ -610,6 +649,14 @@ window.vaptScriptLoaded = true;
       --- DESIGN CONTEXT (JSON) ---
       ${contextJson}
       --- 
+
+      --- OPERATIONAL & SECURITY CONTEXT ---
+      ${operationalContext}
+      ---
+
+      --- MANUAL PROTOCOL CONTEXT ---
+      ${protocolContext}
+      ---
 
       --- REFERENCE CODE ---
       ${referenceCode || 'No specific reference code provided.'}
@@ -622,22 +669,29 @@ window.vaptScriptLoaded = true;
       --- INSTRUCTIONS & CRITICAL RULES ---
       1. **Response Format**: Provide ONLY a JSON block. No preamble. No commentary.
       2. **Single Enforcer Strategy**: You MUST target ONLY the **${prioritizedDriver}** driver. Do NOT suggest hybrid or multi-driver implementations.${driverContextInstruction}
-      3. **Toggle-Aware Mappings**: If a control is a 'toggle', the mapping MUST be the literal string/code to be injected when the toggle is ON. Mappings must be direct and production-ready.
-      4. **Production Precision**: 
+      3. **UI Blueprint Alignment**: Prioritize the components defined in 'ui_blueprint' for the 'controls' array. Keep labels and keys consistent where possible.
+      4. **Strict Key Enforcement**: EVERY control object in the 'controls' array MUST have a unique "key" field. If the blueprint uses "component_id" or "id", map it to "key". A control without a "key" is invalid.
+      5. **Interactive Verification**: Convert the 'verification_steps' into interactive 'test_action' controls. Each step should be a separate 'test_action' using 'universal_probe' as the 'test_logic'.
+      6. **Toggle-Aware Mappings**: If a control is a 'toggle', the mapping MUST be the literal string/code to be injected when the toggle is ON. Mappings must be direct and production-ready.
+      ${includeProtocol ? `7. **Manual Protocol Requirement**: The user has requested a Manual Verification Protocol. You MUST include a 'manual_protocol' object in the root of the JSON schema containing a 'steps' array derived from the provided protocol context.` : ''}
+      ${includeNotes ? `${includeProtocol ? '8' : '7'}. **Operational Notes Requirement**: The user has requested an Operational Notes Section. You MUST include an 'operational_notes' string in the root of the JSON schema summarizing the business impact and security benefits.` : ''}
+      ${(includeProtocol || includeNotes) ? (includeProtocol && includeNotes ? '9' : '8') : '7'}. **Production Precision**:
          - Simplify the 'controls' array. Avoid presentational clutter.
          - Ensure 'mappings' are precise for the chosen driver.
          - For 'htaccess', protect directives with '<IfModule>' block if possible.
-      5. **JSON Skeleton**:
+      ${(includeProtocol || includeNotes) ? (includeProtocol && includeNotes ? '10' : '9') : '8'}. **JSON Skeleton**:
       \`\`\`json
       {
         "metadata": {
-          "risk_id": "V-BT-001",
-          "severity": "High",
-          "category": "Authentication"
+          "risk_id": "${feature.id || 'V-BT-001'}",
+          "severity": "${(typeof feature.severity === 'object' ? feature.severity.level : feature.severity) || 'High'}",
+          "category": "${feature.category || 'General'}"
         },
+        ${includeProtocol ? '"manual_protocol": { "steps": ["Step 1...", "Step 2..."] },' : ''}
+        ${includeNotes ? '"operational_notes": "Summary of risks and benefits...",' : ''}
         "controls": [
           { "type": "toggle", "label": "Enable Feature", "key": "feat_enabled", "default": false, "description": "Protects against enumeration." },
-          { "type": "test_action", "label": "Verify", "key": "verify_feat", "test_logic": "universal_probe", "test_config": { ... } }
+          { "type": "test_action", "label": "Verify Step 1", "key": "verify_step_1", "test_logic": "universal_probe", "test_config": { ... } }
         ],
         "enforcement": {
           "driver": "${prioritizedDriver}",
@@ -650,7 +704,7 @@ window.vaptScriptLoaded = true;
         }
       }
       \`\`\`
-      6. **Escaping**: Escape backslashes (\\\\\\\\) and quotes properly for JSON compatibility.
+      ${(includeProtocol || includeNotes) ? (includeProtocol && includeNotes ? '11' : '10') : '9'}. **Escaping**: Escape backslashes (\\\\) and quotes properly for JSON compatibility.
 
       Feature Name: ${feature.label || 'Unnamed Feature'}
       Feature ID: ${feature.id || 'N/A'}
