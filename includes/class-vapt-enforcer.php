@@ -160,7 +160,14 @@ class VAPT_Enforcer
   {
     $status = $meta['status'] ?? 'draft';
     $raw = (in_array($status, ['test', 'release']) && !empty($meta['override_schema'])) ? $meta['override_schema'] : $meta['generated_schema'];
-    return $raw ? json_decode($raw, true) : [];
+    $schema = $raw ? json_decode($raw, true) : [];
+
+    // [v3.12.5] Inject feature key if missing
+    if (!isset($schema['feature_key']) && isset($meta['feature_key'])) {
+      $schema['feature_key'] = $meta['feature_key'];
+    }
+
+    return $schema;
   }
 
   private static function resolve_impl($meta)
@@ -171,7 +178,7 @@ class VAPT_Enforcer
   }
 
   /**
-   * Rebuilds the .htaccess file by aggregating rules from ALL enabled features.
+   * Rebuilds .htaccess files by aggregating rules from ALL enabled features.
    */
   private static function rebuild_htaccess()
   {
@@ -186,40 +193,36 @@ class VAPT_Enforcer
 
     error_log('VAPT DEBUG rebuild_htaccess - Found ' . count($enforced_features) . ' enforced features after filtering');
 
-    if (empty($enforced_features)) {
-      require_once VAPT_PATH . 'includes/enforcers/class-vapt-htaccess-driver.php';
-      if (class_exists('VAPT_Htaccess_Driver')) {
-        VAPT_Htaccess_Driver::write_batch(array(), 'root');
-      }
-      return;
-    }
-
     require_once VAPT_PATH . 'includes/enforcers/class-vapt-htaccess-driver.php';
     if (!class_exists('VAPT_Htaccess_Driver')) return;
 
-    $all_rules = array();
+    // Group rules by target
+    $targets_rules = array(
+      'root' => array(),
+      'uploads' => array()
+    );
 
     foreach ($enforced_features as $meta) {
       $schema = self::resolve_schema($meta);
       $impl_data = self::resolve_impl($meta);
       $driver = isset($schema['enforcement']['driver']) ? $schema['enforcement']['driver'] : '';
-
-      error_log('VAPT DEBUG - Processing feature: ' . ($meta['feature_key'] ?? 'unknown'));
-      error_log('VAPT DEBUG - Driver detected: ' . ($driver ?: 'NONE'));
-      error_log('VAPT DEBUG - Has schema: ' . (empty($schema) ? 'NO' : 'YES'));
-      error_log('VAPT DEBUG - Has impl_data: ' . (empty($impl_data) ? 'NO' : 'YES'));
+      $target = isset($schema['enforcement']['target']) ? $schema['enforcement']['target'] : 'root';
 
       if ($driver === 'htaccess') {
-        error_log('VAPT DEBUG - Calling generate_rules for htaccess driver');
         $feature_rules = VAPT_Htaccess_Driver::generate_rules($impl_data, $schema);
         if (!empty($feature_rules)) {
-          $all_rules[] = "# Rule for: " . ($meta['feature_key']);
-          $all_rules = array_merge($all_rules, $feature_rules);
+          if (!isset($targets_rules[$target])) {
+            $targets_rules[$target] = array();
+          }
+          $targets_rules[$target] = array_merge($targets_rules[$target], $feature_rules);
         }
       }
     }
 
-    VAPT_Htaccess_Driver::write_batch($all_rules, 'root');
+    // Write batch for each target
+    foreach ($targets_rules as $target => $rules) {
+      VAPT_Htaccess_Driver::write_batch($rules, $target);
+    }
   }
 
   /**

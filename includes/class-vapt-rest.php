@@ -1333,6 +1333,12 @@ class VAPT_REST
       }
     }
 
+    // [v3.12.3] Ensure Production Defaults
+    if ($driver === 'htaccess') {
+      $schema['enforcement']['backup'] = $schema['enforcement']['backup'] ?? true;
+      $schema['enforcement']['rollback_on_disable'] = $schema['enforcement']['rollback_on_disable'] ?? true;
+    }
+
     return $schema;
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "vaptbuilder",
-  "version": "3.12.2",
+  "version": "3.12.7",
   "description": "Originally VAPT Copilot.. Migrated here",
   "main": "index.js",
   "directories": {

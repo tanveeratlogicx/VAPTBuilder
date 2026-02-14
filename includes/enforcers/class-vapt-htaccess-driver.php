@@ -53,8 +53,22 @@ class VAPT_Htaccess_Driver
    */
   public static function generate_rules($data, $schema)
   {
-    // 🛡️ TWO-WAY DEACTIVATION (v3.6.19)
-    $is_enabled = isset($data['enabled']) ? (bool)$data['enabled'] : true;
+    // 🛡️ TWO-WAY DEACTIVATION (v3.12.3 - Intelligent Detection)
+    $is_enabled = true;
+    if (isset($data['enabled'])) {
+      $is_enabled = (bool)$data['enabled'];
+    } else {
+      // If 'enabled' is missing, check if any mapped toggle is set to false
+      $mappings = $enf_config['mappings'] ?? array();
+      foreach ($mappings as $key => $directive) {
+        if (isset($data[$key]) && ($data[$key] === false || $data[$key] === 0 || $data[$key] === '0')) {
+          // If the primary enforcement mapping is a toggle and it's OFF, consider feature disabled
+          $is_enabled = false;
+          break;
+        }
+      }
+    }
+
     if (!$is_enabled) {
       return array(); // Return empty set if disabled
     }
@@ -74,6 +88,13 @@ class VAPT_Htaccess_Driver
         // [ENHANCEMENT] Variable Substitution (v3.12.0)
         $directive = self::substitute_variables($directive);
 
+        // [v3.12.4] Fix literal \n escaping
+        $directive = str_replace('\n', "\n", $directive);
+
+        // [v3.12.7] Strip VAPTBuilder RISK-XXX comments
+        $directive = preg_replace('/^#\s*VAPTBuilder\s+RISK-\d+:.*$/m', '', $directive);
+        $directive = trim($directive);
+
         $processed_directive = self::prepare_directive($directive);
         $validation = self::validate_htaccess_directive($processed_directive);
 
@@ -90,25 +111,22 @@ class VAPT_Htaccess_Driver
       }
     }
 
-    // 2. Wrap collected rules in a marker header for verification
+    // 2. Wrap collected rules in a marker header for verification (v3.12.5 - Compacted)
     if (!empty($rules)) {
       $feature_key = isset($schema['feature_key']) ? $schema['feature_key'] : 'unknown';
-      $enforcer_headers = array();
-      $enforcer_headers[] = "<IfModule mod_headers.c>";
-      $enforcer_headers[] = "  Header set X-VAPT-Enforced \"htaccess\"";
-      $enforcer_headers[] = "  Header append X-VAPT-Feature \"$feature_key\"";
-      $enforcer_headers[] = "</IfModule>";
-
-      // Prepend headers so they appear at the top of the feature block
-      $rules = array_merge($enforcer_headers, $rules);
+      // Compact headers into single block
+      $rules = array_merge(
+        ["<IfModule mod_headers.c>\n  Header set X-VAPT-Enforced \"htaccess\"\n  Header append X-VAPT-Feature \"$feature_key\"\n</IfModule>"],
+        $rules
+      );
     }
 
     return $rules;
   }
 
   /**
-   * 🔍 VERIFICATION LOGIC (v3.6.19)
-   * Phisically checks the .htaccess file for the feature marker.
+   * 🔍 VERIFICATION LOGIC (v3.12.6 - Enhanced Debug)
+   * Physically checks the .htaccess file for the feature marker.
    */
   public static function verify($key, $impl_data, $schema)
   {
@@ -119,13 +137,21 @@ class VAPT_Htaccess_Driver
       $htaccess_path = $upload_dir['basedir'] . '/.htaccess';
     }
 
+    error_log("VAPT VERIFY: Checking for feature '$key' in $htaccess_path");
+
     if (!file_exists($htaccess_path)) {
+      error_log("VAPT VERIFY: File does not exist: $htaccess_path");
       return false;
     }
 
     $content = file_get_contents($htaccess_path);
+    $search_string = "X-VAPT-Feature \"$key\"";
+    $found = (strpos($content, $search_string) !== false);
+
+    error_log("VAPT VERIFY: Looking for '$search_string' - " . ($found ? 'FOUND' : 'NOT FOUND'));
+
     // Look for the specific feature key within our VAPT block
-    return (strpos($content, "X-VAPT-Feature \"$key\"") !== false);
+    return $found;
   }
 
   /**
@@ -163,7 +189,7 @@ class VAPT_Htaccess_Driver
     $rules_string = "";
 
     if (!empty($all_rules_array)) {
-      $rules_string = "\n" . $start_marker . "\n" . implode("\n\n", $all_rules_array) . "\n" . $end_marker . "\n";
+      $rules_string = "\n" . $start_marker . "\n" . implode("\n", $all_rules_array) . "\n" . $end_marker . "\n";
     }
 
     // Replace or Append
@@ -241,6 +267,7 @@ class VAPT_Htaccess_Driver
   /**
    * Automatically wraps directives in <IfModule> if they are not already wrapped.
    * This is a safety measure to prevent server crashes if an Apache module is missing.
+   * [v3.12.6] Enhanced formatting with proper indentation and spacing
    */
   private static function prepare_directive($directive)
   {
@@ -257,9 +284,29 @@ class VAPT_Htaccess_Driver
       return "<IfModule mod_headers.c>\n  $directive\n</IfModule>";
     }
 
-    // Wrap mod_rewrite directives
-    if (stripos($directive, 'RewriteEngine') === 0 || stripos($directive, 'RewriteRule') === 0 || stripos($directive, 'RewriteCond') === 0) {
-      return "<IfModule mod_rewrite.c>\n  $directive\n</IfModule>";
+    // Wrap mod_rewrite directives with enhanced formatting
+    if (stripos($directive, 'RewriteEngine') === 0 || stripos($directive, 'RewriteCond') === 0 || stripos($directive, 'RewriteRule') === 0) {
+      // Check if directive contains a comment line (starts with #)
+      $lines = explode("\n", $directive);
+      $formatted_lines = [];
+
+      foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if (empty($trimmed)) {
+          $formatted_lines[] = '';
+        } elseif (strpos($trimmed, '#') === 0) {
+          // Comment line - add blank line before it and indent
+          if (!empty($formatted_lines) && end($formatted_lines) !== '') {
+            $formatted_lines[] = '';
+          }
+          $formatted_lines[] = '  ' . $trimmed;
+        } else {
+          // Regular directive - indent
+          $formatted_lines[] = '  ' . $trimmed;
+        }
+      }
+
+      return "<IfModule mod_rewrite.c>\n" . implode("\n", $formatted_lines) . "\n</IfModule>";
     }
 
     return $directive;

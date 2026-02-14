@@ -840,7 +840,7 @@
           return el(ToggleControl, {
             key: uniqueKey,
             label: el('strong', { style: { fontSize: '12px', color: '#334155' } }, safeRender(label)),
-            help: safeRender(help),
+            help: safeRender(control.description || help), // Prioritize description (v3.12.3)
             checked: !!value,
             onChange: (val) => handleChange(key, val)
           });
@@ -1056,7 +1056,13 @@
       return null;
     }
 
+    const metadata = schema.metadata || {};
+
     return el('div', { className: 'vapt-generated-interface', style: { display: 'flex', flexDirection: 'column', gap: '20px' } }, [
+
+      // Functional Controls Panel
+
+      // Functional Controls Panel
 
       // Live Rate Limit Monitor
       mainControls.length > 0 && el('div', { className: 'vapt-functional-panel', style: { background: '#fff', borderRadius: '8px', padding: '0' } }, [

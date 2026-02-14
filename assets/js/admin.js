@@ -413,14 +413,16 @@ window.vaptScriptLoaded = true;
         const hasTestActions = controls.some(c => c.type === 'test_action');
 
         setIsSaving(true);
-        updateFeature(feature.key || feature.id, {
+        const payload = {
           generated_schema: JSON.stringify(parsed),
+          implementation_data: JSON.stringify(localImplData),
+          is_enforced: 1, // Force activation on Save & Deploy (v3.12.3)
           include_verification_engine: hasTestActions ? 1 : 0,
           include_verification_guidance: 1,
           include_manual_protocol: includeProtocol ? 1 : 0,
           include_operational_notes: includeNotes ? 1 : 0,
-          implementation_data: JSON.stringify(localImplData)
-        })
+        };
+        updateFeature(feature.key || feature.id, payload)
           .then(() => {
             setIsSaving(false);
             onClose();
@@ -462,7 +464,7 @@ window.vaptScriptLoaded = true;
     const copyContext = () => {
       let contextJson = '';
 
-      // 1. Determine Driver Priority based on Active Datasource (v3.13.0)
+      // 1. Determine Driver Priority based on Active Datasource (v3.12.3)
       let prioritizedDriver = 'hook';
       let driverContextInstruction = '';
       const activeFiles = (selectedFile || '').split(',');
@@ -600,10 +602,10 @@ window.vaptScriptLoaded = true;
       contextJson = replaceAll(contextJson, 'automation_prompts.ai_check', prompts.ai_check || `PHP verification logic for ${feature.label || 'this feature'}.`);
       contextJson = replaceAll(contextJson, 'automation_prompts.ai_schema', prompts.ai_schema || `Essential schema fields for ${feature.label || 'this feature'}.`);
 
-      // 4. Assemble HYBRID PROMPT (v3.13.0 - VAPT Builder Skill Aligned)
+      // 4. Assemble PRODUCTION READY PROMPT (v3.12.3 - VAPT Builder Skill Aligned)
       const finalPrompt = `
       --- ROLE & OBJECTIVE ---
-      You are the **VAPT Builder Expert**. Your mandate is to implement security controls in the VAPTBuilder Plugin using standardized JSON schemas. You MUST follow the **Feature Implementation Protocol** (Locate -> Extract -> Map -> Configure -> Define).
+      You are the **VAPT Builder Expert**. Your mandate is to implement security controls in the VAPTBuilder Plugin using standardized JSON schemas. You MUST provide a **Production-Ready** deployment that is precise, straightforward, and targeted.
 
       --- DESIGN CONTEXT (JSON) ---
       ${contextJson}
@@ -618,28 +620,37 @@ window.vaptScriptLoaded = true;
       ---
 
       --- INSTRUCTIONS & CRITICAL RULES ---
-      1. **Response Format**: Provide ONLY a JSON block. No preamble.
-      2. **Schema Structure**: Include both 'controls' and 'enforcement' blocks.${driverContextInstruction}
-      3. **Reference Code**: Prioritize the logic shown in 'REFERENCE CODE'.
-      4. **Control Types**: Use 'toggle', 'input', 'select', 'textarea', 'code', 'test_action'.
-      5. **Enforcement Drivers**:
-         - Use 'htaccess' for physical files or server blocking. (Requires "target": "root").
-         - Use 'hook' or 'wp-config' for PHP-level logic.
-      6. **JSON Skeleton**:
+      1. **Response Format**: Provide ONLY a JSON block. No preamble. No commentary.
+      2. **Single Enforcer Strategy**: You MUST target ONLY the **${prioritizedDriver}** driver. Do NOT suggest hybrid or multi-driver implementations.${driverContextInstruction}
+      3. **Toggle-Aware Mappings**: If a control is a 'toggle', the mapping MUST be the literal string/code to be injected when the toggle is ON. Mappings must be direct and production-ready.
+      4. **Production Precision**: 
+         - Simplify the 'controls' array. Avoid presentational clutter.
+         - Ensure 'mappings' are precise for the chosen driver.
+         - For 'htaccess', protect directives with '<IfModule>' block if possible.
+      5. **JSON Skeleton**:
       \`\`\`json
       {
+        "metadata": {
+          "risk_id": "V-BT-001",
+          "severity": "High",
+          "category": "Authentication"
+        },
         "controls": [
-          { "type": "toggle", "label": "Enable Feature", "key": "feat_enabled", "default": true },
+          { "type": "toggle", "label": "Enable Feature", "key": "feat_enabled", "default": false, "description": "Protects against enumeration." },
           { "type": "test_action", "label": "Verify", "key": "verify_feat", "test_logic": "universal_probe", "test_config": { ... } }
         ],
-        "enforcement": { 
-          "driver": "${prioritizedDriver}", 
-          "mappings": { "feat_enabled": "logic_or_directive" } 
+        "enforcement": {
+          "driver": "${prioritizedDriver}",
+          "target": "${prioritizedDriver === 'htaccess' ? 'root' : 'universal'}",
+          "backup": true,
+          "rollback_on_disable": true,
+          "mappings": {
+            "feat_enabled": "/* Literal Code/Directive to Inject when ON */"
+          }
         }
       }
       \`\`\`
-      7. **Automated Verification**: Use 'test_action' with 'universal_probe'.
-      8. **Escaping**: Escape backslashes (\\\\\\\\) and quotes properly in JSON strings.
+      6. **Escaping**: Escape backslashes (\\\\\\\\) and quotes properly for JSON compatibility.
 
       Feature Name: ${feature.label || 'Unnamed Feature'}
       Feature ID: ${feature.id || 'N/A'}
@@ -673,7 +684,26 @@ window.vaptScriptLoaded = true;
 
     return el(Modal, {
       title: el('div', { className: 'vapt-design-modal-header' }, [
-        el('span', null, sprintf(__('Design Implementation: %s', 'vapt-builder'), feature.label)),
+        el('div', { className: 'vapt-flex-row', style: { gap: '10px', alignItems: 'center' } }, [
+          el('span', null, sprintf(__('Design Implementation: %s', 'vapt-builder'), feature.label)),
+          // Severity Badge (v3.12.4)
+          (() => {
+            const severity = parsedSchema?.metadata?.severity;
+            if (!severity) return null;
+            const s = severity.toLowerCase();
+            return el('span', {
+              style: {
+                padding: '2px 8px',
+                borderRadius: '4px',
+                fontSize: '10px',
+                fontWeight: '700',
+                color: '#fff',
+                textTransform: 'uppercase',
+                background: s === 'critical' ? '#dc2626' : (s === 'high' ? '#ea580c' : '#2271b1')
+              }
+            }, severity);
+          })(),
+        ]),
         // Status Pill
         el('span', {
           style: {
